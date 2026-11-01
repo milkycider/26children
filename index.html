@@ -11,14 +11,13 @@
 :root{
   --bg:#dff3f9; --panel:#ffffff; --panel2:#ecf8fc; --line:#bfe0ec;
   --text:#123b4f; --muted:#5f8798; --accent:#1fa2d3; --accent-soft:rgba(31,162,211,.12);
-  --radius:14px; --w:1200px;
+  --radius:14px; --w:1400px; /* 全ページ共通の横幅(技能表に合わせる)。ページ切替でタブ位置がずれない */
   --font-body:"Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo",sans-serif;
   --font-display:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
   --font-en:"Quicksand","Zen Maru Gothic","Hiragino Sans","Yu Gothic UI",sans-serif;
 }
-body[data-page="skills"], body[data-page="height"], body[data-view="table"]{--w:1400px}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth; scrollbar-gutter:stable}
 body{
   margin:0; color:var(--text);
   background:
@@ -83,6 +82,8 @@ select{
 .spacer{flex:1}
 
 main{max-width:var(--w); margin:0 auto; padding:22px 20px 80px}
+body[data-view="table"] .only-card{display:none!important}
+.grid.fixed{grid-template-columns:repeat(var(--cols),minmax(0,1fr))}
 .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:16px}
 
 .card{
@@ -96,7 +97,7 @@ main{max-width:var(--w); margin:0 auto; padding:22px 20px 80px}
   content:""; position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--c);
 }
 .card::after{
-  content:attr(data-letter); position:absolute; right:10px; top:-14px;
+  content:attr(data-letter); position:absolute; left:16px; top:-14px;
   font:700 96px/1 Georgia,"Times New Roman",serif; color:var(--c); opacity:.16; pointer-events:none;
 }
 .card:hover,.card:focus-visible{transform:translateY(-3px); border-color:var(--c); box-shadow:0 10px 26px rgba(20,100,135,.22); outline:none}
@@ -287,6 +288,12 @@ footer{color:var(--muted); font-size:12px; text-align:center; padding:0 0 40px}
       <button class="chip" data-v="card" aria-pressed="true">カード</button>
       <button class="chip" data-v="table" aria-pressed="false">一覧表</button>
     </div>
+    <div class="group only-chars only-card"><span class="lbl">列数</span>
+      <select id="cols" aria-label="カードの列数">
+        <option value="auto">自動</option>
+        <option value="2">2列</option><option value="3">3列</option><option value="4">4列</option><option value="5">5列</option><option value="6">6列</option>
+      </select>
+    </div>
     <div class="spacer"></div>
     <button class="chip" id="ftoggle" aria-expanded="false" aria-controls="fpanel">絞り込み ▾</button>
     <button class="chip" id="reset">リセット</button>
@@ -416,7 +423,7 @@ const PORTRAITS = {
   5:{ u:"https://h.turbo.ccfolia-cdn.net/users/bOkBurjIeChK0ePkrtzDsxcsstc2/files/c308f5fc9ae7885fda8c0eaafff44ecf87663fe47119f425d43bc48631825c1b?t=1793366206319"  },
   6:{ u:"https://h.turbo.ccfolia-cdn.net/users/c2efTdZP72SU5flHbwRWHxdCBpE2/files/ea6d261a805d29a857fa19d5d916d03c445ae71fb6da1427a31e3bae06a8d06a?t=1792899222735"  },
   7:{ u:"https://h.turbo.ccfolia-cdn.net/users/a3KkC5k3ZEXngLOoAAxK4gJi8Kv2/files/4c32ab434f9bc4fba777a39c95e572f41a623453bbe30f50d3b3587d04b86501?t=1793494011369"  },
-  9:{ u:"https://h.turbo.ccfolia-cdn.net/users/vpMB0tN9VMSCXJumeqKhyQLV9D83/files/aa829ac261c54a87d8ca2ce83d46301870f262dd47c1855979653e9736627e91?t=1788465670828", x:55  },
+  9:{ u:"https://h.turbo.ccfolia-cdn.net/users/vpMB0tN9VMSCXJumeqKhyQLV9D83/files/97c9d3ccf3259aa1fcc0531b8da35e78209051cb80baa273154e028079d44a64?t=1793548268093" },
   10:{ u:"https://h.turbo.ccfolia-cdn.net/users/1ILkVlVG8aT1jss6FNBPqrRBFxa2/files/c9483f0661f4fa2dfe8977d2f9528b571bfb8a0f73851f2e51ced972f6bd13ad?t=1793472163229" },
   14:{ u:"https://h.turbo.ccfolia-cdn.net/users/GFtC9QilaLcMV5nffWeJgGUAr8N2/files/9a883c1adde255852b6e83500a07bc65ac1624e7d3c79114e482314b35101726?t=1793464537191" },
   15:{ u:"https://h.turbo.ccfolia-cdn.net/users/SVIDpHEbVJT2vPtEwJVNE5MYsTC3/files/b2f0a7407ba498c161d144213615a8c9c9513743ffdfd6387eede94267b3eeba?t=1790084306355" },
@@ -497,7 +504,7 @@ const accent = d => !d.hex ? "#9db6c2" : (lum(d.hex) > 0.6 ? darken(d.hex, 0.78)
 
 /* ===== 状態 ===== */
 const PAGE_HASH = { chars:"", skills:"#skills", height:"#height" };
-const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null };
+const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null };
 let current = []; // 現在表示中の配列
 let openHo = null;
 
@@ -528,6 +535,13 @@ makeChips($("#g-range"), "range", [["all","すべて"],["タッチ","タッチ"]
 })();
 
 $("#q").addEventListener("input", e => { state.q = e.target.value.trim().normalize("NFKC").toLowerCase(); render(); });
+try{ const c = localStorage.getItem("roadCols"); if(c && [...$("#cols").options].some(o => o.value === c)) state.cols = c; }catch(e){}
+$("#cols").value = state.cols;
+$("#cols").addEventListener("change", e => {
+  state.cols = e.target.value;
+  try{ localStorage.setItem("roadCols", state.cols); }catch(err){}
+  render();
+});
 $("#sort").addEventListener("change", e => { state.sort = e.target.value; render(); });
 $("#g-view").querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => {
   state.view = b.dataset.v;
@@ -789,7 +803,7 @@ function render(){
   main.innerHTML = state.page === "height" ? heightHtml()
     : !chars ? tableHtml(current)
     : state.view === "table" ? charTableHtml(current)
-    : `<div class="grid">${current.map(cardHtml).join("")}</div>`;
+    : `<div class="grid${state.cols !== "auto" ? " fixed" : ""}"${state.cols !== "auto" ? ` style="--cols:${state.cols}"` : ""}>${current.map(cardHtml).join("")}</div>`;
   if(state.page === "height") drawHeight();
 }
 $("#main").addEventListener("click", e => {
