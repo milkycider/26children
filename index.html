@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Quicksand:wght@500;700&display=swap">
+<title>ロアドの児従録 - テストプレイ班 探索者ポータル</title>
+<style>
+:root{
+  --bg:#dff3f9; --panel:#ffffff; --panel2:#ecf8fc; --line:#bfe0ec;
+  --text:#123b4f; --muted:#5f8798; --accent:#1fa2d3; --accent-soft:rgba(31,162,211,.12);
+  --radius:14px; --w:1200px;
+  --font-body:"Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo",sans-serif;
+  --font-display:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
+  --font-en:"Quicksand","Zen Maru Gothic","Hiragino Sans","Yu Gothic UI",sans-serif;
+}
+body[data-page="skills"], body[data-page="height"], body[data-view="table"]{--w:1400px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--text);
+  background:
+    radial-gradient(1200px 500px at 85% -10%, rgba(255,255,255,.75), transparent 60%),
+    linear-gradient(180deg,#e8f8fc 0%,#d3eef7 45%,#bfe5f2 100%) fixed;
+  background-color:var(--bg);
+  font-family:var(--font-body);
+  line-height:1.6; -webkit-text-size-adjust:100%;
+}
+a{color:var(--accent)}
+header.top{
+  padding:36px 20px 8px; max-width:var(--w); margin:0 auto;
+  display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:12px;
+}
+header.top h1{margin:0; font-size:clamp(22px,4vw,34px); letter-spacing:.04em}
+.ttl .yomi{font-size:13px; color:var(--muted); letter-spacing:.18em; margin:2px 0 6px}
+.ttl .sub{font-size:14px; color:var(--text); letter-spacing:.08em}
+header.top h1 small{display:block; font-size:12px; color:var(--muted); letter-spacing:.2em; margin-bottom:4px; font-weight:400}
+.count{color:var(--muted); font-size:14px}
+.count b{color:var(--text); font-size:22px; margin-right:2px}
+
+.controls{
+  position:sticky; top:0; z-index:20;
+  background:rgba(236,249,253,.88); backdrop-filter:blur(8px);
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.controls .inner{
+  max-width:var(--w); margin:0 auto; padding:12px 20px;
+  display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center;
+}
+.tabs{max-width:var(--w); margin:0 auto; padding:0 20px; display:flex; gap:6px}
+.tabs button{font:inherit; font-size:15px; color:var(--muted); background:none; border:0; border-bottom:3px solid transparent; padding:10px 18px; cursor:pointer}
+.tabs button:hover{color:var(--text)}
+.tabs button[aria-selected="true"]{color:var(--text); border-color:var(--accent); font-weight:700}
+.panel[hidden]{display:none}
+.panel{border-top:1px solid var(--line)}
+body:not([data-page="chars"]) .only-chars{display:none!important}
+th.sortable{cursor:pointer; user-select:none}
+th.sortable:hover{color:var(--text)}
+th .ind{position:absolute; left:0; right:0; bottom:3px; text-align:center; font-size:9px; line-height:1; color:var(--accent)}
+th.sorted{color:var(--text)}
+td.sorted{background:var(--accent-soft)}
+td.memo{min-width:140px; max-width:280px; color:var(--muted); font-size:12px; word-break:break-all}
+.search{flex:1 1 240px; position:relative}
+.search input{
+  width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--line);
+  background:var(--panel); color:var(--text); font-size:15px; outline:none;
+}
+.search input:focus{border-color:var(--accent)}
+.group{display:flex; gap:6px; align-items:center; flex-wrap:wrap}
+.group .lbl{font-size:12px; color:var(--muted); margin-right:2px}
+.chip{
+  border:1px solid var(--line); background:var(--panel); color:var(--text);
+  padding:6px 12px; border-radius:999px; font-size:13px; cursor:pointer; font-family:inherit;
+}
+.chip:hover{border-color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:600}
+select{
+  padding:7px 10px; border-radius:10px; border:1px solid var(--line);
+  background:var(--panel); color:var(--text); font-size:13px; font-family:inherit;
+}
+.spacer{flex:1}
+
+main{max-width:var(--w); margin:0 auto; padding:22px 20px 80px}
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:16px}
+
+.card{
+  position:relative; text-align:left; font:inherit; color:inherit;
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:16px 16px 14px 20px; cursor:pointer; overflow:hidden;
+  transition:transform .15s, border-color .15s, box-shadow .15s;
+  display:flex; flex-direction:column; gap:8px; min-height:210px;
+}
+.card::before{
+  content:""; position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--c);
+}
+.card::after{
+  content:attr(data-letter); position:absolute; right:10px; top:-14px;
+  font:700 96px/1 Georgia,"Times New Roman",serif; color:var(--c); opacity:.16; pointer-events:none;
+}
+.card:hover,.card:focus-visible{transform:translateY(-3px); border-color:var(--c); box-shadow:0 10px 26px rgba(20,100,135,.22); outline:none}
+.portrait{
+  position:absolute; right:0; top:0; bottom:0; width:74%; overflow:hidden; pointer-events:none;
+  opacity:.42; -webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent 100%); mask-image:linear-gradient(to bottom,#000 55%,transparent 100%);
+}
+.portrait img{
+  position:absolute; top:0; left:0; width:100%; height:auto; max-width:none; display:block;
+  /* 左端と下端(画像自体の下端)をなだらかに消す */
+  -webkit-mask-image:linear-gradient(to right,transparent 0%,#000 50%),linear-gradient(to bottom,#000 55%,transparent 100%);
+  mask-image:linear-gradient(to right,transparent 0%,#000 50%),linear-gradient(to bottom,#000 55%,transparent 100%);
+  -webkit-mask-composite:source-in; mask-composite:intersect;
+}
+.card > *:not(.portrait){position:relative; z-index:1}
+.modal .portrait{width:60%; height:540px; opacity:.45}
+.modal > *:not(.portrait):not(.close){position:relative; z-index:1}
+.modal .close{z-index:3}
+.card .ho{font-size:12px; color:var(--muted); letter-spacing:.12em}
+.card .pc{font-size:22px; font-weight:700; line-height:1.2; word-break:break-word}
+.card .kana{font-size:12px; color:var(--muted); margin-top:-4px}
+/* 見出し系は丸ゴシック、HO名の英字は丸みのあるジオメトリック系で、クールで少しやわらかく */
+header.top h1, .card .pc, .modal h2, .hcard h2{font-family:var(--font-display); font-weight:700}
+header.top h1{letter-spacing:.06em}
+.ttl .yomi, .ttl .sub{font-family:var(--font-display)}
+.tabs button{font-family:var(--font-display); letter-spacing:.08em}
+ruby.hn{font-family:var(--font-en); font-weight:700}
+ruby.hn rt{font-family:var(--font-body)}
+.holine .hn{font-size:16px!important}
+.holine.lg .hn{font-size:24px!important}
+/* HO名(ルビはCSS生成なのでコピー時に混ざらない) */
+ruby.hn{ruby-position:over; font-weight:700; color:var(--text)}
+ruby.hn rt{font-size:.62em; font-weight:400; color:var(--muted); letter-spacing:.02em}
+ruby.hn rt::before{content:attr(data-rt)}
+.holine{display:flex; align-items:flex-end; flex-wrap:wrap; gap:2px 8px; font-size:12px; color:var(--muted); letter-spacing:.08em; line-height:1.9}
+.holine .hn{font-size:15px; letter-spacing:0}
+.holine .mean{font-size:12px; color:var(--muted); letter-spacing:0}
+.holine.lg{font-size:13px}
+.holine.lg .hn{font-size:22px}
+.holine.lg .mean{font-size:14px}
+.meta{display:flex; flex-wrap:wrap; gap:6px; align-items:center; font-size:13px}
+.pill{
+  display:inline-flex; align-items:center; gap:4px; padding:2px 9px; border-radius:999px;
+  background:var(--panel2); border:1px solid var(--line); font-size:12px; color:var(--text);
+}
+.pill.m{color:#2672c4} .pill.f{color:#cf3f7b}
+.pill.range{color:#a96a00}
+.card .weapon{font-size:13px}
+.card .weapon .k{color:var(--muted); font-size:11px; margin-right:4px}
+.card .foot{margin-top:auto; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 8px; padding-top:6px}
+.trait{white-space:nowrap}
+.swatch{display:inline-flex; align-items:center; gap:7px; font-size:12px; color:var(--muted)}
+.swatch i{
+  width:18px; height:18px; border-radius:50%; background:var(--c);
+  box-shadow:0 0 0 1.5px rgba(18,59,79,.28);
+}
+.swatch i.none{background:repeating-linear-gradient(45deg,#c5dbe4 0 4px,#e3f0f5 4px 8px)}
+.trait{font-size:12px; color:var(--text); background:var(--panel2); border-radius:6px; padding:2px 8px}
+
+.empty{text-align:center; color:var(--muted); padding:60px 0}
+
+/* 能力カテゴリ */
+.cats{display:flex; flex-wrap:wrap; gap:4px}
+.cat{display:inline-flex; align-items:center; gap:5px; padding:1px 9px 1px 7px; border-radius:999px; font-size:12px; border:1px solid var(--line); background:var(--panel2)}
+.cat i{width:9px; height:9px; border-radius:50%; background:var(--cc); box-shadow:0 0 0 1px rgba(18,59,79,.3)}
+/* 身長くらべ */
+.hcard{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px 18px 16px}
+.hcard h2{margin:0 0 4px; font-size:22px}
+.hcard .hdesc{margin:0 0 12px; color:var(--muted); font-size:13px}
+.htools{display:flex; flex-wrap:wrap; align-items:center; gap:10px 18px; margin-bottom:6px}
+.htools label{display:inline-flex; align-items:center; gap:6px; font-size:14px; cursor:pointer}
+.hlegend{display:flex; gap:14px; align-items:center; font-size:12px; color:var(--muted); margin:6px 0 10px}
+.hlegend i{display:inline-block; width:11px; height:11px; border-radius:2px; margin-right:5px; vertical-align:-1px}
+#hchart svg{display:block; width:100%; height:auto; overflow:visible}
+#hchart svg text{font-family:inherit}
+.hfig{cursor:pointer; outline:none}
+.hfig:hover .hbg{fill:rgba(31,162,211,.07)}
+.hfig:focus-visible .hbg{stroke:var(--accent)}
+.hpanel{margin-top:10px; padding:12px 16px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; font-size:14px; min-height:48px; display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px}
+.hnote{margin:12px 2px 0; color:var(--muted); font-size:12px}
+/* 技能 */
+.skl{display:flex; flex-wrap:wrap; gap:4px 10px; font-size:12px; color:var(--muted)}
+.skl b{color:var(--text); font-weight:600; margin-left:2px}
+.skgrid{display:grid; grid-template-columns:1fr 1fr; gap:6px 24px; margin-top:8px}
+.skrow{display:grid; grid-template-columns:6.4em 1fr 2.2em; align-items:center; gap:8px; font-size:13px}
+.skrow .skn{color:var(--muted); white-space:nowrap}
+.skrow .bar{height:8px; border-radius:4px; background:var(--panel2); overflow:hidden}
+.skrow .bar i{display:block; height:100%; background:var(--c); border-radius:4px; min-width:2px}
+.skrow .skv{text-align:right; font-variant-numeric:tabular-nums}
+.def{color:#a6bcc6}
+.skrow.def .skn,.skrow.def .skv{color:#a6bcc6}
+.skrow.def .bar i{background:#c9dde5}
+.skrow.off{opacity:.55}
+.skrow.off .bar i{display:none}
+.skmemo{margin-top:12px; padding:10px 14px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; font-size:14px; white-space:pre-wrap}
+th{white-space:nowrap}
+th.num,td.num{padding:8px 4px; text-align:center; font-variant-numeric:tabular-nums}
+td .cats{flex-direction:column; align-items:flex-start}
+td .swatch{gap:5px}
+
+/* table view */
+.tablewrap{overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel)}
+table{border-collapse:collapse; width:100%; font-size:12.5px; line-height:1.4}
+th,td{padding:8px 8px; text-align:left; border-bottom:1px solid var(--line); vertical-align:middle}
+td.nw{white-space:nowrap}
+td .sm{font-size:11px; color:var(--muted); font-weight:400}
+th{background:var(--panel2); font-size:11px; color:var(--muted); line-height:1.2; position:relative; height:40px; vertical-align:middle}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--panel2)}
+td.pcn{font-weight:700}
+td .swatch{color:var(--text)}
+
+/* modal */
+.overlay{
+  position:fixed; inset:0; background:rgba(10,55,75,.45); z-index:50;
+  display:none; align-items:center; justify-content:center; padding:16px;
+}
+.overlay.open{display:flex}
+.modal{
+  width:min(720px,100%); max-height:92vh; overflow:auto;
+  background:var(--panel); border:1px solid var(--line); border-radius:18px;
+  position:relative; padding:28px 28px 22px 34px;
+}
+.modal::before{content:""; position:absolute; left:0; top:0; bottom:0; width:8px; background:var(--c)}
+.modal h2{margin:0; font-size:30px; line-height:1.2}
+.modal .sub{color:var(--muted); font-size:14px; margin:2px 0 14px}
+.modal .code{font-size:14px; margin-bottom:14px}
+.modal .code b{font-size:20px; margin-right:8px}
+dl{display:grid; grid-template-columns:max-content 1fr; gap:8px 18px; margin:14px 0}
+dt{color:var(--muted); font-size:13px}
+dd{margin:0}
+.notes{display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 0; padding:0; list-style:none}
+.notes li{background:var(--panel2); border:1px solid var(--line); padding:4px 10px; border-radius:8px; font-size:14px}
+.sec{font-size:12px; letter-spacing:.14em; color:var(--muted); margin-top:18px}
+.modal .nav{display:flex; justify-content:space-between; gap:8px; margin-top:22px}
+.btn{
+  border:1px solid var(--line); background:var(--panel2); color:var(--text);
+  padding:8px 14px; border-radius:10px; cursor:pointer; font:inherit; font-size:13px;
+}
+.btn:hover{border-color:var(--muted)}
+.close{position:absolute; right:12px; top:12px}
+.hexcode{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px; color:var(--muted)}
+
+footer{color:var(--muted); font-size:12px; text-align:center; padding:0 0 40px}
+
+@media (max-width:560px){
+  .skgrid{grid-template-columns:1fr}
+  .modal{padding:24px 18px 18px 24px}
+  dl{grid-template-columns:1fr; gap:2px}
+  dt{margin-top:8px}
+}
+@media print{
+  .controls,.close,.nav{display:none!important}
+  body{background:#fff; color:#000}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="ttl">
+    <h1>ロアドの児従録</h1>
+    <div class="yomi">-ろあどのにじゅうろく-</div>
+    <div class="sub">テストプレイ班　探索者ポータル</div>
+  </div>
+  <div class="count"><b id="count">0</b>/<span id="total">0</span> 名表示中</div>
+</header>
+
+<nav class="tabs" aria-label="ページ切り替え">
+  <button data-p="chars" aria-selected="true">キャラクター</button>
+  <button data-p="skills" aria-selected="false">技能表</button>
+  <button data-p="height" aria-selected="false">身長くらべ</button>
+</nav>
+
+<div class="controls">
+  <div class="inner">
+    <div class="search"><input id="q" type="search" placeholder="PC名・PL名・読み・HO名・特徴・技能備考などで検索" aria-label="検索"></div>
+    <div class="group only-chars"><span class="lbl">並び替え</span>
+      <select id="sort" aria-label="並び替え">
+        <option value="ho">HO順</option>
+        <option value="ageA">年齢が低い順</option>
+        <option value="ageD">年齢が高い順</option>
+        <option value="hA">身長が低い順</option>
+        <option value="hD">身長が高い順</option>
+      </select>
+    </div>
+    <div class="group only-chars" id="g-view">
+      <button class="chip" data-v="card" aria-pressed="true">カード</button>
+      <button class="chip" data-v="table" aria-pressed="false">一覧表</button>
+    </div>
+    <div class="spacer"></div>
+    <button class="chip" id="ftoggle" aria-expanded="false" aria-controls="fpanel">絞り込み ▾</button>
+    <button class="chip" id="reset">リセット</button>
+  </div>
+  <div class="panel" id="fpanel" hidden>
+    <div class="inner">
+      <div class="group" id="g-sex"><span class="lbl">性別</span></div>
+      <div class="group" id="g-cat"><span class="lbl">能力</span></div>
+      <div class="group only-chars" id="g-range"><span class="lbl">射程</span></div>
+      <div class="group only-chars"><span class="lbl">特徴表</span><select id="trait" aria-label="特徴表"></select></div>
+    </div>
+  </div>
+</div>
+
+<main id="main"></main>
+<footer>クリックで詳細が開きます(←/→キーで前後、Escで閉じる)/ 技能表は見出しクリックで並び替え / 技能の薄いグレーは初期値</footer>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="m-title">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+"use strict";
+/* ===== データ ===== */
+const D = [
+ {ho:1, en:"Actor", kana:"アクター", mean:"俳優", pc:"Albert", pcKana:"アルバート", pl:"あらか", cn:"ポピーレッド", hex:"#ea5550", sex:"男", age:17, h:"177", weapon:"杖", range:["タッチ"], trait:"夜に弱い",
+  notes:["面倒見はいい","かなりの自信家","何事にも堂々と","口調は芝居がかった大仰な感じ","APP10"]},
+ {ho:2, en:"Bash", kana:"バッシュ", mean:"大騒ぎ", pc:"Bacchus", pcKana:"バッカス", pl:"威流", cn:"濡羽色", hex:"#222222", sex:"男", age:6, h:"120", weapon:"カットラス", range:["タッチ"], trait:"大切なもの",
+  notes:["シャチモチーフ","自認キング"]},
+ {ho:3, en:"Crescendo", kana:"クレッシェンド", mean:"次第に強く", pc:"Charlotte", pcKana:"シャルロッテ", pl:"あけり", cn:"サンシャインイエロー", hex:"#ffedab", sex:"女", age:14, h:"160", weapon:"戦輪", range:["3マス"], trait:"大切なもの",
+  notes:["上から金→水色のロングツインテ","髪に花の装飾+カチューシャorリボン","好きな食べ物はチーズとケーキ。チーズケーキありがとう。"], song:{a:"田中琴葉 (CV.種田梨沙)", t:"朝焼けのクレッシェンド", u:"https://www.youtube.com/watch?v=2NSPm0IQwF4&list=RD2NSPm0IQwF4&start_radio=1"}},
+ {ho:4, en:"Dedicate", kana:"デディケート", mean:"献身する", pc:"Diamond", pcKana:"ダイヤモンド", pl:"塩めかぶ", cn:"", hex:"#FF6438", sex:"男", age:17, h:"180", weapon:"弓", range:["5マス"], trait:"夜に弱い",
+  notes:["背の高い女性口調の男。ファビュラス！"]},
+ {ho:5, en:"Eye", kana:"アイ", mean:"目", pc:"Effy", pcKana:"エフィー", pl:"まにょ", cn:"", hex:"#b97583", sex:"女", age:6, h:"107", weapon:"クロスボウ", range:["5マス"], trait:"眼鏡をかけている",
+  notes:["全力で末っ子仕草をやりたい所存。ｴﾌｨｰは愛称です。フルネーム「Euphemia(ユーフェミア)」"]},
+ {ho:6, en:"Fool", kana:"フール", mean:"愚か者", pc:"Felici", pcKana:"フェリチ", pl:"風味鹿", cn:"オレンジか黄緑系統", hex:"#ffce94", sex:"女", age:14, h:"ちょっと小さめ", weapon:"弓", range:["5マス"], trait:"異性が苦手",
+  notes:["あんまり喋らない→これ嘘になるかも、人見知りするし、けど人間観察は好き","モチーフはクリオネなんです信じてください"]},
+ {ho:7, en:"Gravity", kana:"グラビティ", mean:"重力", pc:"Greg", pcKana:"グレッグ", pl:"ほのたま", cn:"", hex:"#162052", sex:"男", age:6, h:"110", weapon:"投擲(瓶・缶)", range:["3マス"], trait:"眼鏡をかけている",
+  notes:["ずっと夜遅くまで本を読みふけっているぼんやりタイプ。自分の好きなことには高速早口になるし、一瞬で元気になるオタクタイプです。お兄ちゃんお姉ちゃんたちには喜んでついていきます"]},
+ {ho:8, en:"Hero", kana:"ヒーロー", mean:"英雄", pc:"Harold", pcKana:"ハロルド", pl:"ねべに", cn:"クリムゾン", hex:"#dc143c", sex:"男", age:17, h:"205", weapon:"安全靴", range:["タッチ"], trait:"夜に弱い",
+  notes:["でっけー身体でっけー声たっけーテンション。顔面や身体に傷跡がある。"]},
+ {ho:9, en:"Invictus", kana:"インヴィクタス", mean:"負けざる者", pc:"Ira", pcKana:"アイラ", pl:"城原", cn:"ピーコックブルー", hex:"#1766AB", sex:"男", age:17, h:"151", weapon:"刺激物が入った瓶", range:["3マス"], trait:"寄せ餌",
+  notes:["嘘つき◎","協調性×","腕っぷし×","船医","APP8"], song:{a:"TeddyLoid&Giga", t:"デスぺレート feat. LOLUET", u:"https://youtu.be/fItPD2iW5I0?si=gcFAUTS397M-1M_V"}},
+ {ho:10, en:"Joker", kana:"ジョーカー", mean:"切り札", pc:"Jade", pcKana:"ジェイド", pl:"らの", cn:"ミントグリーン", hex:"#8DE5B4", sex:"男", age:15, h:"165", weapon:"投擲(投げナイフ)", range:["3マス"], trait:"大切なもの",
+  notes:["瞳…翡翠色(ですが糸目にしたら見えなくなりました)","賭け事大好き","自由人","かっこつけたがり"]},
+ {ho:11, en:"Knife", kana:"ナイフ", mean:"刃物", pc:"Kay", pcKana:"ケイ", pl:"天満", cn:"ラベンダー", hex:"#6a5acd", sex:"男", age:14, h:"190", weapon:"ナイフ", range:["タッチ"], trait:"動物に嫌われる",
+  notes:["青髪(グラデにするかも)","黒かグレー目","APP5(仮)","厨二病(普通に話すこともできる)","右目右腕に包帯を巻いている"], song:{a:"JO1", t:"ANIMAL", u:"https://youtu.be/6KT1qP2OREo?si=edJGi6IThXHWyM91"}},
+ {ho:12, en:"Love", kana:"ラヴ", mean:"愛", pc:"Lucette", pcKana:"リュセット", pl:"かつき", cn:"ルビー", hex:"#c70067", sex:"女", age:10, h:"146", weapon:"安全靴", range:["タッチ"], trait:"不思議ちゃん", notes:[]},
+ {ho:13, en:"Mad", kana:"マッド", mean:"気が狂った", pc:"Merlin", pcKana:"マーリン", pl:"神崎春瀬", cn:"ラピスラズリ", hex:"#426AB3", sex:"男", age:16, h:"170", weapon:"スレッジハンマー", range:["タッチ"], trait:"不思議ちゃん",
+  notes:["髪:白銀","眼:赤紫","肌:色白","自由奔放","黙ってさえいれば容姿端麗","APP18"], song:{a:"初星学園(倉本千奈・篠澤広・月村手毬)", t:"仮装狂騒曲", u:"https://youtu.be/VXB6ZBsrhPc?si=2AkzDgOSxOIX7Nxn"}},
+ {ho:14, en:"Null", kana:"ヌル", mean:"何もない", pc:"Noreen", pcKana:"ノーリーン", pl:"カリン", cn:"バイオレット", hex:"#ee82ee", sex:"女", age:15, h:"", weapon:"弓", range:[], trait:"夜に弱い", notes:[]},
+ {ho:15, en:"Ominous", kana:"オミナス", mean:"不吉な", pc:"O'Bannon", pcKana:"オバノン", pl:"リク", cn:"紫系", hex:"#af6ef1", sex:"女", age:14, h:"158", weapon:"", range:[], trait:"", notes:[]},
+ {ho:16, en:"Period", kana:"ピリオド", mean:"終止符", pc:"Peridot", pcKana:"ペリドット", pl:"藍", cn:"ペリドット", hex:"#A9C52A", sex:"男", age:12, h:"162", weapon:"レイピア", range:["タッチ"], trait:"眼鏡をかけている",
+  notes:["髪と瞳が黄緑(ペリドット)","大きな丸眼鏡をかけている","前髪が長め","自信なさげで","歴史書をよく読んでいる"]},
+ {ho:17, en:"Quit", kana:"クィット", mean:"中止する", pc:"Quince", pcKana:"クインス", pl:"光龍", cn:"赤紫", hex:"#6b2b59", sex:"男", age:15, h:"152", weapon:"旗(投げ槍)", range:["3マス"], trait:"目つきが悪い", notes:[]},
+ {ho:18, en:"Rally", kana:"ラリー", mean:"集会", pc:"Reef", pcKana:"リーフ", pl:"クロイル", cn:"水色", hex:"#D8E7F3", sex:"男", age:15, h:"153", weapon:"弓", range:["5マス"], trait:"動物に嫌われる",
+  notes:["珊瑚礁モチーフ","感情表現が希薄","静か・おとなしめなタイプ","無表情寄り","APP10"]},
+ {ho:19, en:"Stardust", kana:"スターダスト", mean:"星屑", pc:"Stella", pcKana:"ステラ", pl:"スオミ", cn:"黄色", hex:"#FCF16E", sex:"男", age:13, h:"163", weapon:"サーベル", range:["タッチ"], trait:"方向音痴",
+  notes:["何事も前向き","負けず嫌い","喜怒哀楽がはっきりしている","APP12"]},
+ {ho:20, en:"Treasure", kana:"トレジャー", mean:"宝物", pc:"Tiffany", pcKana:"ティファニー", pl:"れい", cn:"ティファニーブルー", hex:"#81CAC4", sex:"女", age:9, h:"135", weapon:"弓", range:["5マス"], trait:"大切なもの",
+  notes:["イメカラ色のクラゲ髪型+サンタモチーフの頭飾り","お姉さんぶってるロリ","なのです口調","目指せ海のサンタさん"], song:{a:"花譜", t:"BLUE SIGNAL", u:"https://www.youtube.com/watch?v=YeQ-9dFrXI4"}},
+ {ho:21, en:"Unbalance", kana:"アンバランス", mean:"不安定な", pc:"Unim", pcKana:"ウニム", pl:"カガリ", cn:"シーグリーン", hex:"#8AC75A", sex:"女", age:9, h:"119", weapon:"投擲(石)", range:["3マス"], trait:"眼鏡をかけている",
+  notes:["頭に双葉🌱","眼鏡","語尾が〜だよ 〜なんだよ","髪:黄緑、目:赤と緑のオッドアイ"]},
+ {ho:22, en:"Vortex", kana:"ヴォルテックス", mean:"旋風", pc:"Vivian", pcKana:"ヴィヴィアン", pl:"かつおみそ", cn:"青緑系", hex:"#26a69a", sex:"女", age:17, h:"", weapon:"", range:[], trait:"", notes:[]},
+ {ho:23, en:"Wyrm", kana:"ウィルム", mean:"龍", pc:"Wawa", pcKana:"ワワ", pl:"光龍", cn:"茶色", hex:"#b57a6e", sex:"女", age:13, h:"145", weapon:"シャベル / 弓", range:["タッチ","5マス"], trait:"寄せ餌",
+  notes:["お団子三つ編み","勝気(※死なば諸共含む)","精神の医務室常連","APP10"], song:{a:"和田たけあき", t:"オールイン・ワン", u:"https://youtu.be/erMpHZQVcF8?list=PLiFNg5fXiX32G3fNBC7U02t19zVkHAmdD"}},
+ {ho:24, en:"Xerography", kana:"ゼログラフィー", mean:"複写技術", pc:"Xenon", pcKana:"ゼノン", pl:"しろ", cn:"カクタス", hex:"#387d39", sex:"女", age:16, h:"164", weapon:"大鎌", range:["タッチ"], trait:"不思議ちゃん",
+  notes:["鴉モチーフ","口数は少なくマイペース","気になったものには黙々と没頭するタイプ","意外と好奇心旺盛","APP8"], song:{a:"結束バンド", t:"月並みに輝け", u:"https://youtu.be/anCp-VnUQtM?si=_OJ3e-Yi2LzhnmGO"}},
+ {ho:25, en:"Yoke", kana:"ヨーク", mean:"束縛", pc:"Yunon", pcKana:"ユノン", pl:"びゃっか", cn:"多分赤系統", hex:"#f38181", sex:"男", age:10, h:"134", weapon:"鞭", range:["タッチ"], trait:"大切なもの",
+  notes:["イカモチーフ"]},
+ {ho:26, en:"Zombi", kana:"ゾンビ", mean:"死者蘇生", pc:"Zimelia", pcKana:"ジメリア", pl:"ぶーこ", cn:"ビビットピンク", hex:"#ff00ff", sex:"女", age:17, h:"173", weapon:"ギザ歯", range:["タッチ"], trait:"不思議ちゃん",
+  notes:["白髪にインクをぶちまけてカラフル","緊張しいで人目恐怖症","叫び声がデカい","いつも腹を空かせている"], song:{a:"かいりきベア feat.初音ミク", t:"ルマ", u:"https://youtu.be/XfUao0_54yM?si=mSGTK6Bpm32ZnI3w"}}
+];
+
+/* 技能データ(戦闘,回避,医学,応急,目星,聞き耳,図書館,精神,水泳,機械,重機械,ナビ / "-"は未取得 / 空欄は記載なし) */
+const SKL = ["戦闘","回避","医学","応急","精神","目星","聞き耳","図書館","水泳","機械","重機械","ナビ"]; // 表示順
+const SKP = ["戦闘","回避","医学","応急","目星","聞き耳","図書館","精神","水泳","機械","重機械","ナビ"]; // 上のskの並び(データ取り込み用・変更不可)
+const SKD = {
+ 1:{sk:"70,70,-,45,,,,65,60,-,-,61", hv:75, hn:"芸術(演劇)", m:"器用貧乏です…"},
+ 2:{sk:"70,78,-,-,,,,,75,-,-,70", hv:79, hn:"動物言語", m:"前線に出ても後衛に出ても大丈夫です！動物さんで矛と盾になります！！"},
+ 3:{sk:"60,77,-,-,,,,-,75,51,-,75", hv:79, hn:"芸術(歌唱)", m:"攻撃は砲、回復は才能でゴリ押し予定。Cは精神分析やってる暇はきっとないだろうの気持ち。"},
+ 4:{sk:"70,70,-,60,,,,71,70,-,-,78", hv:78, hn:"ナビゲート", m:"「庇う」＋反撃中心。"},
+ 5:{sk:"65,74,-,66,,,,-,70,50,-,60", hv:79, hn:"目星", m:"始めは後ろの方から、全開示出来たら長距離武器で後ろから支援かな…！と思ってます。"},
+ 6:{sk:"79,73,-,-,,,,79,75,70,71,-", hv:79, hn:"心理学", m:""},
+ 7:{sk:"66,76,-,-,,,,-,70,70,65,-", hv:79, hn:"物理学", m:"ナビを重機械に変更しました！ただちょっと弱いかもです…！"},
+ 8:{sk:"79,79,-,79,,,,-,77,-,-,-", hv:79, hn:"肉体戦闘技能", m:"ヒーラーも兼ねれるアタッカーにしました💪"},
+ 9:{sk:"79,79,79,79,,,,79,79,79,4,-", hv:79, hn:"医学", m:"死なないで医学しろってHOが言ってそうだったのでヒーラー極振りにしました"},
+ 10:{sk:"79,79,-,70,,,,61,79,-,-,70", hv:79, hn:"芸術(イカサマ)", m:"選択された能力次第で動きが変わるので、前線、サポートどちらにも回れるようにしています。"},
+ 11:{sk:"79,79,-,-,,,,-,79,79,75,-", hv:79, hn:"ナイフ", m:"能力で回復系が多かったので応急医学切ってます！"},
+ 12:{sk:"70,72,-,60,,,,36,75,30,-,70", hv:79, hn:"芸術(ダンス)", m:"精神分析持っていった方がいいのか…？"},
+ 13:{sk:"70,71,-,-,,,,61,75,60,-,70", hv:79, hn:"オカルト", m:"自己完結型"},
+ 14:{sk:"70,79,-,60,,,,71,65,60,-,75", ex:70, hv:79, hn:"夢見", m:"後方支援の予定です"},
+ 15:{sk:"70,79,-,79,,,,-,79,70,-,79", hv:79, hn:"隠す", m:"前衛後衛どっちでもいけます 保険は随時適用"},
+ 16:{sk:"65,66,-,75,,,,77,60,-,-,65", hv:79, hn:"歴史", m:"一定条件で歴史を攻撃として使用可能なため攻撃技能は低めです"},
+ 17:{sk:"", hn:"言いくるめ", m:""},
+ 18:{sk:"79,79,60,60,,,,-,70,-,-,45", hv:79, hn:"隠れる", m:"サポーターです"},
+ 19:{sk:"70,67,-,40,,,,-,70,58,60,1", hv:79, hn:"天文学", m:""},
+ 20:{sk:"70,79,-,70,45,40,25,36,75,-,71,-", hv:79, hn:"信用", m:"全体の技能振りのバランス見つつ応急/精神分析/重機械/機械修理どれかに偏らせたりできます"},
+ 21:{sk:"75,75,-,50,,,,-,75,-,-,70", hv:76, hn:"生物学", m:""},
+ 22:{sk:"", hn:"旋風", m:""},
+ 23:{sk:",,-,-,,,,,,,-,", hv:79, hn:"逆鱗", m:""},
+ 24:{sk:"70,79,-,-,70,40,60,78,79,30,11,70", hv:79, hn:"変装", m:"戦闘と医学応急は任せました･･･ヒーラー足りんかったら能力で技能値量産します"},
+ 25:{sk:"79,79,5,30,,,,79,79,79,,79", hv:70, hn:"錯糸", m:""},
+ 26:{sk:"79,75,,,,,,,55,70,,", hv:79, hn:"噛みつき", m:""}
+};
+D.forEach(d => {
+  const x = SKD[d.ho] || {}, a = (x.sk || "").split(",");
+  d.sk = SKP.map((l,i) => ({ l, v:(a[i] || "").trim() }));
+  d.sk.sort((p,q) => SKL.indexOf(p.l) - SKL.indexOf(q.l)); // 表示順に並べ替え
+  d.ex = x.ex ?? null; d.hv = x.hv ?? null; d.hn = x.hn || ""; d.sm = x.m || "";
+});
+
+/* 交渉技能(技能名と値。入力のあるHOのみ) */
+const NEGO = {
+  20:{n:"信用", v:79}, 1:{n:"説得", v:60}, 4:{n:"値切り", v:50}, 18:{n:"説得", v:49}, 11:{n:"値切り", v:45}, 24:{n:"説得", v:40},
+  14:{n:"値切り", v:38}, 13:{n:"説得", v:35}, 12:{n:"説得", v:31}, 16:{n:"説得", v:30}, 19:{n:"説得", v:30}, 5:{n:"説得", v:25}
+};
+D.forEach(d => { d.nego = NEGO[d.ho] || null; });
+
+/* ===== 立ち絵(カードの薄背景) =====
+   u:画像URL / x:横位置(%) / z:拡大率。追加したいHOはここに足す。画像は外部リンクのまま読み込む */
+const PORTRAITS = {
+  1:{ u:"https://h.turbo.ccfolia-cdn.net/users/A0twnaw0g1XBMw98tuuB8iw3oov1/files/ab2ccef25faee35e91c63fe596e7ffdf36759ffc35f10741ea8c26ac8d39f380?t=1792909593421"  },
+  2:{ u:"https://h.turbo.ccfolia-cdn.net/users/8bN61K4scHU3fcd6CjlkXIAtUif1/files/ddf3e893d384c5e31cb59cf0658a54441c707d492953c919eafe16e233f370e6?t=1793114435787"  },
+  3:{ u:"https://h.turbo.ccfolia-cdn.net/users/ylhvK441icQhzaH043oNGYjeVaz2/files/3881c199052d5aeeae82eba549dabe2c8566d83abe1d469caaa29016c86d7c47?t=1793496307038"  },
+  4:{ u:"https://h.turbo.ccfolia-cdn.net/users/XHuJau5RsfgqB1pzrUKM5MY8Zmh1/files/77dc748c75a5942b8b1b50e93448b78adf99cee8de1e722d84699bcfb758f476?t=1793431258567"  },
+  5:{ u:"https://h.turbo.ccfolia-cdn.net/users/bOkBurjIeChK0ePkrtzDsxcsstc2/files/c308f5fc9ae7885fda8c0eaafff44ecf87663fe47119f425d43bc48631825c1b?t=1793366206319"  },
+  6:{ u:"https://h.turbo.ccfolia-cdn.net/users/c2efTdZP72SU5flHbwRWHxdCBpE2/files/ea6d261a805d29a857fa19d5d916d03c445ae71fb6da1427a31e3bae06a8d06a?t=1792899222735"  },
+  7:{ u:"https://h.turbo.ccfolia-cdn.net/users/a3KkC5k3ZEXngLOoAAxK4gJi8Kv2/files/4c32ab434f9bc4fba777a39c95e572f41a623453bbe30f50d3b3587d04b86501?t=1793494011369"  },
+  9:{ u:"https://h.turbo.ccfolia-cdn.net/users/vpMB0tN9VMSCXJumeqKhyQLV9D83/files/aa829ac261c54a87d8ca2ce83d46301870f262dd47c1855979653e9736627e91?t=1788465670828", x:55  },
+  10:{ u:"https://h.turbo.ccfolia-cdn.net/users/1ILkVlVG8aT1jss6FNBPqrRBFxa2/files/c9483f0661f4fa2dfe8977d2f9528b571bfb8a0f73851f2e51ced972f6bd13ad?t=1793472163229" },
+  14:{ u:"https://h.turbo.ccfolia-cdn.net/users/GFtC9QilaLcMV5nffWeJgGUAr8N2/files/9a883c1adde255852b6e83500a07bc65ac1624e7d3c79114e482314b35101726?t=1793464537191" },
+  15:{ u:"https://h.turbo.ccfolia-cdn.net/users/SVIDpHEbVJT2vPtEwJVNE5MYsTC3/files/b2f0a7407ba498c161d144213615a8c9c9513743ffdfd6387eede94267b3eeba?t=1790084306355" },
+  16:{ u:"https://h.turbo.ccfolia-cdn.net/users/qFOcGcJ7cEaJx8bcj6Xjwf5YDAi1/files/8b60a1bb366d9c2d13da545b79679caa01c7d529c4ef876647420445010b0f42?t=1793441865672" },
+  17:{ u:"https://h.turbo.ccfolia-cdn.net/users/SSPkIEvJHEYpXQ2t0KjnrvRkcvm1/files/d62a2dd5a788a57fa4a6ca0ada5c0ae4c553260c3819ccc0ffb4e4339e3bed44?t=1793004415477" },
+  18:{ u:"https://h.turbo.ccfolia-cdn.net/users/ZHlNhXYwtjbOdHn5dYCltLehcJt1/files/740494a9848be513dbb023daeb072f5e2fc6f27e2b3620cd20a296ad3538cfa7?t=1792945126827" },
+  20:{ u:"https://h.turbo.ccfolia-cdn.net/users/SCmPzbYIdsRdK88sWN3ZGY90jNH3/files/0a9524179d14942cff501b6a558a45a6ebc2377fdabcf2c328daf2702349cd58?t=1793453778737" },
+  21:{ u:"https://h.turbo.ccfolia-cdn.net/users/y9ujUNkgQkOo97SEqVZq5B2P2C82/files/15f398eb76628319dba9c7cb6e57a879266ac8e3ee70acf0d2d66da403a04bbc?t=1793494643404" },
+  23:{ u:"https://h.turbo.ccfolia-cdn.net/users/SSPkIEvJHEYpXQ2t0KjnrvRkcvm1/files/125967188f603fc8991551a51f13c16c70d3b9fb1a4a1d67177c4a7a6e6af6df?t=1792998488025" },
+  24:{ u:"https://h.turbo.ccfolia-cdn.net/users/EN6FyRUYoOWXmHeVDNepBoZflBP2/files/144a79339ee1844090b3c25c55fb3db01e23aabfacc5417ae8cc522685bb67d7?t=1792900733960" },
+  25:{ u:"https://h.turbo.ccfolia-cdn.net/users/nSQCdNYcdIN7qKeV598DSkb3F0O2/files/6d34c7adb69c99c2a5632196027af8e5a9929223865436527ea952878ba0e193?t=1793454040812" },
+  26:{ u:"https://h.turbo.ccfolia-cdn.net/users/2JFJBlBqHRPoy9AVCJIHGjuHu983/files/b8ddd0139e5cfae3b20f4beda5a4b8f370b9d7c01d4de8ef36076cd53a8f6e25?t=1793493599065" }
+};
+/* 拡大率は画像の縦横比から自動計算(全身=縦長は上半身が映る大きさ、顔・胸上=正方形に近いほど縮小して人物の大きさを揃える)。
+   個別に直したい場合は上の項目に z:拡大率(1=カード右側の幅いっぱい)を足すと自動計算より優先される */
+const PORTRAIT_K = 1.7 * (3000 / 1400); // 基準: 縦横比3000:1400の全身絵を1.7倍で表示
+function fitPortrait(img){
+  const r = img.naturalHeight / img.naturalWidth;
+  if(!isFinite(r) || !r) return;
+  const x = parseFloat(img.dataset.x || 50);
+  const s = r >= 2 ? 1 : r <= 1 ? 0.25 : 0.25 + 0.75 * (r - 1); // 絵に映っている身体の割合の推定
+  let z = img.dataset.z ? parseFloat(img.dataset.z) : s * PORTRAIT_K / r;
+  z = Math.max(0.35, Math.min(z, 3));
+  const lo = Math.min(0, 100 * (1 - z)), hi = Math.max(0, 100 * (1 - z));
+  const left = Math.max(lo, Math.min(hi, 50 - z * x));
+  img.style.width = (z * 100) + "%";
+  img.style.left = left + "%";
+}
+D.forEach(d => { d.img = PORTRAITS[d.ho] || null; });
+
+/* ===== 能力カテゴリ ===== */
+const CATS = [
+  {k:"atk", n:"アタッカー", e:"🔴", c:"#e5534b", ho:[2,8,11,22,23]},
+  {k:"heal",n:"ヒーラー",   e:"🟢", c:"#3fb868", ho:[3,8,12,21,24]},
+  {k:"buff",n:"バフ",       e:"🟡", c:"#f0c53a", ho:[6,7,13,15,18,19,20,24,26]},
+  {k:"debf",n:"デバフ",     e:"🟣", c:"#a569e0", ho:[5,7,11,14,17,25]},
+  {k:"tank",n:"タンク",     e:"🔵", c:"#4a8df0", ho:[2,4,9,23]},
+  {k:"sp",  n:"特殊",       e:"⚫", c:"#111111", ho:[1,10,16]}
+];
+D.forEach(d => { d.cat = CATS.filter(c => c.ho.includes(d.ho)); });
+
+/* ===== ユーティリティ ===== */
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const hoName = d => `<ruby class="hn">${esc(d.en)}<rt data-rt="${esc(d.kana)}"></rt></ruby>`;
+const hoLine = (d, lg) => `<div class="holine${lg?" lg":""}"><span>HO${d.ho}</span>${hoName(d)}<span class="mean">${esc(d.mean)}</span></div>`;
+const skNum = v => /^\d+$/.test(v) ? parseInt(v,10) : null;
+/* 技能の初期値(未入力・「-」のときに薄いグレーで表示)
+   ※目星(25)・聞き耳(25)・図書館(25)は入力漏れが多いため、現状は初期値を出さず空欄にしている。戻す場合は下に "目星":25,"聞き耳":25,"図書館":25 を足す */
+const SKDEF = {"医学":5,"応急":30,"精神":1,"水泳":25,"機械":20,"重機械":1,"ナビ":10};
+const skShow = v => v === "-" ? "—" : v;
+const skOf = (d, l) => (d.sk.find(s => s.l === l) || {}).v || "";
+function skEff(d, l){
+  const raw = skOf(d, l), n = skNum(raw);
+  if(n !== null) return { n, def:false, raw };
+  if(l in SKDEF) return { n:SKDEF[l], def:true, raw };
+  return { n:null, def:false, raw };
+}
+const skCell = (d, l) => { const e = skEff(d, l); return e.n === null ? esc(skShow(e.raw)) : (e.def ? `<span class="def" title="初期値">${e.n}</span>` : String(e.n)); };
+const catHtml = d => d.cat.length ? `<div class="cats">${d.cat.map(c => `<span class="cat" style="--cc:${c.c}"><i></i>${esc(c.n)}</span>`).join("")}</div>` : "";
+const songLabel = s => (s.a || "") + "「" + s.t + "」";
+const portraitHtml = d => d.img
+  ? `<div class="portrait"><img src="${esc(d.img.u)}" alt="" loading="lazy" referrerpolicy="no-referrer" data-x="${d.img.x ?? 50}"${d.img.z ? ` data-z="${d.img.z}"` : ""} onload="fitPortrait(this)" onerror="this.parentNode.remove()"></div>` : "";
+const letter = d => d.en.charAt(0).toUpperCase();
+const hNum = d => /^\d+$/.test(d.h) ? parseInt(d.h,10) : null;
+const hText = d => d.h ? (hNum(d) !== null ? d.h + "cm" : d.h) : "—";
+const safeUrl = u => /^https?:\/\//i.test(u || "") ? u : "";
+function lum(hex){
+  const m = /^#([0-9a-f]{6})$/i.exec(hex || ""); if(!m) return 0.5;
+  const v = [0,2,4].map(i => parseInt(m[1].substr(i,2),16)/255)
+    .map(c => c <= .03928 ? c/12.92 : Math.pow((c+.055)/1.055, 2.4));
+  return .2126*v[0] + .7152*v[1] + .0722*v[2];
+}
+/* 暗い背景で見えない色(黒など)はアクセント表示のみ明るく補正 */
+/* 明るい背景で薄すぎる色(黄・水色など)は同じ色味のまま少し濃くして、カードの帯が見えるようにする */
+function darken(hex, f){ const m = /^#([0-9a-f]{6})$/i.exec(hex); if(!m) return hex; return "#" + [0,2,4].map(i => Math.round(parseInt(m[1].substr(i,2),16)*f).toString(16).padStart(2,"0")).join(""); }
+const accent = d => !d.hex ? "#9db6c2" : (lum(d.hex) > 0.6 ? darken(d.hex, 0.78) : d.hex);
+
+/* ===== 状態 ===== */
+const PAGE_HASH = { chars:"", skills:"#skills", height:"#height" };
+const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null };
+let current = []; // 現在表示中の配列
+let openHo = null;
+
+/* ===== フィルタUI生成 ===== */
+function makeChips(el, key, items){
+  items.forEach(([val,label]) => {
+    const b = document.createElement("button");
+    b.className = "chip"; b.textContent = label; b.dataset.val = val;
+    b.setAttribute("aria-pressed", String(state[key] === val));
+    b.addEventListener("click", () => { state[key] = val; syncChips(el, key); render(); });
+    el.appendChild(b);
+  });
+}
+function syncChips(el, key){
+  el.querySelectorAll(".chip").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.val === state[key])));
+}
+makeChips($("#g-sex"), "sex", [["all","すべて"],["男","男"],["女","女"]]);
+makeChips($("#g-cat"), "cat", [["all","すべて"], ...CATS.map(c => [c.k, c.e + " " + c.n])]);
+makeChips($("#g-range"), "range", [["all","すべて"],["タッチ","タッチ"],["3マス","3マス"],["5マス","5マス"],["none","未設定"]]);
+
+(function buildTraitSelect(){
+  const traits = [...new Set(D.map(d => d.trait).filter(Boolean))];
+  const sel = $("#trait");
+  sel.innerHTML = '<option value="all">すべて</option>' +
+    traits.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join("") +
+    '<option value="none">未設定</option>';
+  sel.addEventListener("change", e => { state.trait = e.target.value; render(); });
+})();
+
+$("#q").addEventListener("input", e => { state.q = e.target.value.trim().normalize("NFKC").toLowerCase(); render(); });
+$("#sort").addEventListener("change", e => { state.sort = e.target.value; render(); });
+$("#g-view").querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => {
+  state.view = b.dataset.v;
+  $("#g-view").querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  render();
+}));
+$("#ftoggle").addEventListener("click", () => {
+  const p = $("#fpanel"); p.hidden = !p.hidden;
+  $("#ftoggle").setAttribute("aria-expanded", String(!p.hidden));
+});
+$("#reset").addEventListener("click", () => {
+  Object.assign(state, { q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", skSort:{key:"ho", dir:1} });
+  $("#q").value = ""; $("#trait").value = "all"; $("#sort").value = "ho";
+  syncChips($("#g-sex"), "sex"); syncChips($("#g-range"), "range"); syncChips($("#g-cat"), "cat");
+  render();
+});
+function setPage(p){
+  state.page = p;
+  history.replaceState(null, "", location.pathname + location.search + PAGE_HASH[p]);
+  render();
+}
+document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => setPage(b.dataset.p)));
+
+/* ===== 絞り込み・並び替え ===== */
+function haystack(d){
+  return [d.ho, "HO"+d.ho, d.en, d.kana, d.mean, d.pc, d.pcKana, d.pl, d.cn, d.hex, d.sex, d.weapon,
+          d.range.join(" "), d.trait, d.notes.join(" "), d.song ? songLabel(d.song) : "", d.hn, d.sm, d.nego ? d.nego.n : "", d.cat.map(c => c.n).join(" ")].join(" ").normalize("NFKC").toLowerCase();
+}
+function skKeyVal(d, key){
+  if(key === "ho") return d.ho;
+  if(key === "pc") return d.pc.toLowerCase();
+  if(key === "hv") return d.hv;
+  if(key === "nego") return d.nego ? d.nego.v : null;
+  return skEff(d, key).n;
+}
+function skCmp(a, b){
+  const {key, dir} = state.skSort;
+  const va = skKeyVal(a, key), vb = skKeyVal(b, key);
+  const na = va === null || va === undefined, nb = vb === null || vb === undefined;
+  if(na && nb) return a.ho - b.ho;
+  if(na) return 1;            // 値なしは常に末尾
+  if(nb) return -1;
+  const c = typeof va === "string" ? va.localeCompare(vb) : va - vb;
+  return c * dir || a.ho - b.ho;
+}
+function getList(){
+  const chars = state.page === "chars";
+  const list = D.filter(d => {
+    if(state.q && !haystack(d).includes(state.q)) return false;
+    if(state.cat !== "all" && !d.cat.some(c => c.k === state.cat)) return false;
+    if(state.sex !== "all" && d.sex !== state.sex) return false;
+    if(chars){
+      if(state.range === "none"){ if(d.range.length) return false; }
+      else if(state.range !== "all" && !d.range.includes(state.range)) return false;
+      if(state.trait === "none"){ if(d.trait) return false; }
+      else if(state.trait !== "all" && d.trait !== state.trait) return false;
+    }
+    return true;
+  });
+  if(state.page === "height") return list;
+  if(!chars) return list.sort(skCmp);
+  const cmp = {
+    ho:  (a,b) => a.ho - b.ho,
+    ageA:(a,b) => a.age - b.age || a.ho - b.ho,
+    ageD:(a,b) => b.age - a.age || a.ho - b.ho,
+    hA:  (a,b) => (hNum(a) ?? Infinity) - (hNum(b) ?? Infinity) || a.ho - b.ho,
+    hD:  (a,b) => (hNum(b) ?? -1) - (hNum(a) ?? -1) || a.ho - b.ho
+  }[state.sort];
+  return list.sort(cmp);
+}
+
+/* ===== 描画 ===== */
+function sexPill(d){ return `<span class="pill ${d.sex==="男"?"m":"f"}">${d.sex==="男"?"♂ 男":"♀ 女"}</span>`; }
+function swatch(d){
+  return d.hex
+    ? `<span class="swatch" style="--c:${esc(d.hex)}"><i></i><span class="hexcode">${esc(d.hex)}</span></span>`
+    : `<span class="swatch"><i class="none"></i>未設定</span>`;
+}
+function skLine(d){
+  const f = SKL.filter(l => !["目星","聞き耳","図書館"].includes(l)).map(l => ({l, e:skEff(d, l)})).filter(x => x.e.n !== null || x.e.raw !== "");
+  if(!f.length && !d.nego) return "";
+  return `<div class="skl">${f.map(x => `<span>${x.l}<b${x.e.def ? ' class="def"' : ""}>${skCell(d, x.l)}</b></span>`).join("")}${d.nego ? `<span>${esc(d.nego.n)}<b>${d.nego.v}</b></span>` : ""}</div>`;
+}
+function cardHtml(d){
+  const ranges = d.range.map(r => `<span class="pill range">${esc(r)}</span>`).join("");
+  return `<button class="card" data-ho="${d.ho}" data-letter="${esc(letter(d))}" style="--c:${esc(accent(d))}">
+    ${portraitHtml(d)}
+    ${hoLine(d)}
+    <div class="pc">${esc(d.pc)}</div>
+    <div class="kana">${esc(d.pcKana || "　")} ・ PL: ${esc(d.pl)}</div>
+    <div class="meta">${sexPill(d)}<span class="pill">${d.age}歳</span><span class="pill">${esc(hText(d))}</span></div>
+    ${catHtml(d)}
+    <div class="weapon"><span class="k">武器</span>${esc(d.weapon || "—")} ${ranges}</div>
+    ${skLine(d)}
+    <div class="foot">${swatch(d)}${d.trait ? `<span class="trait">${esc(d.trait)}</span>` : ""}</div>
+  </button>`;
+}
+const CHAR_SORT = { ho:["ho"], age:["ageA","ageD"], h:["hA","hD"] };
+function charTableHtml(list){
+  const info = col => { const i = CHAR_SORT[col].indexOf(state.sort); return { on:i >= 0, dir:i === 1 ? -1 : 1 }; };
+  const sc = col => info(col).on ? " sorted" : "";
+  const th = (col, label) => {
+    const f = info(col);
+    return `<th class="sortable${sc(col)}" data-cs="${col}" aria-sort="${f.on ? (f.dir > 0 ? "ascending" : "descending") : "none"}">${label}<span class="ind">${f.on ? (f.dir > 0 ? "▲" : "▼") : ""}</span></th>`;
+  };
+  const rows = list.map(d => `<tr data-ho="${d.ho}">
+    <td class="nw${sc("ho")}">HO${d.ho}</td>
+    <td>${hoName(d)}<div class="sm">${esc(d.mean)}</div></td>
+    <td class="pcn">${esc(d.pc)}<div class="sm">${esc(d.pcKana)}</div></td>
+    <td>${esc(d.pl)}</td>
+    <td>${catHtml(d)}</td>
+    <td class="nw">${esc(d.sex)}</td>
+    <td class="nw${sc("age")}">${d.age}歳</td>
+    <td class="nw${sc("h")}">${esc(hText(d))}</td>
+    <td>${esc(d.weapon || "—")}</td>
+    <td class="nw">${esc(d.range.join(" / ") || "—")}</td>
+    <td>${esc(d.trait || "—")}</td>
+    <td class="nw">${swatch(d)}</td></tr>`).join("");
+  return `<div class="tablewrap"><table><thead><tr>
+    ${th("ho","HO")}<th>HO名</th><th>PC名</th><th>PL名</th><th>能力</th><th>性別</th>${th("age","年齢")}${th("h","身長")}<th>武器</th><th>射程</th><th>特徴表</th><th>文字色</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function tableHtml(list){
+  const {key, dir} = state.skSort;
+  const cl = k => key === k ? " sorted" : "";
+  const th = (k, label, extra="") => {
+    const on = key === k;
+    return `<th class="sortable${extra}${cl(k)}" data-sk="${esc(k)}" aria-sort="${on ? (dir > 0 ? "ascending" : "descending") : "none"}">${esc(label)}<span class="ind">${on ? (dir > 0 ? "▲" : "▼") : ""}</span></th>`;
+  };
+  const rows = list.map(d => `<tr data-ho="${d.ho}">
+    <td class="nw${cl("ho")}">HO${d.ho}</td>
+    <td>${hoName(d)}<div class="sm">${esc(d.mean)}</div></td>
+    <td class="pcn${cl("pc")}">${esc(d.pc)}<div class="sm">${esc(d.pcKana)}</div></td>
+    <td>${catHtml(d)}</td>
+    ${SKL.map(l => `<td class="num${cl(l)}">${skCell(d, l)}</td>`).join("")}
+    <td class="${cl("nego").trim()}">${d.nego ? esc(d.nego.n) + " <b>" + d.nego.v + "</b>" : ""}</td>
+    <td class="${cl("hv").trim()}">${esc(d.hn)}${d.hv !== null ? " <b>" + d.hv + "</b>" : ""}</td>
+    <td class="memo">${esc(d.sm)}</td></tr>`).join("");
+  return `<div class="tablewrap"><table><thead><tr>
+    ${th("ho","HO")}<th>HO名</th>${th("pc","PC名")}<th>能力</th>${SKL.map(l => th(l, l, " num")).join("")}${th("nego","交渉技能")}${th("hv","HO推奨技能")}<th>備考</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+/* ===== 身長くらべ ===== */
+function heightHtml(){
+  const n = D.filter(d => hNum(d) !== null).length;
+  return `<div class="hcard">
+    <h2>身長くらべ</h2>
+    <p class="hdesc">身長が入っているHOの人型を同じ縮尺で並べています(全${D.length}名のうち、身長が数値で入っているのは${n}名)。人型をクリックすると詳細が出ます。</p>
+    <div class="htools">
+      <div class="group"><button class="chip" data-hsort="ho" aria-pressed="${state.hSort === "ho"}">HO順</button><button class="chip" data-hsort="h" aria-pressed="${state.hSort === "h"}">身長順</button><button class="chip" data-hsort="age" aria-pressed="${state.hSort === "age"}">年齢順</button></div>
+      <label><input type="checkbox" id="h-age"${state.hAge ? " checked" : ""}> 年齢を重ねる</label>
+    </div>
+    <div class="hlegend"><span><i style="background:#3b8ee8"></i>男</span><span><i style="background:#e0592b"></i>女</span><span>人型の中の数字 = 年齢</span></div>
+    <div id="hchart"></div>
+    <div class="hpanel" id="hpanel"></div>
+    <p class="hnote" id="hnote"></p>
+  </div>`;
+}
+function drawHeight(){
+  const box = $("#hchart"); if(!box) return;
+  const list = [...current];
+  if(state.hSort === "h") list.sort((a,b) => {
+    const x = hNum(a), y = hNum(b);
+    if(x === null && y === null) return a.ho - b.ho;
+    if(x === null) return 1; if(y === null) return -1;
+    return x - y || a.ho - b.ho;
+  });
+  else if(state.hSort === "age") list.sort((a,b) => {
+    if(a.age !== b.age) return a.age - b.age;                       // 年齢が低い順、同じ年齢は身長が低い順→HO順
+    const x = hNum(a), y = hNum(b);
+    if(x !== null && y !== null && x !== y) return x - y;
+    if(x === null && y !== null) return 1; if(y === null && x !== null) return -1;
+    return a.ho - b.ho;
+  });
+  else list.sort((a,b) => a.ho - b.ho);
+
+  const W = box.clientWidth || 900, LEFT = 6, RIGHT = 54, SLOT_MIN = 42;
+  const avail = W - LEFT - RIGHT;
+  const maxPer = Math.max(1, Math.floor(avail / SLOT_MIN));          // 入るなら横一列
+  const rows = Math.ceil(list.length / maxPer), per = Math.ceil(list.length / rows);
+  const slotW = avail / per;
+  const MAXH = Math.max(205, ...list.map(d => hNum(d) || 0));
+  const s = Math.min(1.25, 0.85 * slotW / (0.31 * MAXH));            // px / cm
+  const labelH = Math.max(...list.map(d => ("HO" + d.ho + " " + d.pc).length)) * 6.4 + 14;
+  const top = 26, yB = top + 210 * s, rowH = yB + labelH + 8;
+  const MALE = "#3b8ee8", FEMALE = "#e0592b";
+
+  const fig = (d, cx) => {
+    const h = hNum(d);
+    const sel = state.hSel === d.ho;
+    let g = `<g class="hfig" data-hsel="${d.ho}" tabindex="0" role="button" aria-label="${esc("HO" + d.ho + " " + d.pc + " " + d.sex + " " + d.age + "歳 " + hText(d))}">`;
+    g += `<rect class="hbg" x="${cx - slotW / 2 + 1}" y="2" width="${slotW - 2}" height="${rowH - 4}" rx="6" fill="${sel ? "rgba(31,162,211,.14)" : "rgba(0,0,0,0)"}" stroke="${sel ? "#1fa2d3" : "none"}" style="pointer-events:all"/>`;
+    if(h !== null){
+      const hp = h * s, col = d.sex === "男" ? MALE : FEMALE, r = 0.065 * hp;
+      const tw = 0.20 * hp, tTop = yB - hp + 0.145 * hp, tBot = yB - 0.50 * hp, aw = 0.045 * hp;
+      g += `<circle cx="${cx}" cy="${yB - hp + r}" r="${r}" fill="${col}"/>`;
+      g += `<rect x="${cx - tw / 2}" y="${tTop}" width="${tw}" height="${tBot - tTop}" rx="${0.04 * hp}" fill="${col}"/>`;
+      g += `<rect x="${cx - tw / 2 - 0.055 * hp}" y="${tTop + 0.005 * hp}" width="${aw}" height="${(tBot - tTop) * 0.9}" rx="${aw / 2}" fill="${col}"/>`;
+      g += `<rect x="${cx + tw / 2 + 0.01 * hp}" y="${tTop + 0.005 * hp}" width="${aw}" height="${(tBot - tTop) * 0.9}" rx="${aw / 2}" fill="${col}"/>`;
+      g += `<rect x="${cx - 0.09 * hp}" y="${tBot - 0.02 * hp}" width="${0.085 * hp}" height="${yB - tBot + 0.02 * hp}" rx="${0.03 * hp}" fill="${col}"/>`;
+      g += `<rect x="${cx + 0.005 * hp}" y="${tBot - 0.02 * hp}" width="${0.085 * hp}" height="${yB - tBot + 0.02 * hp}" rx="${0.03 * hp}" fill="${col}"/>`;
+      g += `<text x="${cx}" y="${yB - hp - 6}" text-anchor="middle" font-size="10.5" fill="#2c5568">${h}</text>`;
+      if(state.hAge){
+        const fs = Math.max(8, Math.min(14, hp * 0.10));
+        g += `<text x="${cx}" y="${(tTop + tBot) / 2 + fs * 0.36}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="#fff" stroke="#0d3550" stroke-width="2.4" paint-order="stroke" stroke-linejoin="round">${d.age}</text>`;
+      }
+    } else {
+      g += `<text x="${cx}" y="${yB - 8}" text-anchor="middle" font-size="11" fill="#9db6c2">—</text>`;
+    }
+    g += `<text transform="translate(${cx - 4},${yB + 8}) rotate(90)" font-size="11" fill="${sel ? "#0a2e41" : "#5f8798"}" font-weight="${sel ? 700 : 400}">${esc("HO" + d.ho + " " + d.pc)}</text></g>`;
+    return g;
+  };
+
+  let html = "";
+  for(let r = 0; r < rows; r++){
+    const part = list.slice(r * per, (r + 1) * per);
+    const x2 = LEFT + per * slotW;
+    let svg = `<svg viewBox="0 0 ${W} ${rowH}" role="img" aria-label="身長くらべ">`;
+    [100, 150, 200].forEach(cm => {
+      const y = yB - cm * s;
+      svg += `<line x1="${LEFT}" x2="${x2}" y1="${y}" y2="${y}" stroke="#b5d5e1" stroke-dasharray="4 4"/><text x="${x2 + 6}" y="${y + 3.5}" font-size="10" fill="#6a93a5">${cm}cm</text>`;
+    });
+    svg += `<line x1="${LEFT}" x2="${x2}" y1="${yB}" y2="${yB}" stroke="#6d94a6" stroke-width="1.5"/>`;
+    part.forEach((d, i) => { svg += fig(d, LEFT + (i + 0.5) * slotW); });
+    html += svg + "</svg>";
+  }
+  box.innerHTML = html;
+
+  const sel = D.find(d => d.ho === state.hSel);
+  $("#hpanel").innerHTML = sel
+    ? `<b>HO${sel.ho} ${esc(sel.pc)}</b><span>${esc(sel.sex)} ／ ${sel.age}歳 ／ ${esc(hText(sel))}</span>${catHtml(sel)}<button class="chip" id="h-open">詳細を開く</button>`
+    : '<span style="color:var(--muted)">人型をクリックすると、そのHOの性別・年齢・身長が出ます。</span>';
+  const miss = D.filter(d => hNum(d) === null);
+  $("#hnote").textContent = miss.length
+    ? "身長が数値で入っていない" + miss.length + "名(" + miss.map(d => "HO" + d.ho + (d.h ? "「" + d.h + "」" : "")).join("・") + ")は空欄にしています。入力されたら人型が出ます。"
+    : "";
+}
+$("#main").addEventListener("change", e => { if(e.target.id === "h-age"){ state.hAge = e.target.checked; drawHeight(); } });
+let hResizeTimer;
+window.addEventListener("resize", () => {
+  clearTimeout(hResizeTimer);
+  hResizeTimer = setTimeout(() => { if(state.page === "height" && $("#hchart")) drawHeight(); }, 120);
+});
+document.addEventListener("keydown", e => {
+  const f = e.target.closest && e.target.closest("[data-hsel]");
+  if(f && openHo === null && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); state.hSel = parseInt(f.dataset.hsel, 10); drawHeight(); }
+});
+function render(){
+  current = getList();
+  const chars = state.page === "chars";
+  document.body.dataset.page = state.page;
+  document.body.dataset.view = chars ? state.view : "";
+  $("#sort").value = state.sort;
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.p === state.page)));
+  const n = [state.sex, state.cat, ...(chars ? [state.range, state.trait] : [])].filter(v => v !== "all").length;
+  $("#ftoggle").textContent = "絞り込み" + (n ? " (" + n + ")" : "") + " ▾";
+  $("#count").textContent = current.length;
+  $("#total").textContent = D.length;
+  const main = $("#main");
+  if(!current.length){ main.innerHTML = '<div class="empty">条件に合うキャラクターがいません</div>'; return; }
+  main.innerHTML = state.page === "height" ? heightHtml()
+    : !chars ? tableHtml(current)
+    : state.view === "table" ? charTableHtml(current)
+    : `<div class="grid">${current.map(cardHtml).join("")}</div>`;
+  if(state.page === "height") drawHeight();
+}
+$("#main").addEventListener("click", e => {
+  const hs = e.target.closest("[data-hsort]");
+  if(hs){ state.hSort = hs.dataset.hsort; render(); return; }
+  const hf = e.target.closest("[data-hsel]");
+  if(hf){ state.hSel = parseInt(hf.dataset.hsel, 10); drawHeight(); return; }
+  if(e.target.closest("#h-open")){ if(state.hSel !== null) openModal(state.hSel); return; }
+  const ch = e.target.closest("th[data-cs]");
+  if(ch){
+    const m = CHAR_SORT[ch.dataset.cs], i = m.indexOf(state.sort);
+    state.sort = m[(i + 1) % m.length];
+    render(); return;
+  }
+  const h = e.target.closest("th[data-sk]");
+  if(h){
+    const k = h.dataset.sk;
+    state.skSort = state.skSort.key === k
+      ? { key:k, dir:-state.skSort.dir }
+      : { key:k, dir:(k === "ho" || k === "pc") ? 1 : -1 };
+    render(); return;
+  }
+  const el = e.target.closest("[data-ho]");
+  if(el) openModal(parseInt(el.dataset.ho, 10));
+});
+
+/* ===== 詳細モーダル ===== */
+function skillHtml(d){
+  const rows = [];
+  if(d.ex !== null) rows.push({l:"列名なし", n:d.ex, def:false, raw:String(d.ex)});
+  SKL.forEach(l => { const e = skEff(d, l); if(e.n !== null || e.raw !== "") rows.push({l, ...e}); });
+  if(d.nego) rows.push({l:"交渉・" + d.nego.n, n:d.nego.v, def:false, raw:String(d.nego.v)});
+  const grid = rows.map(r => `<div class="skrow${r.def ? " def" : (r.n === null ? " off" : "")}"><span class="skn">${esc(r.l)}</span><span class="bar"><i style="width:${Math.min(r.n ?? 0,100)}%"></i></span><span class="skv">${r.n === null ? esc(skShow(r.raw)) : r.n}</span></div>`).join("");
+  const ho = d.hn ? `<dl style="margin:12px 0 0"><dt>HO推奨技能</dt><dd>${esc(d.hn)}${d.hv !== null ? ` <b>${d.hv}</b>` : ""}</dd></dl>` : "";
+  const memo = d.sm ? `<div class="skmemo">${esc(d.sm)}</div>` : "";
+  return `<div class="sec">技能 <span class="def" style="letter-spacing:0">(薄いグレー=初期値)</span></div><div class="skgrid">${grid}</div>${ho}${memo}`;
+}
+function modalHtml(d){
+  const ranges = d.range.length ? d.range.map(esc).join(" / ") : "—";
+  const song = d.song
+    ? (safeUrl(d.song.u)
+        ? `<a href="${esc(safeUrl(d.song.u))}" target="_blank" rel="noopener noreferrer">${esc(songLabel(d.song))}</a>`
+        : esc(songLabel(d.song)))
+    : "—";
+  const notes = d.notes.length
+    ? `<ul class="notes">${d.notes.map(n => `<li>${esc(n)}</li>`).join("")}</ul>` : '<span style="color:var(--muted)">未記入</span>';
+  return `${portraitHtml(d)}<button class="btn close" id="m-close" aria-label="閉じる">✕</button>
+    ${hoLine(d, true)}
+    <h2 id="m-title">${esc(d.pc)}</h2>
+    <div class="sub">${esc(d.pcKana || "")}${d.pcKana ? " ・ " : ""}PL: ${esc(d.pl)}</div>
+    <div class="meta">${sexPill(d)}<span class="pill">${d.age}歳</span><span class="pill">${esc(hText(d))}</span></div>
+    <dl>
+      <dt>能力カテゴリ</dt><dd>${catHtml(d) || "—"}</dd>
+      <dt>武器</dt><dd>${esc(d.weapon || "—")}</dd>
+      <dt>射程</dt><dd>${ranges}</dd>
+      <dt>特徴表</dt><dd>${esc(d.trait || "—")}</dd>
+      <dt>文字色</dt><dd>${swatch(d)}</dd>
+      <dt>イメソン</dt><dd>${song}</dd>
+    </dl>
+    <div class="sec">見た目・性格 etc.</div>
+    ${notes}
+    ${skillHtml(d)}
+    <div class="nav">
+      <button class="btn" id="m-prev">← 前へ</button>
+      <button class="btn" id="m-next">次へ →</button>
+    </div>`;
+}
+function openModal(ho){
+  const d = D.find(x => x.ho === ho); if(!d) return;
+  openHo = ho;
+  const m = $("#modal");
+  m.style.setProperty("--c", accent(d));
+  m.innerHTML = modalHtml(d);
+  $("#overlay").classList.add("open");
+  history.replaceState(null, "", "#HO" + ho);
+  $("#m-close").focus();
+}
+function closeModal(){
+  $("#overlay").classList.remove("open");
+  openHo = null;
+  history.replaceState(null, "", location.pathname + location.search + PAGE_HASH[state.page]);
+}
+function step(dir){
+  const list = current.length ? current : D;
+  const i = list.findIndex(x => x.ho === openHo);
+  const n = list[(i + dir + list.length) % list.length];
+  if(n) openModal(n.ho);
+}
+$("#overlay").addEventListener("click", e => {
+  if(e.target.id === "overlay" || e.target.id === "m-close") closeModal();
+  else if(e.target.id === "m-prev") step(-1);
+  else if(e.target.id === "m-next") step(1);
+});
+document.addEventListener("keydown", e => {
+  if(openHo === null) return;
+  if(e.key === "Escape") closeModal();
+  else if(e.key === "ArrowLeft") step(-1);
+  else if(e.key === "ArrowRight") step(1);
+});
+window.addEventListener("hashchange", () => {
+  const m = /^#HO(\d+)$/.exec(location.hash);
+  if(m) openModal(parseInt(m[1], 10));
+  else {
+    const p = location.hash === "#skills" ? "skills" : location.hash === "#height" ? "height" : "chars";
+    if(openHo !== null) { $("#overlay").classList.remove("open"); openHo = null; }
+    if(p !== state.page){ state.page = p; render(); }
+  }
+});
+
+/* ===== 初期化 ===== */
+if(location.hash === "#skills") state.page = "skills";
+else if(location.hash === "#height") state.page = "height";
+render();
+(function(){ const m = /^#HO(\d+)$/.exec(location.hash); if(m) openModal(parseInt(m[1], 10)); })();
+</script>
+</body>
+</html>
