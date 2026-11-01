@@ -265,6 +265,11 @@ footer{color:var(--muted); font-size:12px; text-align:center; padding:0 0 40px}
   .search input{font-size:16px}
   select, input{font-size:16px}
   .only-card{display:none!important}
+  /* 表の能力は色の丸だけ(色と役割は「絞り込み」の能力ボタンで確認できる) */
+  .tablewrap .cats{flex-direction:row; flex-wrap:nowrap; gap:5px}
+  .tablewrap .cat{padding:0; border:0; background:none}
+  .tablewrap .cat .cn{display:none}
+  .tablewrap .cat i{width:13px; height:13px}
   .grid.fixed{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
   main{padding:16px 14px 60px}
   .hcard{padding:14px}
@@ -514,7 +519,7 @@ function skEff(d, l){
   return { n:null, def:false, raw };
 }
 const skCell = (d, l) => { const e = skEff(d, l); return e.n === null ? esc(skShow(e.raw)) : (e.def ? `<span class="def" title="初期値">${e.n}</span>` : String(e.n)); };
-const catHtml = d => d.cat.length ? `<div class="cats">${d.cat.map(c => `<span class="cat" style="--cc:${c.c}"><i></i>${esc(c.n)}</span>`).join("")}</div>` : "";
+const catHtml = d => d.cat.length ? `<div class="cats">${d.cat.map(c => `<span class="cat" style="--cc:${c.c}" title="${esc(c.n)}"><i></i><span class="cn">${esc(c.n)}</span></span>`).join("")}</div>` : "";
 const songLabel = s => (s.a || "") + "「" + s.t + "」";
 const portraitHtml = d => d.img
   ? `<div class="portrait"><img src="${esc(d.img.u)}" alt="" loading="lazy" referrerpolicy="no-referrer" data-x="${d.img.x ?? 50}"${d.img.z ? ` data-z="${d.img.z}"` : ""} onload="fitPortrait(this)" onerror="this.parentNode.remove()"></div>` : "";
