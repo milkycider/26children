@@ -5,22 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,500;0,700;1,600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Quicksand:wght@500;700&display=swap">
 <title>ロアドの児従録 - テストプレイ班 探索者ポータル</title>
 <style>
 :root{
-  --bg:#12131a; --panel:#1b1d27; --panel2:#232634; --line:#2f3345;
-  --text:#e9eaf0; --muted:#9aa0b4; --accent:#8fb3ff;
+  --bg:#dff3f9; --panel:#ffffff; --panel2:#ecf8fc; --line:#bfe0ec;
+  --text:#123b4f; --muted:#5f8798; --accent:#1fa2d3; --accent-soft:rgba(31,162,211,.12);
   --radius:14px; --w:1200px;
   --font-body:"Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo",sans-serif;
-  --font-display:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP",serif;
-  --font-en:"Cormorant Garamond","Shippori Mincho",Georgia,"Times New Roman",serif;
+  --font-display:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
+  --font-en:"Quicksand","Zen Maru Gothic","Hiragino Sans","Yu Gothic UI",sans-serif;
 }
 body[data-page="skills"], body[data-page="height"], body[data-view="table"]{--w:1400px}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{
-  margin:0; background:var(--bg); color:var(--text);
+  margin:0; color:var(--text);
+  background:
+    radial-gradient(1200px 500px at 85% -10%, rgba(255,255,255,.75), transparent 60%),
+    linear-gradient(180deg,#e8f8fc 0%,#d3eef7 45%,#bfe5f2 100%) fixed;
+  background-color:var(--bg);
   font-family:var(--font-body);
   line-height:1.6; -webkit-text-size-adjust:100%;
 }
@@ -38,7 +42,7 @@ header.top h1 small{display:block; font-size:12px; color:var(--muted); letter-sp
 
 .controls{
   position:sticky; top:0; z-index:20;
-  background:rgba(18,19,26,.92); backdrop-filter:blur(8px);
+  background:rgba(236,249,253,.88); backdrop-filter:blur(8px);
   border-top:1px solid var(--line); border-bottom:1px solid var(--line);
 }
 .controls .inner{
@@ -56,7 +60,7 @@ th.sortable{cursor:pointer; user-select:none}
 th.sortable:hover{color:var(--text)}
 th .ind{position:absolute; left:0; right:0; bottom:3px; text-align:center; font-size:9px; line-height:1; color:var(--accent)}
 th.sorted{color:var(--text)}
-td.sorted{background:rgba(143,179,255,.08)}
+td.sorted{background:var(--accent-soft)}
 td.memo{min-width:140px; max-width:280px; color:var(--muted); font-size:12px; word-break:break-all}
 .search{flex:1 1 240px; position:relative}
 .search input{
@@ -71,7 +75,7 @@ td.memo{min-width:140px; max-width:280px; color:var(--muted); font-size:12px; wo
   padding:6px 12px; border-radius:999px; font-size:13px; cursor:pointer; font-family:inherit;
 }
 .chip:hover{border-color:var(--muted)}
-.chip[aria-pressed="true"]{background:var(--accent); color:#0c1020; border-color:var(--accent); font-weight:600}
+.chip[aria-pressed="true"]{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:600}
 select{
   padding:7px 10px; border-radius:10px; border:1px solid var(--line);
   background:var(--panel); color:var(--text); font-size:13px; font-family:inherit;
@@ -93,12 +97,12 @@ main{max-width:var(--w); margin:0 auto; padding:22px 20px 80px}
 }
 .card::after{
   content:attr(data-letter); position:absolute; right:10px; top:-14px;
-  font:italic 600 100px/1 var(--font-en); color:var(--c); opacity:.14; pointer-events:none;
+  font:700 100px/1 var(--font-en); color:var(--c); opacity:.16; pointer-events:none;
 }
-.card:hover,.card:focus-visible{transform:translateY(-3px); border-color:var(--c); box-shadow:0 8px 24px rgba(0,0,0,.35); outline:none}
+.card:hover,.card:focus-visible{transform:translateY(-3px); border-color:var(--c); box-shadow:0 10px 26px rgba(20,100,135,.22); outline:none}
 .portrait{
   position:absolute; right:0; top:0; bottom:0; width:74%; overflow:hidden; pointer-events:none;
-  opacity:.32; -webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent 100%); mask-image:linear-gradient(to bottom,#000 55%,transparent 100%);
+  opacity:.42; -webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent 100%); mask-image:linear-gradient(to bottom,#000 55%,transparent 100%);
 }
 .portrait img{
   position:absolute; top:0; left:0; width:100%; height:auto; max-width:none; display:block;
@@ -108,21 +112,21 @@ main{max-width:var(--w); margin:0 auto; padding:22px 20px 80px}
   -webkit-mask-composite:source-in; mask-composite:intersect;
 }
 .card > *:not(.portrait){position:relative; z-index:1}
-.modal .portrait{width:60%; height:540px; opacity:.34}
+.modal .portrait{width:60%; height:540px; opacity:.45}
 .modal > *:not(.portrait):not(.close){position:relative; z-index:1}
 .modal .close{z-index:3}
 .card .ho{font-size:12px; color:var(--muted); letter-spacing:.12em}
 .card .pc{font-size:22px; font-weight:700; line-height:1.2; word-break:break-word}
 .card .kana{font-size:12px; color:var(--muted); margin-top:-4px}
-/* 見出し系は明朝、HO名の英字はガラモン系で上品に */
+/* 見出し系は丸ゴシック、HO名の英字は丸みのあるジオメトリック系で、クールで少しやわらかく */
 header.top h1, .card .pc, .modal h2, .hcard h2{font-family:var(--font-display); font-weight:700}
-header.top h1{letter-spacing:.08em}
+header.top h1{letter-spacing:.06em}
 .ttl .yomi, .ttl .sub{font-family:var(--font-display)}
 .tabs button{font-family:var(--font-display); letter-spacing:.08em}
 ruby.hn{font-family:var(--font-en); font-weight:700}
 ruby.hn rt{font-family:var(--font-body)}
-.holine .hn{font-size:18px!important}
-.holine.lg .hn{font-size:26px!important}
+.holine .hn{font-size:16px!important}
+.holine.lg .hn{font-size:24px!important}
 /* HO名(ルビはCSS生成なのでコピー時に混ざらない) */
 ruby.hn{ruby-position:over; font-weight:700; color:var(--text)}
 ruby.hn rt{font-size:.62em; font-weight:400; color:var(--muted); letter-spacing:.02em}
@@ -138,8 +142,8 @@ ruby.hn rt::before{content:attr(data-rt)}
   display:inline-flex; align-items:center; gap:4px; padding:2px 9px; border-radius:999px;
   background:var(--panel2); border:1px solid var(--line); font-size:12px; color:var(--text);
 }
-.pill.m{color:#9cc4ff} .pill.f{color:#ffa9c9}
-.pill.range{color:#ffd98a}
+.pill.m{color:#2672c4} .pill.f{color:#cf3f7b}
+.pill.range{color:#a96a00}
 .card .weapon{font-size:13px}
 .card .weapon .k{color:var(--muted); font-size:11px; margin-right:4px}
 .card .foot{margin-top:auto; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 8px; padding-top:6px}
@@ -147,9 +151,9 @@ ruby.hn rt::before{content:attr(data-rt)}
 .swatch{display:inline-flex; align-items:center; gap:7px; font-size:12px; color:var(--muted)}
 .swatch i{
   width:18px; height:18px; border-radius:50%; background:var(--c);
-  box-shadow:0 0 0 1.5px rgba(255,255,255,.4);
+  box-shadow:0 0 0 1.5px rgba(18,59,79,.28);
 }
-.swatch i.none{background:repeating-linear-gradient(45deg,#3a3e52 0 4px,#2a2d3d 4px 8px)}
+.swatch i.none{background:repeating-linear-gradient(45deg,#c5dbe4 0 4px,#e3f0f5 4px 8px)}
 .trait{font-size:12px; color:var(--text); background:var(--panel2); border-radius:6px; padding:2px 8px}
 
 .empty{text-align:center; color:var(--muted); padding:60px 0}
@@ -157,7 +161,7 @@ ruby.hn rt::before{content:attr(data-rt)}
 /* 能力カテゴリ */
 .cats{display:flex; flex-wrap:wrap; gap:4px}
 .cat{display:inline-flex; align-items:center; gap:5px; padding:1px 9px 1px 7px; border-radius:999px; font-size:12px; border:1px solid var(--line); background:var(--panel2)}
-.cat i{width:9px; height:9px; border-radius:50%; background:var(--cc); box-shadow:0 0 0 1px rgba(255,255,255,.45)}
+.cat i{width:9px; height:9px; border-radius:50%; background:var(--cc); box-shadow:0 0 0 1px rgba(18,59,79,.3)}
 /* 身長くらべ */
 .hcard{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px 18px 16px}
 .hcard h2{margin:0 0 4px; font-size:22px}
@@ -169,7 +173,7 @@ ruby.hn rt::before{content:attr(data-rt)}
 #hchart svg{display:block; width:100%; height:auto; overflow:visible}
 #hchart svg text{font-family:inherit}
 .hfig{cursor:pointer; outline:none}
-.hfig:hover .hbg{fill:rgba(143,179,255,.07)}
+.hfig:hover .hbg{fill:rgba(31,162,211,.07)}
 .hfig:focus-visible .hbg{stroke:var(--accent)}
 .hpanel{margin-top:10px; padding:12px 16px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; font-size:14px; min-height:48px; display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px}
 .hnote{margin:12px 2px 0; color:var(--muted); font-size:12px}
@@ -182,9 +186,9 @@ ruby.hn rt::before{content:attr(data-rt)}
 .skrow .bar{height:8px; border-radius:4px; background:var(--panel2); overflow:hidden}
 .skrow .bar i{display:block; height:100%; background:var(--c); border-radius:4px; min-width:2px}
 .skrow .skv{text-align:right; font-variant-numeric:tabular-nums}
-.def{color:#656b80}
-.skrow.def .skn,.skrow.def .skv{color:#656b80}
-.skrow.def .bar i{background:#4a4f62}
+.def{color:#a6bcc6}
+.skrow.def .skn,.skrow.def .skv{color:#a6bcc6}
+.skrow.def .bar i{background:#c9dde5}
 .skrow.off{opacity:.55}
 .skrow.off .bar i{display:none}
 .skmemo{margin-top:12px; padding:10px 14px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; font-size:14px; white-space:pre-wrap}
@@ -207,7 +211,7 @@ td .swatch{color:var(--text)}
 
 /* modal */
 .overlay{
-  position:fixed; inset:0; background:rgba(5,6,10,.72); z-index:50;
+  position:fixed; inset:0; background:rgba(10,55,75,.45); z-index:50;
   display:none; align-items:center; justify-content:center; padding:16px;
 }
 .overlay.open{display:flex}
@@ -487,7 +491,9 @@ function lum(hex){
   return .2126*v[0] + .7152*v[1] + .0722*v[2];
 }
 /* 暗い背景で見えない色(黒など)はアクセント表示のみ明るく補正 */
-const accent = d => !d.hex ? "#8b90a8" : (lum(d.hex) < 0.04 ? "#8b90a8" : d.hex);
+/* 明るい背景で薄すぎる色(黄・水色など)は同じ色味のまま少し濃くして、カードの帯が見えるようにする */
+function darken(hex, f){ const m = /^#([0-9a-f]{6})$/i.exec(hex); if(!m) return hex; return "#" + [0,2,4].map(i => Math.round(parseInt(m[1].substr(i,2),16)*f).toString(16).padStart(2,"0")).join(""); }
+const accent = d => !d.hex ? "#9db6c2" : (lum(d.hex) > 0.6 ? darken(d.hex, 0.78) : d.hex);
 
 /* ===== 状態 ===== */
 const PAGE_HASH = { chars:"", skills:"#skills", height:"#height" };
@@ -711,7 +717,7 @@ function drawHeight(){
     const h = hNum(d);
     const sel = state.hSel === d.ho;
     let g = `<g class="hfig" data-hsel="${d.ho}" tabindex="0" role="button" aria-label="${esc("HO" + d.ho + " " + d.pc + " " + d.sex + " " + d.age + "歳 " + hText(d))}">`;
-    g += `<rect class="hbg" x="${cx - slotW / 2 + 1}" y="2" width="${slotW - 2}" height="${rowH - 4}" rx="6" fill="${sel ? "rgba(143,179,255,.12)" : "rgba(0,0,0,0)"}" stroke="${sel ? "#8fb3ff" : "none"}" style="pointer-events:all"/>`;
+    g += `<rect class="hbg" x="${cx - slotW / 2 + 1}" y="2" width="${slotW - 2}" height="${rowH - 4}" rx="6" fill="${sel ? "rgba(31,162,211,.14)" : "rgba(0,0,0,0)"}" stroke="${sel ? "#1fa2d3" : "none"}" style="pointer-events:all"/>`;
     if(h !== null){
       const hp = h * s, col = d.sex === "男" ? MALE : FEMALE, r = 0.065 * hp;
       const tw = 0.20 * hp, tTop = yB - hp + 0.145 * hp, tBot = yB - 0.50 * hp, aw = 0.045 * hp;
@@ -721,15 +727,15 @@ function drawHeight(){
       g += `<rect x="${cx + tw / 2 + 0.01 * hp}" y="${tTop + 0.005 * hp}" width="${aw}" height="${(tBot - tTop) * 0.9}" rx="${aw / 2}" fill="${col}"/>`;
       g += `<rect x="${cx - 0.09 * hp}" y="${tBot - 0.02 * hp}" width="${0.085 * hp}" height="${yB - tBot + 0.02 * hp}" rx="${0.03 * hp}" fill="${col}"/>`;
       g += `<rect x="${cx + 0.005 * hp}" y="${tBot - 0.02 * hp}" width="${0.085 * hp}" height="${yB - tBot + 0.02 * hp}" rx="${0.03 * hp}" fill="${col}"/>`;
-      g += `<text x="${cx}" y="${yB - hp - 6}" text-anchor="middle" font-size="10.5" fill="#cfd6e6">${h}</text>`;
+      g += `<text x="${cx}" y="${yB - hp - 6}" text-anchor="middle" font-size="10.5" fill="#2c5568">${h}</text>`;
       if(state.hAge){
         const fs = Math.max(8, Math.min(14, hp * 0.10));
-        g += `<text x="${cx}" y="${(tTop + tBot) / 2 + fs * 0.36}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="#fff" stroke="#0b1520" stroke-width="2.4" paint-order="stroke" stroke-linejoin="round">${d.age}</text>`;
+        g += `<text x="${cx}" y="${(tTop + tBot) / 2 + fs * 0.36}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="#fff" stroke="#0d3550" stroke-width="2.4" paint-order="stroke" stroke-linejoin="round">${d.age}</text>`;
       }
     } else {
-      g += `<text x="${cx}" y="${yB - 8}" text-anchor="middle" font-size="11" fill="#656b80">—</text>`;
+      g += `<text x="${cx}" y="${yB - 8}" text-anchor="middle" font-size="11" fill="#9db6c2">—</text>`;
     }
-    g += `<text transform="translate(${cx - 4},${yB + 8}) rotate(90)" font-size="11" fill="${sel ? "#fff" : "#9aa0b4"}">${esc("HO" + d.ho + " " + d.pc)}</text></g>`;
+    g += `<text transform="translate(${cx - 4},${yB + 8}) rotate(90)" font-size="11" fill="${sel ? "#0a2e41" : "#5f8798"}" font-weight="${sel ? 700 : 400}">${esc("HO" + d.ho + " " + d.pc)}</text></g>`;
     return g;
   };
 
@@ -740,9 +746,9 @@ function drawHeight(){
     let svg = `<svg viewBox="0 0 ${W} ${rowH}" role="img" aria-label="身長くらべ">`;
     [100, 150, 200].forEach(cm => {
       const y = yB - cm * s;
-      svg += `<line x1="${LEFT}" x2="${x2}" y1="${y}" y2="${y}" stroke="#2f3345" stroke-dasharray="4 4"/><text x="${x2 + 6}" y="${y + 3.5}" font-size="10" fill="#7d849a">${cm}cm</text>`;
+      svg += `<line x1="${LEFT}" x2="${x2}" y1="${y}" y2="${y}" stroke="#b5d5e1" stroke-dasharray="4 4"/><text x="${x2 + 6}" y="${y + 3.5}" font-size="10" fill="#6a93a5">${cm}cm</text>`;
     });
-    svg += `<line x1="${LEFT}" x2="${x2}" y1="${yB}" y2="${yB}" stroke="#6b7188" stroke-width="1.5"/>`;
+    svg += `<line x1="${LEFT}" x2="${x2}" y1="${yB}" y2="${yB}" stroke="#6d94a6" stroke-width="1.5"/>`;
     part.forEach((d, i) => { svg += fig(d, LEFT + (i + 0.5) * slotW); });
     html += svg + "</svg>";
   }
