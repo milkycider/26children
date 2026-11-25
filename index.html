@@ -346,6 +346,10 @@ body[data-page="board"] .controls, body[data-page="board"] .count{display:none}
 .bd-rform .bd-rurl, .bd-eform .bd-rurl{max-width:none; width:100%}
 .bd-rcount{font-size:12px; color:var(--muted); padding:2px 0 4px; display:flex; flex-wrap:wrap; gap:4px 12px; align-items:center}
 .bd-more{font-size:12px; color:#0f6f9c}
+.bd-rehide{font-size:11px; color:#a33}
+.bd-rspl{display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text); width:max-content}
+.bd-rform .bd-rspl input, .bd-eform .bd-rspl input{width:16px; height:16px; min-width:0; padding:0; margin:0; accent-color:#d6453d}
+.bd-rep .bd-reveal{margin-top:2px}
 .bd-fold{display:block; margin-top:2px; font-size:12px; color:#0f6f9c}
 .bd-wide label{flex:1 1 240px}
 .bd-hobox{margin:0 0 10px}
@@ -1069,7 +1073,7 @@ function bodyHtml(p){
 function editFormHtml(p){
   const e = bdEdit;
   const act = `<div class="rp-act"><button class="btn rp-send" data-bdesave="${esc(p.id)}">保存</button><button class="btn" data-bdecancel="1">やめる</button><span id="bd-emsg"></span></div>`;
-  if(e.reply) return `<div class="bd-eform"><input data-bde="url" type="url" maxlength="500" placeholder="URL(任意)" autocomplete="off" value="${esc(e.url)}" class="bd-rurl"><textarea data-bde="text" maxlength="1000" rows="3" placeholder="返信(URLだけでもOK)">${esc(e.text)}</textarea>${act}</div>`;
+  if(e.reply) return `<div class="bd-eform"><input data-bde="url" type="url" maxlength="500" placeholder="URL(任意)" autocomplete="off" value="${esc(e.url)}" class="bd-rurl"><textarea data-bde="text" maxlength="1000" rows="3" placeholder="返信(URLだけでもOK)">${esc(e.text)}</textarea><label class="bd-rspl"><input type="checkbox" data-bde="spoiler"${e.spoiler ? " checked" : ""}> ネタバレを含む</label>${act}</div>`;
   const cats = BD_CATS.map(c => `<option${e.cat === c ? " selected" : ""}>${esc(c)}</option>`).join("");
   const chips = [0, ...D.map(d => d.ho), BD_OTHER].map(n => {
     const d = D.find(x => x.ho === n), on = n === 0 ? !e.hos.length : e.hos.includes(n);
@@ -1107,7 +1111,7 @@ function threadHtml({ r, rs }){
     </article>`;
   }
   const head = r.deleted ? `<div class="bd-gone">この投稿は削除されました</div>` : state.editId === r.id ? `<div class="rp-head"><span class="rp-cat">編集中</span>${postMeta(r)}</div>${editFormHtml(r)}` : `
-    <div class="rp-head"><span class="rp-cat">${esc(r.cat)}</span>${spl}${postMeta(r)}</div>
+    <div class="rp-head"><span class="rp-cat">${esc(r.cat)}</span>${spl}${r.spoiler ? `<button class="lnk bd-rehide" data-bdhide="${esc(r.id)}">▴ 隠す</button>` : ""}${postMeta(r)}</div>
     <div class="bd-title">${esc(r.title)}</div>
     ${linkHtml(r.url)}
     ${(r.hos || []).length ? `<div class="bd-tags">${r.hos.map(hoTag).join("")}</div>` : ""}
@@ -1117,11 +1121,18 @@ function threadHtml({ r, rs }){
   const more = rs.length > REP_SHOW ? (many
     ? `<button class="lnk bd-more" data-bdmore="${esc(r.id)}">▾ ${REP_SHOW ? `古い返信をあと${rs.length - REP_SHOW}件表示` : "返信を表示"}</button>`
     : `<button class="lnk bd-more" data-bdmore="${esc(r.id)}">▴ ${REP_SHOW ? "古い返信をしまう" : "返信をしまう"}</button>`) : "";
-  const reps = shown.map(x => `<div class="bd-rep"><div class="rp-head">${postMeta(x)}</div>${state.editId === x.id ? editFormHtml(x) : linkHtml(x.url) + bodyHtml(x)}</div>`).join("");
+  const repBody = x => {
+    if(state.editId === x.id) return editFormHtml(x);
+    if(x.spoiler && !bdShow.has(x.id)) return `<button class="btn bd-reveal" data-bdshow="${esc(x.id)}">ネタバレを含む返信です。押すと表示します</button>`;
+    return linkHtml(x.url) + bodyHtml(x);
+  };
+  const repTag = x => x.spoiler ? `<span class="bd-splb">ネタバレ注意</span>${bdShow.has(x.id) && state.editId !== x.id ? `<button class="lnk bd-rehide" data-bdhide="${esc(x.id)}">▴ 隠す</button>` : ""}` : "";
+  const reps = shown.map(x => `<div class="bd-rep"><div class="rp-head">${repTag(x)}${postMeta(x)}</div>${repBody(x)}</div>`).join("");
   const form = open ? `<div class="bd-rform">
       <input data-bdr="${esc(r.id)}" data-f="name" maxlength="20" placeholder="お名前(任意)" autocomplete="off" value="${esc(dr.name ?? getName())}">
       <input data-bdr="${esc(r.id)}" data-f="url" type="url" maxlength="500" placeholder="URL(任意)" autocomplete="off" value="${esc(dr.url || "")}" class="bd-rurl">
       <textarea data-bdr="${esc(r.id)}" data-f="text" maxlength="1000" rows="2" placeholder="返信を書く(URLだけでもOK)">${esc(dr.text || "")}</textarea>
+      <label class="bd-rspl"><input type="checkbox" data-bdr="${esc(r.id)}" data-f="spoiler"${dr.spoiler ? " checked" : ""}> ネタバレを含む</label>
       <div class="rp-act"><button class="btn rp-send" data-bdsend="${esc(r.id)}">返信する</button><button class="btn" data-bdreply="">閉じる</button><span class="bd-rmsg" id="bd-rmsg"></span></div>
     </div>` : ((r.deleted || state.editId === r.id) ? "" : `<button class="btn bd-rbtn" data-bdreply="${esc(r.id)}">↩ 返信</button>`);
   const repHead = rs.length ? `<div class="bd-rcount">返信 ${rs.length}件 ${more}</div>` : "";
@@ -1193,7 +1204,7 @@ document.addEventListener("input", e => { const el = e.target; if(bdEdit && el.d
 document.addEventListener("change", e => { const el = e.target; if(bdEdit && el.dataset && el.dataset.bde) bdEdit[el.dataset.bde] = el.type === "checkbox" ? el.checked : el.value; });
 document.addEventListener("input", e => {
   const el = e.target; if(!el.dataset || !el.dataset.bdr) return;
-  (bdDrafts[el.dataset.bdr] = bdDrafts[el.dataset.bdr] || {})[el.dataset.f] = el.value;
+  (bdDrafts[el.dataset.bdr] = bdDrafts[el.dataset.bdr] || {})[el.dataset.f] = el.type === "checkbox" ? el.checked : el.value;
 });
 document.addEventListener("click", async e => {
   const t = e.target; if(!t.closest) return;
@@ -1222,7 +1233,7 @@ document.addEventListener("click", async e => {
       const rawUrl = (ed.url || "").trim(), url = rawUrl ? safeUrl(rawUrl) : "";
       if(rawUrl && !url){ say("bd-emsg", "URLは https:// から始まる形で入れてください", true); return; }
       if(!text && !url){ say("bd-emsg", "返信かURLを入力してください", true); return; }
-      patch = { text:text.slice(0, 1000), url };
+      patch = { text:text.slice(0, 1000), url, spoiler:!!ed.spoiler };
     } else {
       const title = (ed.title || "").trim(), rawUrl = (ed.url || "").trim(), url = rawUrl ? safeUrl(rawUrl) : "";
       if(!title){ say("bd-emsg", "タイトルを入力してください", true); return; }
@@ -1236,6 +1247,8 @@ document.addEventListener("click", async e => {
   }
   const mo = t.closest("[data-bdmore]");
   if(mo){ const id = mo.dataset.bdmore; if(bdRepOpen.has(id)) bdRepOpen.delete(id); else bdRepOpen.add(id); drawBoard(); return; }
+  const hd = t.closest("[data-bdhide]");
+  if(hd){ bdShow.delete(hd.dataset.bdhide); drawBoard(); return; }
   const sh = t.closest("[data-bdshow]");
   if(sh){ bdShow.add(sh.dataset.bdshow); drawBoard(); return; }
   const fd = t.closest("[data-bdfold]");
@@ -1289,7 +1302,7 @@ document.addEventListener("click", async e => {
     if(!text && !url){ say("bd-rmsg", "返信かURLを入力してください", true); return; }
     sd.disabled = true;
     try {
-      await addPost({ parent:id, cat:"", title:"", url, text:text.slice(0, 1000), name, hos:[] });
+      await addPost({ parent:id, cat:"", title:"", url, text:text.slice(0, 1000), name, hos:[], spoiler:!!dr.spoiler });
       setName(name); delete bdDrafts[id]; state.replyTo = null; bdRepOpen.add(id); drawBoard();
     } catch(err){ sd.disabled = false; say("bd-rmsg", "送信に失敗しました", true); }
     return;
