@@ -404,7 +404,10 @@ body[data-page="board"] .controls, body[data-page="board"] .count{display:none}
 .sitefoot a{color:inherit; text-decoration:underline; text-underline-offset:2px}
 .sitefoot a:hover{color:var(--text)}
 .fcoc{font-size:11px}
-.fhint{font-size:11px; margin-top:10px !important; opacity:.85}
+.pagehint{max-width:var(--w); margin:0 auto; padding:4px 20px 18px; box-sizing:border-box; text-align:center; font-size:11.5px; color:var(--muted)}
+body[data-page="board"] .pagehint, body[data-page="reports"] .pagehint{display:none}
+.fenv{font-size:11px; margin-bottom:10px !important}
+.fcopy{margin-top:10px !important}
 .infomodal{width:min(680px,100%)}
 .infomodal .mscroll{font-size:14px; line-height:1.8}
 .infomodal h3{font-size:15px; margin:20px 0 6px; padding-left:8px; border-left:3px solid var(--accent)}
@@ -591,6 +594,7 @@ footer{color:var(--muted); font-size:12px; text-align:center; padding:0 0 40px}
 </div>
 
 <main id="main"></main>
+<p class="pagehint">カードや行をクリックで詳細(←/→キーで前後、Escで閉じる) / データ一覧は見出しクリックで並び替え / 技能の薄いグレーは初期値</p>
 <footer class="sitefoot" id="sitefoot"></footer>
 
 <div class="overlay" id="info-ov" role="dialog" aria-modal="true" aria-labelledby="info-title">
@@ -1455,10 +1459,10 @@ function drawFooter(){
       <button class="lnk" data-info="privacy">プライバシーポリシー</button><span>|</span>
       <button class="lnk" data-info="credits">権利表記</button>
     </nav>
+    <p class="fenv">推奨環境: PC・スマートフォンの最新版の Chrome / Safari / Edge / Firefox</p>
     <p class="fcoc">${esc(COC_NOTE)}</p>
     <p>シナリオ「${esc(SITE.scenario)}」 製作: ${extLink(SITE.scenarioAuthor, SITE.scenarioAuthorUrl)}(${extLink(SITE.circle, SITE.circleUrl)}) ・ KP: ${extLink(SITE.kp, SITE.kpUrl)}</p>
-    <p>© ${SITE.since} ${esc(SITE.name)} ${esc(SITE.team)} ・ サイト運営: ${extLink(SITE.owner, SITE.ownerUrl)} ・ 最終更新: ${esc(SITE.updated.replace(/-/g, "/"))}</p>
-    <p class="fhint">カードや行をクリックで詳細(←/→キーで前後、Escで閉じる) / データ一覧は見出しクリックで並び替え / 技能の薄いグレーは初期値<br>推奨環境: PC・スマートフォンの最新版の Chrome / Safari / Edge / Firefox</p>`;
+    <p class="fcopy">© ${SITE.since} ${esc(SITE.name)} ${esc(SITE.team)} ・ サイト運営: ${extLink(SITE.owner, SITE.ownerUrl)} ・ 最終更新: ${esc(SITE.updated.replace(/-/g, "/"))}</p>`;
 }
 document.addEventListener("click", e => {
   const t = e.target; if(!t.closest) return;
