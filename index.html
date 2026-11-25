@@ -401,6 +401,8 @@ body[data-page="board"] .controls, body[data-page="board"] .count{display:none}
 .sitefoot p{margin:4px 0}
 .flinks{display:flex; justify-content:center; flex-wrap:wrap; gap:4px 10px; margin-bottom:6px}
 .flinks .lnk{font-size:12.5px; color:var(--text)}
+.sitefoot a{color:inherit; text-decoration:underline; text-underline-offset:2px}
+.sitefoot a:hover{color:var(--text)}
 .fcoc{font-size:11px}
 .fhint{font-size:11px; margin-top:10px !important; opacity:.85}
 .infomodal{width:min(680px,100%)}
@@ -535,7 +537,7 @@ footer{color:var(--muted); font-size:12px; text-align:center; padding:0 0 40px}
       <ul>
         <li>Googleのパスワードが、このサイトに渡ることはありません(ログインはGoogleの画面で行います)</li>
         <li>メールアドレスや名前は、投稿には保存されず、ほかのPLにも見えません。右上の「ログイン中」の表示に、あなたの画面でだけ使います</li>
-        <li>ただし、ログインした人のメールアドレスは、サイトの管理者(KP)が見られるFirebaseの管理画面のユーザー一覧に記録されます</li>
+        <li>ただし、ログインした人のメールアドレスは、サイト運営者が見られるFirebaseの管理画面のユーザー一覧に記録されます</li>
         <li>Googleのメール・連絡先・ドライブなどの中身を、このサイトが見ることはできません</li>
       </ul>
       <p>自分の投稿を消せなくなったときは、不具合報告の「掲示板の削除依頼」から知らせてください。</p>
@@ -1321,21 +1323,28 @@ document.addEventListener("click", e => {
 document.addEventListener("keydown", e => { if(e.key === "Escape" && !document.getElementById("lhelp").hidden) toggleHelp(false); });
 
 /* ===== サイト情報(フッター・利用規約・プライバシーポリシー・権利表記) =====
-   （　）の部分は書き換える。運営者名は本名でなくてよい(KP名・サークル名など) */
+   （　）の部分は書き換える。運営者名は本名でなくてよい(ハンドルネームなど) */
 const SITE = {
   name: "ロアドの児従録",
   team: "テストプレイ班",
-  owner: "（運営者名）",                 // サイトの運営者
-  contactLabel: "",                    // 連絡先の表示名(例: "X(@xxxx)")。空なら不具合報告ページを案内
-  contactUrl: "",                      // 連絡先のURL(https://〜)
+  owner: "城原",                                   // サイト運営者
+  ownerUrl: "https://x.com/kibaaal",
+  contactLabel: "城原のX(@kibaaal)",               // 連絡先の表示名。空なら不具合報告ページだけを案内
+  contactUrl: "https://x.com/kibaaal",
   scenario: "ロアドの児従録",
-  scenarioAuthor: "（シナリオ作者名）",
+  scenarioAuthor: "光龍",                          // シナリオ製作者
+  scenarioAuthorUrl: "https://x.com/kouri_owob",
+  circle: "龍巣譚",                                // サークル
+  circleUrl: "https://kouri-029.booth.pm/",
+  kp: "光龍",                                      // テストプレイ班のKP
+  kpUrl: "https://x.com/kouri_owob",
   since: 2026,
   updated: "2026-11-25",               // フッターの最終更新日(HTMLを更新したら書き換える)
   policyDate: "2026-11-25"             // 利用規約・プライバシーポリシーの制定日・改定日
 };
 const COC_NOTE = "本サイトは、「株式会社アークライト」及び「株式会社KADOKAWA」が権利を有する『クトゥルフ神話TRPG』の二次創作物です。";
 const COC_FULL = COC_NOTE + "<br>Call of Cthulhu is copyright ©1981, 2015, 2019 by Chaosium Inc. ;all rights reserved. Arranged by Arclight Inc.<br>Call of Cthulhu is a registered trademark of Chaosium Inc.<br>PUBLISHED BY KADOKAWA CORPORATION";
+const extLink = (label, url) => { const u = safeUrl(url); return u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>` : esc(label); };
 const contactHtml = () => {
   const u = safeUrl(SITE.contactUrl);
   const ext = u ? `、または <a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(SITE.contactLabel || u)}</a>` : "";
@@ -1354,19 +1363,19 @@ const DOCS = {
       <li>シナリオのネタバレを、「ネタバレを含む」のチェックなしで書くこと、またはタイトルに書くこと</li>
       <li>他人になりすますこと</li>
       <li>本サイトのデータを不正に書き換えたり、動作を妨げたりすること</li>
-      <li>その他、管理者が不適切と判断すること</li>
+      <li>その他、サイト運営者が不適切と判断すること</li>
     </ul>
     <h3>2. 投稿の扱い</h3>
     <ul>
-      <li>管理者は、上の禁止事項に当たる、または不適切と判断した投稿を、予告なく削除・非表示にできます。</li>
+      <li>サイト運営者は、上の禁止事項に当たる、または不適切と判断した投稿を、予告なく削除・非表示にできます。</li>
       <li>投稿の内容についての責任は、投稿した本人が負います。</li>
     </ul>
     <h3>3. 立ち絵・イラスト・作品について</h3>
     <p>本サイトに掲載している立ち絵やイラスト、掲示板で共有された作品の権利は、それぞれのPL・作者に帰属します。無断での転載・保存・加工・再配布・AIの学習などへの利用はご遠慮ください。</p>
     <h3>4. 免責</h3>
     <ul>
-      <li>本サイトからリンクしている外部サイトの内容について、管理者は責任を負いません。</li>
-      <li>入力したデータ(SAN・HP・MP、投稿など)の消失や、本サイトの不具合・停止によって生じた損害について、管理者は責任を負いません。</li>
+      <li>本サイトからリンクしている外部サイトの内容について、サイト運営者は責任を負いません。</li>
+      <li>入力したデータ(SAN・HP・MP、投稿など)の消失や、本サイトの不具合・停止によって生じた損害について、サイト運営者は責任を負いません。</li>
       <li>本サイトは、予告なく内容の変更や公開の終了をすることがあります。</li>
     </ul>
     <h3>5. 規約の変更</h3>
@@ -1383,18 +1392,18 @@ const DOCS = {
       <li><b>入力した内容</b>: 掲示板・不具合報告に入力したお名前・本文・URL・選択した項目と、その日時</li>
       <li><b>キャラクターの数値</b>: 入力したSAN・不定・発狂・HP・MP</li>
     </ul>
-    <p>このほか、表示の設定・お知らせの既読・お名前の入力欄の内容などを、利用者のブラウザの中に保存します。これらは本サイトの管理者には送られません。</p>
+    <p>このほか、表示の設定・お知らせの既読・お名前の入力欄の内容などを、利用者のブラウザの中に保存します。これらはサイト運営者には送られません。</p>
     <h3>2. 利用目的</h3>
     <ul>
       <li>掲示板で、投稿した人を見分けるため(自分の投稿だけを編集・削除できるようにするため)</li>
-      <li>管理者を見分けるため</li>
+      <li>サイト運営者を見分けるため</li>
       <li>本サイトの提供と、不具合への対応のため</li>
     </ul>
     <p>これ以外の目的には使いません。</p>
     <h3>3. 公開される範囲</h3>
     <ul>
       <li>Googleアカウントのメールアドレス・表示名は、ほかの利用者には公開されません。ログイン中の表示として、本人の画面にだけ表示します。</li>
-      <li>ログインした人のメールアドレスは、管理者が閲覧できる管理画面(Firebase)のユーザー一覧に記録されます。</li>
+      <li>ログインした人のメールアドレスは、サイト運営者が閲覧できる管理画面(Firebase)のユーザー一覧に記録されます。</li>
       <li>掲示板・不具合報告に入力したお名前・本文などは、本サイトの利用者全員が見られます。</li>
     </ul>
     <h3>4. 利用している外部サービス</h3>
@@ -1415,7 +1424,10 @@ const DOCS = {
     <h3>クトゥルフ神話TRPG</h3>
     <p class="doc-coc">${COC_FULL}</p>
     <h3>シナリオ</h3>
-    <p>「${esc(SITE.scenario)}」 作: ${esc(SITE.scenarioAuthor)}</p>
+    <p>「${esc(SITE.scenario)}」<br>製作: ${extLink(SITE.scenarioAuthor, SITE.scenarioAuthorUrl)}(サークル: ${extLink(SITE.circle, SITE.circleUrl)})<br>テストプレイ班 KP: ${extLink(SITE.kp, SITE.kpUrl)}</p>
+    <p>シナリオの内容・設定の権利は、シナリオ製作者に帰属します。</p>
+    <h3>本サイト</h3>
+    <p>運営: ${extLink(SITE.owner, SITE.ownerUrl)}</p>
     <h3>キャラクター・立ち絵</h3>
     <p>各探索者と立ち絵の権利は、それぞれのPL・作者に帰属します。無断での転載・保存・加工・再配布・AIの学習などへの利用はご遠慮ください。</p>
     <h3>イメージソング</h3>
@@ -1437,7 +1449,6 @@ function closeInfo(){
   if(!document.getElementById("overlay").classList.contains("open") && !document.getElementById("news-ov").classList.contains("open")) document.documentElement.classList.remove("modal-open");
 }
 function drawFooter(){
-  const u = safeUrl(SITE.contactUrl);
   document.getElementById("sitefoot").innerHTML = `
     <nav class="flinks" aria-label="サイト情報">
       <button class="lnk" data-info="terms">利用規約</button><span>|</span>
@@ -1445,7 +1456,8 @@ function drawFooter(){
       <button class="lnk" data-info="credits">権利表記</button>
     </nav>
     <p class="fcoc">${esc(COC_NOTE)}</p>
-    <p>© ${SITE.since} ${esc(SITE.name)} ${esc(SITE.team)} ・ 運営: ${u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(SITE.owner)}</a>` : esc(SITE.owner)} ・ 最終更新: ${esc(SITE.updated.replace(/-/g, "/"))}</p>
+    <p>シナリオ「${esc(SITE.scenario)}」 製作: ${extLink(SITE.scenarioAuthor, SITE.scenarioAuthorUrl)}(${extLink(SITE.circle, SITE.circleUrl)}) ・ KP: ${extLink(SITE.kp, SITE.kpUrl)}</p>
+    <p>© ${SITE.since} ${esc(SITE.name)} ${esc(SITE.team)} ・ サイト運営: ${extLink(SITE.owner, SITE.ownerUrl)} ・ 最終更新: ${esc(SITE.updated.replace(/-/g, "/"))}</p>
     <p class="fhint">カードや行をクリックで詳細(←/→キーで前後、Escで閉じる) / データ一覧は見出しクリックで並び替え / 技能の薄いグレーは初期値<br>推奨環境: PC・スマートフォンの最新版の Chrome / Safari / Edge / Firefox</p>`;
 }
 document.addEventListener("click", e => {
