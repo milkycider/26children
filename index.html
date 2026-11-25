@@ -1121,7 +1121,7 @@ function linkHtml(url){
   const u = safeUrl(url); if(!u) return "";
   let short = u.replace(/^https?:\/\/(www\.)?/, "");
   if(short.length > 48) short = short.slice(0, 46) + "…";
-  return `<a class="bd-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer"><b>${esc(siteOf(u))}</b><span>${esc(short)}</span><i>↗</i></a>`;
+  return `<a class="bd-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer"><b>${esc(siteOf(u))}</b><span>${esc(short)}</span><i>↗︎</i></a>`;
 }
 const bdShow = new Set();
 const REP_SHOW = 0, bdRepOpen = new Set();   // 最初から見せておく返信の件数(0 = すべてしまう)。残りは「返信を表示」で開く   // ネタバレ投稿のうち「表示する」を押したもの
@@ -1162,7 +1162,7 @@ function threadHtml({ r, rs }){
       <textarea data-bdr="${esc(r.id)}" data-f="text" maxlength="1000" rows="2" placeholder="返信を書く(URLだけでもOK)">${esc(dr.text || "")}</textarea>
       <label class="bd-rspl"><input type="checkbox" data-bdr="${esc(r.id)}" data-f="spoiler"${dr.spoiler ? " checked" : ""}> ネタバレを含む</label>
       <div class="rp-act"><button class="btn rp-send" data-bdsend="${esc(r.id)}">返信する</button><button class="btn" data-bdreply="">閉じる</button><span class="bd-rmsg" id="bd-rmsg"></span></div>
-    </div>` : ((r.deleted || state.editId === r.id) ? "" : `<button class="btn bd-rbtn" data-bdreply="${esc(r.id)}">↩ 返信</button>`);
+    </div>` : ((r.deleted || state.editId === r.id) ? "" : `<button class="btn bd-rbtn" data-bdreply="${esc(r.id)}">返信する</button>`);
   const repHead = rs.length ? `<div class="bd-rcount">返信 ${rs.length}件 ${more}</div>` : "";
   return `<article class="rp bd${state.editId === r.id ? " bd-isedit" : ""}">${head}${rs.length ? `<div class="bd-reps">${repHead}${reps}</div>` : ""}${form}</article>`;
 }
