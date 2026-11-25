@@ -230,7 +230,8 @@ th.gb, td.gb{border-left:1px solid var(--line)}
 .stg i{display:block; font-style:normal; font-size:10px; color:var(--muted); letter-spacing:.08em}
 .stg b{font-size:15px; font-variant-numeric:tabular-nums}
 
-.lv{width:44px; padding:4px 3px; text-align:center; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--text); font:inherit; font-size:12.5px; font-variant-numeric:tabular-nums}
+.lv::-webkit-outer-spin-button, .lv::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
+.lv{-moz-appearance:textfield; appearance:textfield; box-sizing:border-box; width:44px; padding:4px 3px; text-align:center; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--text); font:inherit; font-size:12.5px; font-variant-numeric:tabular-nums}
 .lv::placeholder{color:#b4cbd6}
 .lv:disabled, .lvchk:disabled{pointer-events:none; opacity:.75}
 .lv:disabled{background:transparent; border-color:transparent}
@@ -590,6 +591,11 @@ async function initFirebase(){
     }, () => setLiveMode("error"));
   } catch(e){ setLiveMode("error"); }
 }
+document.addEventListener("input", e => {      // 数字以外は入れさせない(全角数字は半角に)
+  const el = e.target; if(!el.dataset || !el.dataset.lv || el.type !== "text") return;
+  const v = el.value.replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/\D/g, "");
+  if(v !== el.value) el.value = v;
+});
 /* 不定欄: 表示は閾値。クリックで「開始時SAN」に切り替わり、確定すると新しい閾値に戻る */
 document.addEventListener("focusin", e => {
   const el = e.target; if(!el.dataset || el.dataset.lv !== "base" || el.disabled) return;
@@ -608,7 +614,7 @@ document.addEventListener("change", e => {
     if(k === "base"){ const t = indOf(v); el.value = t === null ? "" : t; } else el.value = v === null ? "" : v;
   }
 });
-document.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.dataset && e.target.dataset.lv && (e.target.type === "number" || e.target.dataset.lv === "base")) e.target.blur(); });
+document.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.dataset && e.target.dataset.lv && e.target.type === "text") e.target.blur(); });
 
 /* ===== 立ち絵(カードの薄背景) =====
    u:画像URL / x:横位置(%) / z:拡大率。追加したいHOはここに足す。画像は外部リンクのまま読み込む */
@@ -867,7 +873,7 @@ function charTableHtml(list){
 }
 function liveCells(d, cl){
   const L = liveOf(d.ho), ind = indOf(L.base), v = x => x === null ? "" : x, dis = state.edit ? "" : " disabled";
-  return `<td class="num lvc gb${cl("SAN")}"><input type="number" class="lv" data-lv="san" data-ho="${d.ho}" min="0" max="99" inputmode="numeric" placeholder="${(d.st.POW ?? 0) * 5}" value="${v(L.san)}" aria-label="HO${d.ho} 現在SAN"${dis}></td>`
+  return `<td class="num lvc gb${cl("SAN")}"><input type="text" class="lv" data-lv="san" data-ho="${d.ho}" maxlength="2" autocomplete="off" inputmode="numeric" placeholder="${(d.st.POW ?? 0) * 5}" value="${v(L.san)}" aria-label="HO${d.ho} 現在SAN"${dis}></td>`
     + `<td class="num lvc${cl("IND")}"><input type="text" class="lv ind" data-lv="base" data-ho="${d.ho}" inputmode="numeric" autocomplete="off" value="${ind === null ? "" : ind}" title="不定ライン(SANがこの値以下で不定)。編集モードONでクリック → その日の開始時SANを入力" aria-label="HO${d.ho} 不定ライン(入力は開始時SAN)"${dis}></td>`
     + `<td class="num lvc${cl("INS")}"><input type="checkbox" class="lvchk" data-lv="insane" data-ho="${d.ho}"${L.insane ? " checked" : ""} aria-label="HO${d.ho} 発狂中"${dis}></td>`;
 }
