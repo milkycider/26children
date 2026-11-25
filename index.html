@@ -230,15 +230,17 @@ th.gb, td.gb{border-left:1px solid var(--line)}
 .stg i{display:block; font-style:normal; font-size:10px; color:var(--muted); letter-spacing:.08em}
 .stg b{font-size:15px; font-variant-numeric:tabular-nums}
 
-.lv{width:54px; padding:4px 3px; text-align:center; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--text); font:inherit; font-size:12.5px; font-variant-numeric:tabular-nums}
+.lv{width:44px; padding:4px 3px; text-align:center; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--text); font:inherit; font-size:12.5px; font-variant-numeric:tabular-nums}
 .lv::placeholder{color:#b4cbd6}
 .lv:disabled, .lvchk:disabled{pointer-events:none; opacity:.75}
 .lv:disabled{background:transparent; border-color:transparent}
+.lv:disabled::placeholder{color:#c3d6df}
 .chip.edit[aria-pressed="true"]{background:#d6453d; border-color:#d6453d}
 .vsep{width:1px; height:20px; background:var(--line); margin:0 4px}
 .lv:focus{outline:2px solid var(--accent); outline-offset:0}
 .lvc{white-space:nowrap}
-.indv{display:inline-block; min-width:26px; margin-left:4px; color:#8a4a9a}
+.lv.ind{color:#8a4a9a; font-weight:700}
+.lv.ind.raw{color:var(--text); font-weight:400; background:#fffbe6}
 .lvchk{width:18px; height:18px; accent-color:#d6453d; cursor:pointer}
 tr.insane td{background:#fdecec}
 tr.insane:hover td{background:#fbdede}
@@ -540,7 +542,7 @@ let liveMode = "local";                // "local" | "connecting" | "firestore" |
 let fbSave = null;
 const LIVE_KEY = "roado-live-v1";
 const liveOf = ho => live[ho] || (live[ho] = { san:null, base:null, insane:false });
-const indOf = base => (base === null || base === undefined) ? null : Math.ceil(base / 5);   // 不定の閾値 = 開始時SANの1/5(端数切り上げ)
+const indOf = base => (base === null || base === undefined) ? null : base - Math.ceil(base / 5);   // 不定ライン = 開始時SAN − その1/5(端数切り上げ)。SANがこの値以下になると不定
 const toVal = v => { if(v === "" || v === null || v === undefined) return null; const n = Math.round(Number(v)); return isNaN(n) ? null : Math.max(0, Math.min(99, n)); };
 try { const o = JSON.parse(localStorage.getItem(LIVE_KEY) || "{}"); Object.keys(o).forEach(k => Object.assign(liveOf(+k), o[k])); } catch(e){}
 function persistLocal(){ try { localStorage.setItem(LIVE_KEY, JSON.stringify(live)); } catch(e){} }
@@ -549,9 +551,11 @@ function applyLive(ho){
   document.querySelectorAll(`[data-lv][data-ho="${ho}"]`).forEach(el => {
     const k = el.dataset.lv;
     if(k === "insane") el.checked = !!L.insane;
-    else if(document.activeElement !== el) el.value = L[k] === null ? "" : L[k];
+    else if(document.activeElement !== el){
+      if(k === "base"){ const t = indOf(L.base); el.value = t === null ? "" : t; }   // 不定欄は計算後の閾値を表示
+      else el.value = L[k] === null ? "" : L[k];
+    }
   });
-  document.querySelectorAll(`[data-indv][data-ho="${ho}"]`).forEach(el => { const t = indOf(L.base); el.textContent = t === null ? "—" : t; });
   const tr = document.querySelector(`tr[data-ho="${ho}"]`); if(tr) tr.classList.toggle("insane", !!L.insane);
 }
 function setLive(ho, patch, remote){
@@ -586,18 +590,25 @@ async function initFirebase(){
     }, () => setLiveMode("error"));
   } catch(e){ setLiveMode("error"); }
 }
-document.addEventListener("input", e => {
+/* 不定欄: 表示は閾値。クリックで「開始時SAN」に切り替わり、確定すると新しい閾値に戻る */
+document.addEventListener("focusin", e => {
+  const el = e.target; if(!el.dataset || el.dataset.lv !== "base" || el.disabled) return;
+  const L = liveOf(+el.dataset.ho); el.value = L.base === null ? "" : L.base; el.classList.add("raw"); el.select();
+});
+document.addEventListener("focusout", e => {
   const el = e.target; if(!el.dataset || el.dataset.lv !== "base") return;
-  const t = indOf(toVal(el.value)), v = document.querySelector(`[data-indv][data-ho="${el.dataset.ho}"]`);
-  if(v) v.textContent = t === null ? "—" : t;
+  const t = indOf(liveOf(+el.dataset.ho).base); el.value = t === null ? "" : t; el.classList.remove("raw");
 });
 document.addEventListener("change", e => {
   const el = e.target; if(!el.dataset || !el.dataset.lv) return;
   const ho = parseInt(el.dataset.ho, 10), k = el.dataset.lv;
   if(k === "insane") setLive(ho, { insane:el.checked });
-  else { const v = toVal(el.value); el.value = v === null ? "" : v; setLive(ho, { [k]:v }); }
+  else {
+    const v = toVal(el.value); setLive(ho, { [k]:v });
+    if(k === "base"){ const t = indOf(v); el.value = t === null ? "" : t; } else el.value = v === null ? "" : v;
+  }
 });
-document.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.dataset && e.target.dataset.lv && e.target.type === "number") e.target.blur(); });
+document.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.dataset && e.target.dataset.lv && (e.target.type === "number" || e.target.dataset.lv === "base")) e.target.blur(); });
 
 /* ===== 立ち絵(カードの薄背景) =====
    u:画像URL / x:横位置(%) / z:拡大率。追加したいHOはここに足す。画像は外部リンクのまま読み込む */
@@ -857,7 +868,7 @@ function charTableHtml(list){
 function liveCells(d, cl){
   const L = liveOf(d.ho), ind = indOf(L.base), v = x => x === null ? "" : x, dis = state.edit ? "" : " disabled";
   return `<td class="num lvc gb${cl("SAN")}"><input type="number" class="lv" data-lv="san" data-ho="${d.ho}" min="0" max="99" inputmode="numeric" placeholder="${(d.st.POW ?? 0) * 5}" value="${v(L.san)}" aria-label="HO${d.ho} 現在SAN"${dis}></td>`
-    + `<td class="num lvc${cl("IND")}"><input type="number" class="lv" data-lv="base" data-ho="${d.ho}" min="0" max="99" inputmode="numeric" placeholder="開始" value="${v(L.base)}" aria-label="HO${d.ho} 不定の基準にする開始時SAN"${dis}><b class="indv" data-indv data-ho="${d.ho}" title="不定の閾値">${ind === null ? "—" : ind}</b></td>`
+    + `<td class="num lvc${cl("IND")}"><input type="text" class="lv ind" data-lv="base" data-ho="${d.ho}" inputmode="numeric" autocomplete="off" value="${ind === null ? "" : ind}" title="不定ライン(SANがこの値以下で不定)。編集モードONでクリック → その日の開始時SANを入力" aria-label="HO${d.ho} 不定ライン(入力は開始時SAN)"${dis}></td>`
     + `<td class="num lvc${cl("INS")}"><input type="checkbox" class="lvchk" data-lv="insane" data-ho="${d.ho}"${L.insane ? " checked" : ""} aria-label="HO${d.ho} 発狂中"${dis}></td>`;
 }
 function tableHtml(list){
@@ -896,7 +907,7 @@ function tableHtml(list){
     <button class="chip" data-grpt="sk" aria-pressed="${skOn}">技能</button>
     ${liveStatusHtml()}
     <span class="dhint">表は掴んで左右にドラッグでスクロールできます</span>
-    <span class="lvnote">SAN・不定・発狂中は「編集モード」をONにしたときだけ書き換えできます(誤入力防止)。<br>SAN=現在値(薄い数字はPOW×5の初期値) ／ 不定=「その日の開始時SAN」を入力すると、右に閾値(その1/5・端数切り上げ)が出ます ／ 発狂中=チェックで行が赤くなります</span></div>`;
+    <span class="lvnote">SAN・不定・発狂中は「編集モード」をONにしたときだけ書き換えできます(誤入力防止)。<br>SAN=現在値(薄い数字はPOW×5の初期値) ／ 不定=「SANがこの値以下になると不定」のライン(開始時SAN − その1/5・端数切り上げ。例: 53 → 42)。編集モードで欄をクリックすると開始時SANを入力でき、確定するとラインに戻ります ／ 発狂中=チェックで行が赤くなります</span></div>`;
   return `${tools}<div class="tablewrap dragscroll"><table><thead>${head1}${head2}</thead><tbody>${rows}</tbody></table></div>`;
 }
 /* ===== 身長くらべ ===== */
@@ -1113,7 +1124,7 @@ function skillHtml(d){
   const ho = d.hn ? `<dl style="margin:12px 0 0"><dt>HO推奨技能</dt><dd>${esc(d.hn)}${d.hv !== null ? ` <b>${d.hv}</b>` : ""}</dd></dl>` : "";
   const memo = d.sm ? `<div class="skmemo">${esc(d.sm)}</div>` : "";
   const L = liveOf(d.ho), ind = indOf(L.base);
-  const lvm = `<div class="lvm">現在SAN <b>${L.san === null ? "—" : L.san}</b> ／ 不定の閾値 <b>${ind === null ? "—" : ind}</b>${L.insane ? ' ／ <b class="bad">発狂中</b>' : ""}</div>`;
+  const lvm = `<div class="lvm">現在SAN <b>${L.san === null ? "—" : L.san}</b> ／ 不定ライン <b>${ind === null ? "—" : ind}</b>${L.insane ? ' ／ <b class="bad">発狂中</b>' : ""}</div>`;
   return `<div class="sec">ステータス</div>${lvm}<div class="stg">${STK.map(k => `<div><i>${k}</i><b>${d.st[k] === null ? "—" : d.st[k]}</b></div>`).join("")}</div><div class="sec">技能 <span class="def" style="letter-spacing:0">(薄いグレー=初期値)</span></div><div class="skgrid">${grid}</div>${ho}${memo}`;
 }
 function modalHtml(d){
