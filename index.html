@@ -360,6 +360,11 @@ body[data-page="board"] .controls, body[data-page="board"] .count{display:none}
 .bd-notes{margin:0; padding:10px 12px 10px 28px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; font-size:12.5px; color:var(--muted); line-height:1.7}
 .bd-notes li{margin:1px 0}
 .bd-notes b{color:var(--text)}
+.bd-editbar{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; padding:8px 12px; border-radius:10px; background:#fff4d6; border:1px solid #f0d58a; font-size:13px; font-weight:700; color:#7a5300}
+.bd-editbar .btn{font-size:12px; font-weight:400}
+.bd-formbody.editing{border-top-color:#f0d58a}
+.bd-editing{background:#fff4d6; color:#7a5300; border:1px solid #f0d58a; border-radius:99px; padding:0 8px; font-size:11px; font-weight:700}
+.rp.bd.bd-isedit{border-color:#f0d58a; box-shadow:0 0 0 2px #fff4d6}
 .bd-formbody{margin-top:14px; padding-top:14px; border-top:1px dashed var(--line)}
 .bd-wide label{flex:1 1 240px}
 .bd-hobox{margin:0 0 10px}
@@ -1122,8 +1127,8 @@ function threadHtml({ r, rs }){
       <button class="btn bd-reveal" data-bdshow="${esc(r.id)}">ネタバレを含む投稿です。押すと表示します${rs.length ? `(返信${rs.length}件)` : ""}</button>
     </article>`;
   }
-  const head = r.deleted ? `<div class="bd-gone">この投稿は削除されました</div>` : state.editId === r.id ? `<div class="rp-head"><span class="rp-cat">編集中</span>${postMeta(r)}</div>${editFormHtml(r)}` : `
-    <div class="rp-head"><span class="rp-cat">${esc(r.cat)}</span>${spl}${r.spoiler ? `<button class="lnk bd-rehide" data-bdhide="${esc(r.id)}">▴ 隠す</button>` : ""}${postMeta(r)}</div>
+  const head = r.deleted ? `<div class="bd-gone">この投稿は削除されました</div>` : `
+    <div class="rp-head"><span class="rp-cat">${esc(r.cat)}</span>${state.editId === r.id ? '<span class="bd-editing">✎ 上のフォームで編集中</span>' : ""}${spl}${r.spoiler ? `<button class="lnk bd-rehide" data-bdhide="${esc(r.id)}">▴ 隠す</button>` : ""}${postMeta(r)}</div>
     <div class="bd-title">${esc(r.title)}</div>
     ${linkHtml(r.url)}
     ${(r.hos || []).length ? `<div class="bd-tags">${r.hos.map(hoTag).join("")}</div>` : ""}
@@ -1150,7 +1155,7 @@ function threadHtml({ r, rs }){
       <div class="rp-act"><button class="btn rp-send" data-bdsend="${esc(r.id)}">返信する</button><button class="btn" data-bdreply="">閉じる</button><span class="bd-rmsg" id="bd-rmsg"></span></div>
     </div>` : ((r.deleted || state.editId === r.id) ? "" : `<button class="btn bd-rbtn" data-bdreply="${esc(r.id)}">↩ 返信</button>`);
   const repHead = rs.length ? `<div class="bd-rcount">返信 ${rs.length}件 ${more}</div>` : "";
-  return `<article class="rp bd">${head}${rs.length ? `<div class="bd-reps">${repHead}${reps}</div>` : ""}${form}</article>`;
+  return `<article class="rp bd${state.editId === r.id ? " bd-isedit" : ""}">${head}${rs.length ? `<div class="bd-reps">${repHead}${reps}</div>` : ""}${form}</article>`;
 }
 function drawBoard(){
   const box = document.getElementById("bd-list"); if(!box) return;
@@ -1180,6 +1185,49 @@ function drawBoard(){
     er.textContent = authError ? "投稿の準備に失敗しました(Firebaseで匿名認証が有効になっているか確認してください)。" : "掲示板の読み込みに失敗しました(Firestoreのルールに posts が入っているか確認してください)。";
   }
 }
+/* スレッドの投稿の編集は、上の投稿フォームを使う(書きかけの新規投稿は退避して、編集後に戻す) */
+let bdNewDraft = null;
+const formVals = () => ({ cat:document.getElementById("bd-cat").value, title:document.getElementById("bd-title").value, url:document.getElementById("bd-url").value, text:document.getElementById("bd-text").value, spoiler:document.getElementById("bd-spoiler").checked, hos:[...state.bdHos] });
+function setFormVals(v){
+  document.getElementById("bd-cat").value = v.cat || BD_CATS[0];
+  document.getElementById("bd-title").value = v.title || "";
+  document.getElementById("bd-url").value = v.url || "";
+  document.getElementById("bd-text").value = v.text || "";
+  document.getElementById("bd-spoiler").checked = !!v.spoiler;
+  state.bdHos = [...(v.hos || [])]; syncHoSel();
+}
+function closeHoGrid(){
+  const g = document.getElementById("bd-hogrid"), b = document.getElementById("bd-hotg");
+  if(g){ g.hidden = true; b.setAttribute("aria-expanded", "false"); b.textContent = "選ぶ ▾"; }
+}
+function setFormMode(editing, title, name){
+  const bar = document.getElementById("bd-editbar"); if(!bar) return;
+  closeHoGrid();
+  document.getElementById("bd-name").value = editing ? (name || "") : getName();   // 編集中は投稿時の名前を表示(変更不可)
+  bar.hidden = !editing;
+  document.getElementById("bd-editlbl").textContent = editing ? "✎ 「" + title + "」を編集中" : "";
+  document.getElementById("bd-send").textContent = editing ? "保存する" : "投稿";
+  document.getElementById("bd-name").disabled = editing;          // 名前は編集では変えられない
+  document.getElementById("bd-formbody").classList.toggle("editing", editing);
+}
+function startRootEdit(p){
+  const wasRootEdit = state.editId && !bdEdit;
+  bdEdit = null;                                                   // 返信の編集中なら閉じる
+  if(!wasRootEdit) bdNewDraft = formVals();                        // 新規の書きかけを退避(編集から編集へ移るときは退避済み)
+  state.editId = p.id; state.bdForm = true;
+  const f = document.getElementById("bd-formbody"), b = document.getElementById("bd-ftg");
+  f.hidden = false; b.setAttribute("aria-expanded", "true"); b.textContent = "閉じる ▴";
+  setFormVals(p); setFormMode(true, p.title, p.name);
+  drawBoard();
+  document.querySelector(".rp-form").scrollIntoView({ behavior:"smooth", block:"start" });
+  document.getElementById("bd-title").focus({ preventScroll:true });
+}
+function endRootEdit(){
+  state.editId = null;
+  setFormVals(bdNewDraft || {}); bdNewDraft = null;
+  setFormMode(false);
+  drawBoard();
+}
 function boardHtml(){
   const hoChips = [0, ...D.map(d => d.ho), BD_OTHER].map(n => {
     const d = D.find(x => x.ho === n);
@@ -1203,6 +1251,7 @@ function boardHtml(){
       <li>削除ボタンが出なくなった投稿は、<a href="#reports" class="bd-req">不具合報告の「掲示板の削除依頼」</a>から知らせてください。</li>
     </ul>
     <div id="bd-formbody" class="bd-formbody"${state.bdForm ? "" : " hidden"}>
+      <div class="bd-editbar" id="bd-editbar" hidden><span id="bd-editlbl"></span><button class="btn" id="bd-editcancel">編集をやめる</button></div>
     <div class="rp-row">
       <label>種類<select id="bd-cat">${cats}</select></label>
       <label class="bd-spl"><span>&nbsp;</span><span><input type="checkbox" id="bd-spoiler"> ネタバレを含む</span></label>
@@ -1249,11 +1298,14 @@ document.addEventListener("click", async e => {
   const eb = t.closest("[data-bdedit]");
   if(eb){
     const p = posts.find(x => x.id === eb.dataset.bdedit); if(!p) return;
+    if(!p.parent){ startRootEdit(p); return; }
+    if(state.editId && !bdEdit) endRootEdit();
     bdEdit = { id:p.id, reply:!!p.parent, cat:p.cat, title:p.title, url:p.url, text:p.text, hos:[...(p.hos || [])], spoiler:!!p.spoiler };
     state.editId = p.id; drawBoard();
     const f = document.querySelector(p.parent ? '[data-bde="text"]' : '[data-bde="title"]'); if(f) f.focus();
     return;
   }
+  if(t.closest("#bd-editcancel")){ endRootEdit(); return; }
   if(t.closest("[data-bdecancel]")){ bdEdit = null; state.editId = null; drawBoard(); return; }
   const eh = t.closest("[data-bdeho]");
   if(eh && bdEdit){
@@ -1293,6 +1345,7 @@ document.addEventListener("click", async e => {
   const cat = t.closest("[data-bdcat]");
   if(cat){ state.bdCat = cat.dataset.bdcat; drawBoard(); return; }
   if(t.closest("#bd-ftg")){
+    if(state.bdForm && state.editId && !bdEdit){ endRootEdit(); }
     state.bdForm = !state.bdForm;
     const f = document.getElementById("bd-formbody"), b = t.closest("#bd-ftg");
     f.hidden = !state.bdForm; b.setAttribute("aria-expanded", String(state.bdForm)); b.textContent = state.bdForm ? "閉じる ▴" : "＋ 投稿する";
@@ -1325,6 +1378,15 @@ document.addEventListener("click", async e => {
     if(rawUrl && !url){ say("bd-msg", "URLは https:// から始まる形で入れてください", true); return; }
     const name = v("bd-name").slice(0, 20);
     btn.disabled = true;
+    if(state.editId && !bdEdit){                                   // 上のフォームで投稿を編集中 → 保存
+      try {
+        await editPost(state.editId, { cat:v("bd-cat"), title:title.slice(0, 80), url, text:v("bd-text").slice(0, 1000), hos:[...state.bdHos], spoiler:document.getElementById("bd-spoiler").checked });
+        endRootEdit(); say("bd-msg", "保存しました", false);
+      } catch(err){ say("bd-msg", "保存に失敗しました。時間をおいてもう一度試してください", true); }
+      btn.disabled = false;
+      setTimeout(() => say("bd-msg", "", false), 5000);
+      return;
+    }
     try {
       await addPost({ parent:null, cat:v("bd-cat"), title:title.slice(0, 80), url, text:v("bd-text").slice(0, 1000), name, hos:[...state.bdHos], spoiler:document.getElementById("bd-spoiler").checked });
       setName(name);
@@ -2037,7 +2099,11 @@ function render(){
   $("#total").textContent = D.length;
   const main = $("#main");
   if(state.page === "reports"){ main.innerHTML = reportsHtml(); drawReports(); return; }
-  if(state.page === "board"){ main.innerHTML = boardHtml(); syncHoSel(); drawBoard(); return; }
+  if(state.page === "board"){
+    main.innerHTML = boardHtml(); syncHoSel();
+    if(state.editId && !bdEdit){ const p = posts.find(x => x.id === state.editId); if(p){ setFormVals(p); setFormMode(true, p.title, p.name); } else state.editId = null; }
+    drawBoard(); return;
+  }
   if(!current.length){ main.innerHTML = '<div class="empty">条件に合うキャラクターがいません</div>'; return; }
   main.innerHTML = state.page === "height" ? heightHtml()
     : !chars ? tableHtml(current)
