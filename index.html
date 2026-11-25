@@ -196,7 +196,7 @@ ruby.hn rt::before{content:attr(data-rt)}
 .skrow.off .bar i{display:none}
 .skmemo{margin-top:12px; padding:10px 14px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; font-size:14px; white-space:pre-wrap}
 th{white-space:nowrap}
-th.num,td.num{padding:8px 4px; text-align:center; font-variant-numeric:tabular-nums}
+th.num,td.num{width:42px; min-width:42px; max-width:42px; box-sizing:border-box; padding:8px 2px; text-align:center; font-variant-numeric:tabular-nums}
 td .cats{flex-direction:column; align-items:flex-start}
 td .cat{white-space:nowrap}
 td.memo{min-width:220px}
@@ -220,6 +220,7 @@ td .swatch{color:var(--text)}
 .dragscroll.dragging, .dragscroll.dragging *{cursor:grabbing !important; user-select:none; -webkit-user-select:none}
 th.grp{height:26px; text-align:center; font-size:11px; letter-spacing:.08em; cursor:pointer; user-select:none}
 th.grp.st{background:#dff1f8}
+th.grp.san{background:#f3e6f6}
 th.grp.sk{background:#e7f6ee}
 th.grp:hover{filter:brightness(.96)}
 th.gcol, td.gcol{width:26px; min-width:26px; padding:0; text-align:center}
@@ -231,7 +232,7 @@ th.gb, td.gb{border-left:1px solid var(--line)}
 .stg b{font-size:15px; font-variant-numeric:tabular-nums}
 
 .lv::-webkit-outer-spin-button, .lv::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
-.lv{-moz-appearance:textfield; appearance:textfield; box-sizing:border-box; width:44px; padding:4px 3px; text-align:center; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--text); font:inherit; font-size:12.5px; font-variant-numeric:tabular-nums}
+.lv{-moz-appearance:textfield; appearance:textfield; box-sizing:border-box; width:36px; padding:4px 2px; text-align:center; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--text); font:inherit; font-size:12.5px; font-variant-numeric:tabular-nums}
 .lv::placeholder{color:#b4cbd6}
 .lv:disabled, .lvchk:disabled{pointer-events:none; opacity:.75}
 .lv:disabled{background:transparent; border-color:transparent}
@@ -710,7 +711,7 @@ const accent = d => !d.hex ? "#9db6c2" : (lum(d.hex) > 0.6 ? darken(d.hex, 0.78)
 
 /* ===== 状態 ===== */
 const PAGE_HASH = { chars:"", skills:"#skills", height:"#height" };
-const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true, edit:false };
+const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true, showSan:true, edit:false };
 let current = []; // 現在表示中の配列
 let openHo = null;
 
@@ -878,7 +879,7 @@ function liveCells(d, cl){
   const L = liveOf(d.ho), ind = indOf(L.base), v = x => x === null ? "" : x, dis = state.edit ? "" : " disabled";
   return `<td class="num lvc gb${cl("SAN")}"><input type="text" class="lv" data-lv="san" data-ho="${d.ho}" maxlength="2" autocomplete="off" inputmode="numeric" placeholder="${(d.st.POW ?? 0) * 5}" value="${v(L.san)}" aria-label="HO${d.ho} 現在SAN"${dis}></td>`
     + `<td class="num lvc${cl("IND")}"><input type="text" class="lv ind" data-lv="base" data-ho="${d.ho}" inputmode="numeric" autocomplete="off" value="${ind === null ? "" : ind}" title="不定ライン(SANがこの値以下で不定)。編集モードONでクリック → その日の開始時SANを入力" aria-label="HO${d.ho} 不定ライン(入力は開始時SAN)"${dis}></td>`
-    + `<td class="num lvc${cl("INS")}"><input type="checkbox" class="lvchk" data-lv="insane" data-ho="${d.ho}"${L.insane ? " checked" : ""} aria-label="HO${d.ho} 発狂中"${dis}></td>`;
+    + `<td class="num lvc${cl("INS")}"><input type="checkbox" class="lvchk" data-lv="insane" data-ho="${d.ho}"${L.insane ? " checked" : ""} aria-label="HO${d.ho} 発狂"${dis}></td>`;
 }
 function tableHtml(list){
   const {key, dir} = state.skSort;
@@ -887,15 +888,15 @@ function tableHtml(list){
     const on = key === k;
     return `<th${attr} class="sortable${extra}${cl(k)}" data-sk="${esc(k)}" aria-sort="${on ? (dir > 0 ? "ascending" : "descending") : "none"}">${esc(label)}<span class="ind">${on ? (dir > 0 ? "▲" : "▼") : ""}</span></th>`;
   };
-  const stOn = state.showSt, skOn = state.showSk, iniOn = state.showIni;
+  const stOn = state.showSt, skOn = state.showSk, iniOn = state.showIni, sanOn = state.showSan;
   const STX = STK.slice(1);   // INIはHOの横に別枠で表示
   const skN = SKL.length + 2;
   const grp = (id, label, on, n) => on
     ? `<th class="grp ${id} gb" colspan="${n}" data-grp="${id}" title="クリックで折りたたみ">▼ ${label}</th>`
     : `<th class="grp ${id} gcol gb" rowspan="2" data-grp="${id}" title="クリックで展開"><span>▶ ${label}</span></th>`;
   const head1 = `<tr>${th("ho","HO","",' rowspan="2"')}${iniOn ? th("INI","INI"," num",' rowspan="2"') : ""}<th rowspan="2">HO名</th>${th("pc","PC名","",' rowspan="2"')}<th rowspan="2">能力</th>`
-    + grp("st","ステータス",stOn,STX.length + 3) + grp("sk","技能",skOn,skN) + `<th rowspan="2">備考</th></tr>`;
-  const head2 = `<tr>${stOn ? th("SAN","SAN"," num gb") + th("IND","不定"," num") + th("INS","発狂中"," num") + STX.map(k => th(k, k, " num")).join("") : ""}`
+    + grp("san","SAN",sanOn,3) + grp("st","ステータス",stOn,STX.length) + grp("sk","技能",skOn,skN) + `<th rowspan="2">備考</th></tr>`;
+  const head2 = `<tr>${sanOn ? th("SAN","SAN"," num gb") + th("IND","不定"," num") + th("INS","発狂"," num") : ""}${stOn ? STX.map((k,i) => th(k, k, " num" + (i === 0 ? " gb" : ""))).join("") : ""}`
     + (skOn ? SKL.map((l,i) => th(l, l, " num" + (i === 0 ? " gb" : ""))).join("") + th("nego","交渉技能") + th("hv","HO推奨技能") : "") + `</tr>`;
   const rows = list.map(d => `<tr data-ho="${d.ho}"${liveOf(d.ho).insane ? ' class="insane"' : ""}>
     <td class="nw${cl("ho")}">HO${d.ho}</td>
@@ -903,7 +904,8 @@ function tableHtml(list){
     <td>${hoName(d)}<div class="sm">${esc(d.mean)}</div></td>
     <td class="pcn${cl("pc")}">${esc(d.pc)}<div class="sm">${esc(d.pcKana)}</div></td>
     <td>${catHtml(d)}</td>
-    ${stOn ? liveCells(d, cl) + STX.map(k => `<td class="num${cl(k)}">${d.st[k] === null ? "" : d.st[k]}</td>`).join("") : '<td class="gcol gb"></td>'}
+    ${sanOn ? liveCells(d, cl) : '<td class="gcol gb"></td>'}
+    ${stOn ? STX.map((k,i) => `<td class="num${cl(k)}${i === 0 ? " gb" : ""}">${d.st[k] === null ? "" : d.st[k]}</td>`).join("") : '<td class="gcol gb"></td>'}
     ${skOn ? SKL.map((l,i) => `<td class="num${cl(l)}${i === 0 ? " gb" : ""}">${skCell(d, l)}</td>`).join("")
       + `<td class="${cl("nego").trim()}">${d.nego ? esc(d.nego.n) + " <b>" + d.nego.v + "</b>" : ""}</td>`
       + `<td class="${cl("hv").trim()}">${esc(d.hn)}${d.hv !== null ? " <b>" + d.hv + "</b>" : ""}</td>` : '<td class="gcol gb"></td>'}
@@ -912,11 +914,12 @@ function tableHtml(list){
     <button class="chip edit" data-grpt="edit" aria-pressed="${state.edit}">${state.edit ? "✎ 編集モード ON" : "✎ 編集モード OFF"}</button>
     <span class="vsep"></span>
     <button class="chip" data-grpt="ini" aria-pressed="${iniOn}">INI</button>
+    <button class="chip" data-grpt="san" aria-pressed="${sanOn}">SAN</button>
     <button class="chip" data-grpt="st" aria-pressed="${stOn}">ステータス</button>
     <button class="chip" data-grpt="sk" aria-pressed="${skOn}">技能</button>
     ${liveStatusHtml()}
     <span class="dhint">表は掴んで左右にドラッグでスクロールできます</span>
-    <span class="lvnote">SAN・不定・発狂中は「編集モード」をONにしたときだけ書き換えできます(誤入力防止)。<br>SAN=現在値(薄い数字はPOW×5の初期値) ／ 不定=「SANがこの値以下になると不定」のライン(開始時SAN − その1/5・端数切り上げ。例: 53 → 42)。編集モードで欄をクリックすると開始時SANを入力でき、確定するとラインに戻ります ／ 発狂中=チェックで行が赤くなります</span></div>`;
+    <span class="lvnote">SAN・不定・発狂は「編集モード」をONにしたときだけ書き換えできます(誤入力防止)。<br>SAN=現在値(薄い数字はPOW×5の初期値) ／ 不定=「SANがこの値以下になると不定」のライン(開始時SAN − その1/5・端数切り上げ。例: 53 → 42)。編集モードで欄をクリックすると開始時SANを入力でき、確定するとラインに戻ります ／ 発狂=チェックで行が赤くなります(発狂中)</span></div>`;
   return `${tools}<div class="tablewrap dragscroll"><table><thead>${head1}${head2}</thead><tbody>${rows}</tbody></table></div>`;
 }
 /* ===== 身長くらべ ===== */
@@ -1060,7 +1063,7 @@ $("#main").addEventListener("click", e => {
   const gt = e.target.closest("[data-grpt], th[data-grp]");
   if(gt){
     const g = gt.dataset.grpt || gt.dataset.grp;
-    if(g === "edit") state.edit = !state.edit; else if(g === "ini") state.showIni = !state.showIni; else if(g === "st") state.showSt = !state.showSt; else state.showSk = !state.showSk;
+    if(g === "edit") state.edit = !state.edit; else if(g === "ini") state.showIni = !state.showIni; else if(g === "san") state.showSan = !state.showSan; else if(g === "st") state.showSt = !state.showSt; else state.showSk = !state.showSk;
     render(); return;
   }
   const ch = e.target.closest("th[data-cs]");
