@@ -232,6 +232,10 @@ th.gb, td.gb{border-left:1px solid var(--line)}
 
 .lv{width:54px; padding:4px 3px; text-align:center; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--text); font:inherit; font-size:12.5px; font-variant-numeric:tabular-nums}
 .lv::placeholder{color:#b4cbd6}
+.lv:disabled, .lvchk:disabled{pointer-events:none; opacity:.75}
+.lv:disabled{background:transparent; border-color:transparent}
+.chip.edit[aria-pressed="true"]{background:#d6453d; border-color:#d6453d}
+.vsep{width:1px; height:20px; background:var(--line); margin:0 4px}
 .lv:focus{outline:2px solid var(--accent); outline-offset:0}
 .lvc{white-space:nowrap}
 .indv{display:inline-block; min-width:26px; margin-left:4px; color:#8a4a9a}
@@ -684,7 +688,7 @@ const accent = d => !d.hex ? "#9db6c2" : (lum(d.hex) > 0.6 ? darken(d.hex, 0.78)
 
 /* ===== 状態 ===== */
 const PAGE_HASH = { chars:"", skills:"#skills", height:"#height" };
-const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true };
+const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true, edit:false };
 let current = []; // 現在表示中の配列
 let openHo = null;
 
@@ -849,10 +853,10 @@ function charTableHtml(list){
     ${th("ho","HO")}<th>HO名</th><th>PC名</th><th>PL名</th><th>能力</th><th>性別</th>${th("age","年齢")}${th("h","身長")}<th>武器</th><th>射程</th><th>特徴表</th><th>文字色</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function liveCells(d, cl){
-  const L = liveOf(d.ho), ind = indOf(L.base), v = x => x === null ? "" : x;
-  return `<td class="num lvc gb${cl("SAN")}"><input type="number" class="lv" data-lv="san" data-ho="${d.ho}" min="0" max="99" inputmode="numeric" placeholder="${(d.st.POW ?? 0) * 5}" value="${v(L.san)}" aria-label="HO${d.ho} 現在SAN"></td>`
-    + `<td class="num lvc${cl("IND")}"><input type="number" class="lv" data-lv="base" data-ho="${d.ho}" min="0" max="99" inputmode="numeric" placeholder="開始" value="${v(L.base)}" aria-label="HO${d.ho} 不定の基準にする開始時SAN"><b class="indv" data-indv data-ho="${d.ho}" title="不定の閾値">${ind === null ? "—" : ind}</b></td>`
-    + `<td class="num lvc${cl("INS")}"><input type="checkbox" class="lvchk" data-lv="insane" data-ho="${d.ho}"${L.insane ? " checked" : ""} aria-label="HO${d.ho} 発狂中"></td>`;
+  const L = liveOf(d.ho), ind = indOf(L.base), v = x => x === null ? "" : x, dis = state.edit ? "" : " disabled";
+  return `<td class="num lvc gb${cl("SAN")}"><input type="number" class="lv" data-lv="san" data-ho="${d.ho}" min="0" max="99" inputmode="numeric" placeholder="${(d.st.POW ?? 0) * 5}" value="${v(L.san)}" aria-label="HO${d.ho} 現在SAN"${dis}></td>`
+    + `<td class="num lvc${cl("IND")}"><input type="number" class="lv" data-lv="base" data-ho="${d.ho}" min="0" max="99" inputmode="numeric" placeholder="開始" value="${v(L.base)}" aria-label="HO${d.ho} 不定の基準にする開始時SAN"${dis}><b class="indv" data-indv data-ho="${d.ho}" title="不定の閾値">${ind === null ? "—" : ind}</b></td>`
+    + `<td class="num lvc${cl("INS")}"><input type="checkbox" class="lvchk" data-lv="insane" data-ho="${d.ho}"${L.insane ? " checked" : ""} aria-label="HO${d.ho} 発狂中"${dis}></td>`;
 }
 function tableHtml(list){
   const {key, dir} = state.skSort;
@@ -883,12 +887,14 @@ function tableHtml(list){
       + `<td class="${cl("hv").trim()}">${esc(d.hn)}${d.hv !== null ? " <b>" + d.hv + "</b>" : ""}</td>` : '<td class="gcol gb"></td>'}
     <td class="memo">${esc(d.sm)}</td></tr>`).join("");
   const tools = `<div class="coltools"><span class="lbl">表示する項目</span>
+    <button class="chip edit" data-grpt="edit" aria-pressed="${state.edit}">${state.edit ? "✎ 編集モード ON" : "✎ 編集モード OFF"}</button>
+    <span class="vsep"></span>
     <button class="chip" data-grpt="ini" aria-pressed="${iniOn}">INI</button>
     <button class="chip" data-grpt="st" aria-pressed="${stOn}">ステータス</button>
     <button class="chip" data-grpt="sk" aria-pressed="${skOn}">技能</button>
     ${liveStatusHtml()}
     <span class="dhint">表は掴んで左右にドラッグでスクロールできます</span>
-    <span class="lvnote">SAN=現在値(薄い数字はPOW×5の初期値) ／ 不定=「その日の開始時SAN」を入力すると、右に閾値(その1/5・端数切り上げ)が出ます ／ 発狂中=チェックで行が赤くなります</span></div>`;
+    <span class="lvnote">SAN・不定・発狂中は「編集モード」をONにしたときだけ書き換えできます(誤入力防止)。<br>SAN=現在値(薄い数字はPOW×5の初期値) ／ 不定=「その日の開始時SAN」を入力すると、右に閾値(その1/5・端数切り上げ)が出ます ／ 発狂中=チェックで行が赤くなります</span></div>`;
   return `${tools}<div class="tablewrap dragscroll"><table><thead>${head1}${head2}</thead><tbody>${rows}</tbody></table></div>`;
 }
 /* ===== 身長くらべ ===== */
@@ -1032,7 +1038,7 @@ $("#main").addEventListener("click", e => {
   const gt = e.target.closest("[data-grpt], th[data-grp]");
   if(gt){
     const g = gt.dataset.grpt || gt.dataset.grp;
-    if(g === "ini") state.showIni = !state.showIni; else if(g === "st") state.showSt = !state.showSt; else state.showSk = !state.showSk;
+    if(g === "edit") state.edit = !state.edit; else if(g === "ini") state.showIni = !state.showIni; else if(g === "st") state.showSt = !state.showSt; else state.showSk = !state.showSk;
     render(); return;
   }
   const ch = e.target.closest("th[data-cs]");
