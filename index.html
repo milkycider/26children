@@ -593,7 +593,7 @@ const accent = d => !d.hex ? "#9db6c2" : (lum(d.hex) > 0.6 ? darken(d.hex, 0.78)
 
 /* ===== 状態 ===== */
 const PAGE_HASH = { chars:"", skills:"#skills", height:"#height" };
-const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true };
+const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true };
 let current = []; // 現在表示中の配列
 let openHo = null;
 
@@ -760,26 +760,29 @@ function tableHtml(list){
     const on = key === k;
     return `<th${attr} class="sortable${extra}${cl(k)}" data-sk="${esc(k)}" aria-sort="${on ? (dir > 0 ? "ascending" : "descending") : "none"}">${esc(label)}<span class="ind">${on ? (dir > 0 ? "▲" : "▼") : ""}</span></th>`;
   };
-  const stOn = state.showSt, skOn = state.showSk;
+  const stOn = state.showSt, skOn = state.showSk, iniOn = state.showIni;
+  const STX = STK.slice(1);   // INIはHOの横に別枠で表示
   const skN = SKL.length + 2;
   const grp = (id, label, on, n) => on
     ? `<th class="grp ${id} gb" colspan="${n}" data-grp="${id}" title="クリックで折りたたみ">▼ ${label}</th>`
     : `<th class="grp ${id} gcol gb" rowspan="2" data-grp="${id}" title="クリックで展開"><span>▶ ${label}</span></th>`;
-  const head1 = `<tr>${th("ho","HO","",' rowspan="2"')}<th rowspan="2">HO名</th>${th("pc","PC名","",' rowspan="2"')}<th rowspan="2">能力</th>`
-    + grp("st","ステータス",stOn,STK.length) + grp("sk","技能",skOn,skN) + `<th rowspan="2">備考</th></tr>`;
-  const head2 = `<tr>${stOn ? STK.map((k,i) => th(k, k, " num" + (i === 0 ? " gb" : ""))).join("") : ""}`
+  const head1 = `<tr>${th("ho","HO","",' rowspan="2"')}${iniOn ? th("INI","INI"," num",' rowspan="2"') : ""}<th rowspan="2">HO名</th>${th("pc","PC名","",' rowspan="2"')}<th rowspan="2">能力</th>`
+    + grp("st","ステータス",stOn,STX.length) + grp("sk","技能",skOn,skN) + `<th rowspan="2">備考</th></tr>`;
+  const head2 = `<tr>${stOn ? STX.map((k,i) => th(k, k, " num" + (i === 0 ? " gb" : ""))).join("") : ""}`
     + (skOn ? SKL.map((l,i) => th(l, l, " num" + (i === 0 ? " gb" : ""))).join("") + th("nego","交渉技能") + th("hv","HO推奨技能") : "") + `</tr>`;
   const rows = list.map(d => `<tr data-ho="${d.ho}">
     <td class="nw${cl("ho")}">HO${d.ho}</td>
+    ${iniOn ? `<td class="num${cl("INI")}">${d.st.INI === null ? "" : d.st.INI}</td>` : ""}
     <td>${hoName(d)}<div class="sm">${esc(d.mean)}</div></td>
     <td class="pcn${cl("pc")}">${esc(d.pc)}<div class="sm">${esc(d.pcKana)}</div></td>
     <td>${catHtml(d)}</td>
-    ${stOn ? STK.map((k,i) => `<td class="num${cl(k)}${i === 0 ? " gb" : ""}">${d.st[k] === null ? "" : d.st[k]}</td>`).join("") : '<td class="gcol gb"></td>'}
+    ${stOn ? STX.map((k,i) => `<td class="num${cl(k)}${i === 0 ? " gb" : ""}">${d.st[k] === null ? "" : d.st[k]}</td>`).join("") : '<td class="gcol gb"></td>'}
     ${skOn ? SKL.map((l,i) => `<td class="num${cl(l)}${i === 0 ? " gb" : ""}">${skCell(d, l)}</td>`).join("")
       + `<td class="${cl("nego").trim()}">${d.nego ? esc(d.nego.n) + " <b>" + d.nego.v + "</b>" : ""}</td>`
       + `<td class="${cl("hv").trim()}">${esc(d.hn)}${d.hv !== null ? " <b>" + d.hv + "</b>" : ""}</td>` : '<td class="gcol gb"></td>'}
     <td class="memo">${esc(d.sm)}</td></tr>`).join("");
   const tools = `<div class="coltools"><span class="lbl">表示する項目</span>
+    <button class="chip" data-grpt="ini" aria-pressed="${iniOn}">INI</button>
     <button class="chip" data-grpt="st" aria-pressed="${stOn}">ステータス</button>
     <button class="chip" data-grpt="sk" aria-pressed="${skOn}">技能</button>
     <span class="dhint">表は掴んで左右にドラッグでスクロールできます</span></div>`;
@@ -925,7 +928,7 @@ $("#main").addEventListener("click", e => {
   const gt = e.target.closest("[data-grpt], th[data-grp]");
   if(gt){
     const g = gt.dataset.grpt || gt.dataset.grp;
-    if(g === "st") state.showSt = !state.showSt; else state.showSk = !state.showSk;
+    if(g === "ini") state.showIni = !state.showIni; else if(g === "st") state.showSt = !state.showSt; else state.showSk = !state.showSk;
     render(); return;
   }
   const ch = e.target.closest("th[data-cs]");
