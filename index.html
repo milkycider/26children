@@ -316,6 +316,7 @@ body[data-page="reports"] .controls, body[data-page="reports"] .count{display:no
 body[data-page="board"] .controls, body[data-page="board"] .count{display:none}
 /* 掲示板 */
 .bd-req{color:#0f6f9c}
+.bd-fold{display:block; margin-top:2px; font-size:12px; color:#0f6f9c}
 .bd-wide label{flex:1 1 240px}
 .bd-hobox{margin:0 0 10px}
 .bd-hohead{display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px}
@@ -515,6 +516,8 @@ footer{color:var(--muted); font-size:12px; text-align:center; padding:0 0 40px}
   <div class="modal" id="modal"></div>
 </div>
 
+<!-- Firebaseの設定と管理者IDは、同じ場所に置いた firebase-config.js に書く(無ければDB未接続で動く) -->
+<script src="firebase-config.js"></script>
 <script>
 "use strict";
 /* ===== データ ===== */
@@ -651,14 +654,7 @@ D.forEach(d => {
 /* ===== 可変データ(SAN・不定の開始SAN・発狂中) =====
    FIREBASE_CONFIG を入れるとFirestoreで全員に同期。nullの間はこの端末のブラウザにだけ保存(動作確認用)。
    保存先: characters/HO<番号> = { san, base, insane, updatedAt } (san/baseは0〜99の整数かnull) */
-const firebaseConfig = {
-  apiKey: "AIzaSyBhuX48vaAbZqjHKnts-70CQnN9M3s4eAA",
-  authDomain: "children-81e2c.firebaseapp.com",
-  projectId: "children-81e2c",
-  storageBucket: "children-81e2c.firebasestorage.app",
-  messagingSenderId: "83378381554",
-  appId: "1:83378381554:web:3f9067554820c01ed9e66b"
-};
+// Firebaseの設定は firebase-config.js に書く(このHTMLを差し替えても設定は消えない)
 const FB_VER = "10.14.1";
 const live = {};                       // { ho: { san, base, insane } }
 let liveMode = "local";                // "local" | "connecting" | "firestore" | "error"
@@ -797,9 +793,9 @@ document.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.dat
    「修正済み」は一方通行(未対応→修正済みのみ)。戻すときはFirebaseコンソールで done を false に直す */
 const RP_CATS = ["ステータス", "技能", "名前・設定", "表示・動作", "掲示板の削除依頼", "その他"];   // 増やすときはここと、Firestoreルールの一覧の両方に足す
 const RP_KEY = "roado-reports-v1", RP_NAME = "roado-rpname-v1";
-const ADMIN_UIDS = ["aXHRxtCbAhXXAXF1Xb1W8sscwch1"];   // 「修正済みにする」を押せる端末のID。不具合報告ページの一番下に出るIDを "..." で入れる(複数可)
+const ADMIN_LIST = (() => { try { return typeof ADMIN_UIDS !== "undefined" && Array.isArray(ADMIN_UIDS) ? ADMIN_UIDS : []; } catch(e){ return []; } })();   // 管理者ID(firebase-config.js の ADMIN_UIDS)
 const useFs = () => liveMode === "firestore" && !!fbCtx;
-const isAdmin = () => !useFs() || ADMIN_UIDS.includes(myUid);
+const isAdmin = () => !useFs() || ADMIN_LIST.includes(myUid);
 const getName = () => { try { return localStorage.getItem(RP_NAME) || ""; } catch(e){ return ""; } };
 const setName = n => { try { localStorage.setItem(RP_NAME, n); } catch(e){} };
 let reports = [];
@@ -954,6 +950,17 @@ function postMeta(p){
   const mine = p.uid && p.uid === curUid() && !p.deleted;
   return `<span class="rp-meta">${esc(p.name || "名無し")} ・ ${fmtTime(p.at)}${mine ? `<button class="bd-del" data-bddel="${esc(p.id)}">削除</button>` : ""}</span>`;
 }
+/* 長い本文は折りたたむ(140文字超 または 6行超)。開いた投稿は再描画しても開いたまま */
+const FOLD_CHARS = 140, FOLD_LINES = 6;
+const bdOpen = new Set();
+function bodyHtml(p){
+  const t = p.text || ""; if(!t) return "";
+  const lines = t.split("\n"), long = t.length > FOLD_CHARS || lines.length > FOLD_LINES;
+  if(!long) return `<p class="rp-text">${esc(t)}</p>`;
+  if(bdOpen.has(p.id)) return `<p class="rp-text">${esc(t)}</p><button class="lnk bd-fold" data-bdfold="${esc(p.id)}">折りたたむ ▴</button>`;
+  const short = lines.slice(0, FOLD_LINES).join("\n").slice(0, FOLD_CHARS).replace(/\s+$/, "");
+  return `<p class="rp-text">${esc(short)}…</p><button class="lnk bd-fold" data-bdfold="${esc(p.id)}">続きを読む ▾</button>`;
+}
 function threadHtml({ r, rs }){
   const open = state.replyTo === r.id, dr = bdDrafts[r.id] || {};
   const u = safeUrl(r.url);
@@ -961,8 +968,8 @@ function threadHtml({ r, rs }){
     <div class="rp-head"><span class="rp-cat">${esc(r.cat)}</span>${postMeta(r)}</div>
     <div class="bd-title">${u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a> <span class="bd-site">${esc(siteOf(u))} ↗</span>` : esc(r.title)}</div>
     ${(r.hos || []).length ? `<div class="bd-tags">${r.hos.map(hoTag).join("")}</div>` : ""}
-    ${r.text ? `<p class="rp-text">${esc(r.text)}</p>` : ""}`;
-  const reps = rs.map(x => `<div class="bd-rep"><div class="rp-head">${postMeta(x)}</div><p class="rp-text">${esc(x.text)}</p></div>`).join("");
+    ${bodyHtml(r)}`;
+  const reps = rs.map(x => `<div class="bd-rep"><div class="rp-head">${postMeta(x)}</div>${bodyHtml(x)}</div>`).join("");
   const form = open ? `<div class="bd-rform">
       <input data-bdr="${esc(r.id)}" data-f="name" maxlength="20" placeholder="お名前(任意)" autocomplete="off" value="${esc(dr.name ?? getName())}">
       <textarea data-bdr="${esc(r.id)}" data-f="text" maxlength="1000" rows="2" placeholder="返信を書く">${esc(dr.text || "")}</textarea>
@@ -1018,7 +1025,7 @@ function boardHtml(){
       <label>タイトル<input id="bd-title" maxlength="80" autocomplete="off" placeholder="例: 後日談の小話"></label>
       <label>URL(任意)<input id="bd-url" type="url" maxlength="500" autocomplete="off" placeholder="https://"></label>
     </div>
-    <textarea id="bd-text" class="bd-text" maxlength="1000" rows="3" placeholder="ひとこと(任意)"></textarea>
+    <textarea id="bd-text" class="bd-text" maxlength="1000" rows="3" placeholder="ひとこと・本文(任意)"></textarea>
     <div class="rp-act"><button class="btn rp-send" id="bd-send">投稿</button><span id="bd-msg" role="status"></span>${liveStatusHtml()}</div>
     <div class="rp-err" id="bd-err" hidden></div>
   </div>
@@ -1038,6 +1045,8 @@ document.addEventListener("input", e => {
 document.addEventListener("click", async e => {
   const t = e.target; if(!t.closest) return;
   const say = (id, m, bad) => { const el = document.getElementById(id); if(el){ el.textContent = m; el.className = bad ? "bad" : "ok"; } };
+  const fd = t.closest("[data-bdfold]");
+  if(fd){ const id = fd.dataset.bdfold; if(bdOpen.has(id)) bdOpen.delete(id); else bdOpen.add(id); drawBoard(); return; }
   const cat = t.closest("[data-bdcat]");
   if(cat){ state.bdCat = cat.dataset.bdcat; drawBoard(); return; }
   if(t.closest("#bd-hotg")){
