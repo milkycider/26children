@@ -1094,7 +1094,7 @@ function linkHtml(url){
   return `<a class="bd-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer"><b>${esc(siteOf(u))}</b><span>${esc(short)}</span><i>↗</i></a>`;
 }
 const bdShow = new Set();
-const REP_SHOW = 3, bdRepOpen = new Set();   // 返信は新しい3件だけ表示し、残りは「古い返信を表示」でしまっておく   // ネタバレ投稿のうち「表示する」を押したもの
+const REP_SHOW = 0, bdRepOpen = new Set();   // 最初から見せておく返信の件数(0 = すべてしまう)。残りは「返信を表示」で開く   // ネタバレ投稿のうち「表示する」を押したもの
 function threadHtml({ r, rs }){
   const open = state.replyTo === r.id, dr = bdDrafts[r.id] || {};
   const u = safeUrl(r.url);
@@ -1113,10 +1113,10 @@ function threadHtml({ r, rs }){
     ${(r.hos || []).length ? `<div class="bd-tags">${r.hos.map(hoTag).join("")}</div>` : ""}
     ${bodyHtml(r)}`;
   const many = rs.length > REP_SHOW && !bdRepOpen.has(r.id) && !rs.some(x => x.id === state.editId);
-  const shown = many ? rs.slice(-REP_SHOW) : rs;     // 返信が多いときは新しい方だけ出す
+  const shown = many ? (REP_SHOW ? rs.slice(-REP_SHOW) : []) : rs;   // しまっているときは新しい方の REP_SHOW 件だけ
   const more = rs.length > REP_SHOW ? (many
-    ? `<button class="lnk bd-more" data-bdmore="${esc(r.id)}">▾ 古い返信をあと${rs.length - REP_SHOW}件表示</button>`
-    : `<button class="lnk bd-more" data-bdmore="${esc(r.id)}">▴ 古い返信をしまう</button>`) : "";
+    ? `<button class="lnk bd-more" data-bdmore="${esc(r.id)}">▾ ${REP_SHOW ? `古い返信をあと${rs.length - REP_SHOW}件表示` : "返信を表示"}</button>`
+    : `<button class="lnk bd-more" data-bdmore="${esc(r.id)}">▴ ${REP_SHOW ? "古い返信をしまう" : "返信をしまう"}</button>`) : "";
   const reps = shown.map(x => `<div class="bd-rep"><div class="rp-head">${postMeta(x)}</div>${state.editId === x.id ? editFormHtml(x) : linkHtml(x.url) + bodyHtml(x)}</div>`).join("");
   const form = open ? `<div class="bd-rform">
       <input data-bdr="${esc(r.id)}" data-f="name" maxlength="20" placeholder="お名前(任意)" autocomplete="off" value="${esc(dr.name ?? getName())}">
@@ -1125,7 +1125,7 @@ function threadHtml({ r, rs }){
       <div class="rp-act"><button class="btn rp-send" data-bdsend="${esc(r.id)}">返信する</button><button class="btn" data-bdreply="">閉じる</button><span class="bd-rmsg" id="bd-rmsg"></span></div>
     </div>` : ((r.deleted || state.editId === r.id) ? "" : `<button class="btn bd-rbtn" data-bdreply="${esc(r.id)}">↩ 返信</button>`);
   const repHead = rs.length ? `<div class="bd-rcount">返信 ${rs.length}件 ${more}</div>` : "";
-  return `<article class="rp bd">${head}${reps ? `<div class="bd-reps">${repHead}${reps}</div>` : ""}${form}</article>`;
+  return `<article class="rp bd">${head}${rs.length ? `<div class="bd-reps">${repHead}${reps}</div>` : ""}${form}</article>`;
 }
 function drawBoard(){
   const box = document.getElementById("bd-list"); if(!box) return;
@@ -1290,7 +1290,7 @@ document.addEventListener("click", async e => {
     sd.disabled = true;
     try {
       await addPost({ parent:id, cat:"", title:"", url, text:text.slice(0, 1000), name, hos:[] });
-      setName(name); delete bdDrafts[id]; state.replyTo = null; drawBoard();
+      setName(name); delete bdDrafts[id]; state.replyTo = null; bdRepOpen.add(id); drawBoard();
     } catch(err){ sd.disabled = false; say("bd-rmsg", "送信に失敗しました", true); }
     return;
   }
