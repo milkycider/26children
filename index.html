@@ -199,7 +199,8 @@ th{white-space:nowrap}
 th.num,td.num{width:42px; min-width:42px; max-width:42px; box-sizing:border-box; padding:8px 2px; text-align:center; font-variant-numeric:tabular-nums}
 td .cats{flex-direction:column; align-items:flex-start}
 td .cat{white-space:nowrap}
-td.memo{min-width:220px}
+td.pcn, th.pcn{white-space:nowrap}
+td.nw2{white-space:nowrap}
 td .swatch{gap:5px}
 
 /* table view */
@@ -758,7 +759,7 @@ const accent = d => !d.hex ? "#9db6c2" : (lum(d.hex) > 0.6 ? darken(d.hex, 0.78)
 
 /* ===== 状態 ===== */
 const PAGE_HASH = { chars:"", skills:"#skills", height:"#height" };
-const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true, showSan:true, showHm:true, edit:false, showMemo:true, hurtHp:false, hurtMp:false };
+const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true, showSan:true, showHm:true, edit:false, hurtHp:false, hurtMp:false };
 let current = []; // 現在表示中の配列
 let openHo = null;
 
@@ -957,7 +958,7 @@ function tableHtml(list){
     ? `<th class="grp ${id} gb" colspan="${n}" data-grp="${id}" title="クリックで非表示(再表示は表の上のボタン)">▼ ${label}</th>`
     : "";                                                   // 折りたたんだグループは表から完全に消す(再表示は表の上のボタン)
   const head1 = `<tr>${th("ho","HO","",' rowspan="2"')}${iniOn ? th("INI","INI"," num",' rowspan="2"') : ""}<th rowspan="2">HO名</th>${th("pc","PC名","",' rowspan="2"')}<th rowspan="2">能力</th>`
-    + grp("san","SAN",sanOn,3) + grp("hm","HP・MP",hmOn,2) + grp("st","ステータス",stOn,STX.length) + grp("sk","技能",skOn,skN) + (state.showMemo ? `<th rowspan="2" class="gb">備考</th>` : "") + `</tr>`;
+    + grp("san","SAN",sanOn,3) + grp("hm","HP・MP",hmOn,2) + grp("st","ステータス",stOn,STX.length) + grp("sk","技能",skOn,skN) + `</tr>`;
   const head2 = `<tr>${sanOn ? th("SAN","SAN"," num gb") + th("IND","不定"," num") + th("INS","発狂"," num") : ""}${hmOn ? hmTh("HP","HP",true) + hmTh("MP","MP",false) : ""}${stOn ? STX.map((k,i) => th(k, k, " num" + (i === 0 ? " gb" : ""))).join("") : ""}`
     + (skOn ? SKL.map((l,i) => th(l, l, " num" + (i === 0 ? " gb" : ""))).join("") + th("nego","交渉技能") + th("hv","HO推奨技能") : "") + `</tr>`;
   const rows = list.map(d => `<tr data-ho="${d.ho}"${liveOf(d.ho).insane ? ' class="insane"' : ""}${anyHurt() && !isHurt(d) ? " hidden" : ""}>
@@ -970,9 +971,9 @@ function tableHtml(list){
     ${hmOn ? hmCells(d, key) : ''}
     ${stOn ? STX.map((k,i) => `<td class="num${cl(k)}${i === 0 ? " gb" : ""}">${d.st[k] === null ? "" : d.st[k]}</td>`).join("") : ''}
     ${skOn ? SKL.map((l,i) => `<td class="num${cl(l)}${i === 0 ? " gb" : ""}">${skCell(d, l)}</td>`).join("")
-      + `<td class="${cl("nego").trim()}">${d.nego ? esc(d.nego.n) + " <b>" + d.nego.v + "</b>" : ""}</td>`
-      + `<td class="${cl("hv").trim()}">${esc(d.hn)}${d.hv !== null ? " <b>" + d.hv + "</b>" : ""}</td>` : ''}
-    ${state.showMemo ? `<td class="memo gb">${esc(d.sm)}</td>` : ""}</tr>`).join("");
+      + `<td class="nw2 ${cl("nego").trim()}">${d.nego ? esc(d.nego.n) + " <b>" + d.nego.v + "</b>" : ""}</td>`
+      + `<td class="nw2 ${cl("hv").trim()}">${esc(d.hn)}${d.hv !== null ? " <b>" + d.hv + "</b>" : ""}</td>` : ''}
+    </tr>`).join("");
   const tools = `<div class="coltools"><button class="chip edit" data-grpt="edit" aria-pressed="${state.edit}">${state.edit ? "✎ 編集モード ON" : "✎ 編集モード OFF"}</button>
     <span class="vsep"></span>
     <button class="chip" data-grpt="ini" aria-pressed="${iniOn}">INI</button>
@@ -980,7 +981,6 @@ function tableHtml(list){
     <button class="chip" data-grpt="hm" aria-pressed="${hmOn}">HP・MP</button>
     <button class="chip" data-grpt="st" aria-pressed="${stOn}">ステータス</button>
     <button class="chip" data-grpt="sk" aria-pressed="${skOn}">技能</button>
-    <button class="chip" data-grpt="memo" aria-pressed="${state.showMemo}">備考</button>
     <span class="vsep"></span>
     <button class="chip" data-grpt="hurtHp" aria-pressed="${state.hurtHp}" title="HPが最大値より減っているHOだけ表示(MP減少と両方ONなら、どちらかが減っているHO)">HP減少</button>
     <button class="chip" data-grpt="hurtMp" aria-pressed="${state.hurtMp}" title="MPが最大値より減っているHOだけ表示(HP減少と両方ONなら、どちらかが減っているHO)">MP減少</button>
@@ -1129,7 +1129,7 @@ $("#main").addEventListener("click", e => {
   const gt = e.target.closest("[data-grpt], th[data-grp]");
   if(gt){
     const g = gt.dataset.grpt || gt.dataset.grp;
-    if(g === "edit") state.edit = !state.edit; else if(g === "memo") state.showMemo = !state.showMemo; else if(g === "hurtHp") state.hurtHp = !state.hurtHp; else if(g === "hurtMp") state.hurtMp = !state.hurtMp; else if(g === "ini") state.showIni = !state.showIni; else if(g === "san") state.showSan = !state.showSan; else if(g === "hm") state.showHm = !state.showHm; else if(g === "st") state.showSt = !state.showSt; else state.showSk = !state.showSk;
+    if(g === "edit") state.edit = !state.edit; else if(g === "hurtHp") state.hurtHp = !state.hurtHp; else if(g === "hurtMp") state.hurtMp = !state.hurtMp; else if(g === "ini") state.showIni = !state.showIni; else if(g === "san") state.showSan = !state.showSan; else if(g === "hm") state.showHm = !state.showHm; else if(g === "st") state.showSt = !state.showSt; else state.showSk = !state.showSk;
     render(); return;
   }
   const ch = e.target.closest("th[data-cs]");
