@@ -11,7 +11,7 @@
 :root{
   --bg:#dff3f9; --panel:#ffffff; --panel2:#ecf8fc; --line:#bfe0ec;
   --text:#123b4f; --muted:#5f8798; --accent:#1fa2d3; --accent-soft:rgba(31,162,211,.12);
-  --radius:14px; --w:1400px; /* 全ページ共通の横幅(技能表に合わせる)。ページ切替でタブ位置がずれない */
+  --radius:14px; --w:1400px; /* 全ページ共通の横幅(データ一覧に合わせる)。ページ切替でタブ位置がずれない */
   --font-body:"Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo",sans-serif;
   --font-display:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
   --font-en:"Quicksand","Zen Maru Gothic","Hiragino Sans","Yu Gothic UI",sans-serif;
@@ -446,7 +446,7 @@ footer{color:var(--muted); font-size:12px; text-align:center; padding:0 0 40px}
 
 <nav class="tabs" aria-label="ページ切り替え">
   <button data-p="chars" aria-selected="true">キャラクター</button>
-  <button data-p="skills" aria-selected="false">技能表</button>
+  <button data-p="skills" aria-selected="false">データ一覧</button>
   <button data-p="height" aria-selected="false">身長くらべ</button>
   <button data-p="board" aria-selected="false">掲示板</button>
   <button data-p="reports" aria-selected="false">不具合報告<span class="rbadge" id="rbadge" hidden></span></button>
@@ -489,7 +489,7 @@ footer{color:var(--muted); font-size:12px; text-align:center; padding:0 0 40px}
 </div>
 
 <main id="main"></main>
-<footer>クリックで詳細が開きます(←/→キーで前後、Escで閉じる)/ 技能表は見出しクリックで並び替え / 技能の薄いグレーは初期値</footer>
+<footer>クリックで詳細が開きます(←/→キーで前後、Escで閉じる)/ データ一覧は見出しクリックで並び替え / 技能の薄いグレーは初期値</footer>
 
 <div class="overlay" id="news-ov" role="dialog" aria-modal="true" aria-labelledby="news-title">
   <div class="modal newsmodal">
@@ -1057,7 +1057,7 @@ document.addEventListener("click", async e => {
    新しいものを一番上に足す。id は前のものより大きい数字にする(未読の判定に使う)。k は "更新" か "お知らせ" */
 const NEWS = [
   { id:2, d:"2026-11-25", k:"更新", t:"掲示板と不具合報告のページを追加しました。掲示板ではふせったーや二次創作のURLを共有できます。" },
-  { id:1, d:"2026-11-25", k:"更新", t:"技能表にSAN・HP・MP・ステータスの欄を追加しました。SAN・HP・MPは「編集モード」をONにすると書き換えられます。" }
+  { id:1, d:"2026-11-25", k:"更新", t:"「技能表」を「データ一覧」に改名し、SAN・HP・MP・ステータスの欄を追加しました。SAN・HP・MPは「編集モード」をONにすると書き換えられます。" }
 ];
 const NEWS_KEY = "roado-news-seen";
 const newsSeen = () => { try { return parseInt(localStorage.getItem(NEWS_KEY) || "0", 10) || 0; } catch(e){ return 0; } };
@@ -1173,7 +1173,7 @@ function darken(hex, f){ const m = /^#([0-9a-f]{6})$/i.exec(hex); if(!m) return 
 const accent = d => !d.hex ? "#9db6c2" : (lum(d.hex) > 0.6 ? darken(d.hex, 0.78) : d.hex);
 
 /* ===== 状態 ===== */
-const PAGE_HASH = { chars:"", skills:"#skills", height:"#height", board:"#board", reports:"#reports" };
+const PAGE_HASH = { chars:"", skills:"#data", height:"#height", board:"#board", reports:"#reports" };
 const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true, showSan:true, showHm:true, edit:false, hurtHp:false, hurtMp:false, bdCat:"all", replyTo:null, rpCat:"ステータス" };
 let current = []; // 現在表示中の配列
 let openHo = null;
@@ -1705,14 +1705,14 @@ window.addEventListener("hashchange", () => {
   const m = /^#HO(\d+)$/.exec(location.hash);
   if(m) openModal(parseInt(m[1], 10));
   else {
-    const p = location.hash === "#skills" ? "skills" : location.hash === "#height" ? "height" : location.hash === "#reports" ? "reports" : location.hash === "#board" ? "board" : "chars";
+    const p = (location.hash === "#data" || location.hash === "#skills") ? "skills" : location.hash === "#height" ? "height" : location.hash === "#reports" ? "reports" : location.hash === "#board" ? "board" : "chars";
     if(openHo !== null) { setOverlay(false); openHo = null; }
     if(p !== state.page){ state.page = p; render(); }
   }
 });
 
 /* ===== 初期化 ===== */
-if(location.hash === "#skills") state.page = "skills";
+if(location.hash === "#data" || location.hash === "#skills") state.page = "skills";   // #skills は旧URL(ブックマーク用に残す)
 else if(location.hash === "#height") state.page = "height";
 else if(location.hash === "#reports") state.page = "reports";
 else if(location.hash === "#board") state.page = "board";
