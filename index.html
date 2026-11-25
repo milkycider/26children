@@ -271,7 +271,7 @@ th.gb, td.gb{border-left:1px solid var(--line)}
 /* 不具合報告ページ */
 body[data-page="reports"] .controls, body[data-page="reports"] .count{display:none}
 .rbadge{display:inline-block; margin-left:6px; min-width:18px; padding:0 5px; border-radius:99px; background:#d6453d; color:#fff; font-size:11px; font-weight:700; line-height:18px; letter-spacing:0; vertical-align:2px}
-.rbadge[hidden]{display:none}
+[hidden]{display:none !important}   /* display指定のある要素でも hidden 属性で確実に隠す */
 .rp-form{margin-bottom:14px}
 .rp-row{display:flex; flex-wrap:wrap; gap:10px 14px; margin-bottom:10px}
 .rp-row label{display:flex; flex-direction:column; gap:3px; font-size:12px; color:var(--muted)}
