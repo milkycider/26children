@@ -533,7 +533,7 @@ const firebaseConfig = {
   storageBucket: "children-81e2c.firebasestorage.app",
   messagingSenderId: "83378381554",
   appId: "1:83378381554:web:3f9067554820c01ed9e66b"
-};
+};   // Firebaseコンソールの firebaseConfig = {...} を、この行ごと置き換える(名前は FIREBASE_CONFIG / firebaseConfig どちらでも可)
 const FB_VER = "10.14.1";
 const live = {};                       // { ho: { san, base, insane } }
 let liveMode = "local";                // "local" | "connecting" | "firestore" | "error"
@@ -566,12 +566,14 @@ function liveStatusHtml(){
 }
 function setLiveMode(m){ liveMode = m; const el = document.getElementById("lvstat"); if(el){ el.outerHTML = liveStatusHtml(); } }
 async function initFirebase(){
-  if(!FIREBASE_CONFIG) return;
+  let cfg = null;
+  try { cfg = (typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG) || (typeof firebaseConfig !== "undefined" && firebaseConfig) || null; } catch(e){}
+  if(!cfg) return;
   setLiveMode("connecting");
   try {
     const base = "https://www.gstatic.com/firebasejs/" + FB_VER + "/";
     const [{ initializeApp }, fs] = await Promise.all([import(base + "firebase-app.js"), import(base + "firebase-firestore.js")]);
-    const db = fs.getFirestore(initializeApp(FIREBASE_CONFIG));
+    const db = fs.getFirestore(initializeApp(cfg));
     fbSave = (ho, patch) => fs.setDoc(fs.doc(db, "characters", "HO" + ho), { ...patch, updatedAt:fs.serverTimestamp() }, { merge:true })
       .catch(() => setLiveMode("error"));
     fs.onSnapshot(fs.collection(db, "characters"), snap => {
