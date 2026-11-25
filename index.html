@@ -356,6 +356,7 @@ body[data-page="board"] .controls, body[data-page="board"] .count{display:none}
 .bd-top .hdesc{margin-bottom:0}
 .btn.bd-ftg{flex:none; padding:9px 20px}
 .btn.bd-ftg[aria-expanded="true"]{background:var(--panel2); color:var(--text); border-color:var(--line); font-weight:400}
+.bd-help{vertical-align:4px; margin-left:4px}
 .bd-notes{margin:0; padding:10px 12px 10px 28px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; font-size:12.5px; color:var(--muted); line-height:1.7}
 .bd-notes li{margin:1px 0}
 .bd-notes b{color:var(--text)}
@@ -1204,17 +1205,11 @@ function boardHtml(){
   return `<div class="hcard rp-form">
     <div class="bd-top">
       <div>
-        <h2>掲示板</h2>
+        <h2>掲示板 <button class="lq bd-help" data-info="board" aria-label="掲示板の使い方" title="掲示板の使い方">?</button></h2>
         <p class="hdesc">ふせったーや二次創作のURLを共有したり、ひとこと残したりする場所です。</p>
       </div>
       <button class="btn rp-send bd-ftg" id="bd-ftg" aria-expanded="${state.bdForm}" aria-controls="bd-formbody">${state.bdForm ? "閉じる ▴" : "＋ 投稿する"}</button>
     </div>
-    <ul class="bd-notes">
-      <li><b>ネタバレ</b>を含むときは「ネタバレを含む」にチェック。タイトルにはネタバレを書かないでください。</li>
-      <li>返信にもURLを付けられます。「ふせまとめ」のように、ひとつの投稿にまとめていく使い方もできます。</li>
-      <li>自分の投稿は<b>編集・削除</b>できます。別の端末からも操作したいときは、右上からGoogleでログインしてください。</li>
-      <li>削除ボタンが出なくなった投稿は、<a href="#reports" class="bd-req">不具合報告の「掲示板の削除依頼」</a>から知らせてください。</li>
-    </ul>
     <div id="bd-formbody" class="bd-formbody"${state.bdForm ? "" : " hidden"}>
     <div class="rp-row">
       <label>種類<select id="bd-cat">${cats}</select></label>
@@ -1331,7 +1326,7 @@ document.addEventListener("click", async e => {
     else state.bdHos = state.bdHos.includes(n) ? state.bdHos.filter(x => x !== n) : [...state.bdHos, n].sort((a, b) => a - b);
     syncHoSel(); return;
   }
-  if(t.closest(".bd-req")){ e.preventDefault(); state.rpCat = "掲示板の削除依頼"; state.rpHo = 0; setPage("reports"); return; }
+  if(t.closest(".bd-req")){ e.preventDefault(); if(typeof closeInfo === "function") closeInfo(); state.rpCat = "掲示板の削除依頼"; state.rpHo = 0; setPage("reports"); return; }
   const rb = t.closest("[data-bdreply]");
   if(rb){
     state.replyTo = rb.dataset.bdreply || null; drawBoard();
@@ -1532,6 +1527,25 @@ const DOCS = {
     <p>自分の掲示板の投稿は、自分で編集・削除できます。自分で削除できなくなった投稿や、ログイン情報の削除を希望するときは、${contactHtml()}からご連絡ください。</p>
     <h3>7. 改定</h3>
     <p>このポリシーは、必要に応じて改定することがあります。改定したときは、本サイトのお知らせでお知らせします。</p>`,
+  board: () => `<h2 id="info-title">掲示板の使い方</h2>
+    <p>ふせったーや二次創作のURLを共有したり、ひとこと残したりする場所です。</p>
+    <h3>ネタバレ</h3>
+    <ul>
+      <li>シナリオのネタバレを含むときは「ネタバレを含む」にチェックしてください。本文やURLが隠れ、押すまで表示されません。</li>
+      <li>タイトルは隠れないので、タイトルにはネタバレを書かないでください。</li>
+      <li>返信にも、ネタバレのチェックとタイトルを付けられます。</li>
+    </ul>
+    <h3>返信・まとめ</h3>
+    <ul>
+      <li>返信にもURLを付けられます。「ふせまとめ」のように、ひとつの投稿にまとめていく使い方もできます。</li>
+      <li>返信は普段はしまわれていて、「返信を表示」で開けます。</li>
+    </ul>
+    <h3>編集・削除</h3>
+    <ul>
+      <li>自分の投稿は編集・削除できます。</li>
+      <li>別の端末からも操作したいときは、右上からGoogleでログインしてください(詳しくは右上の「?」)。</li>
+      <li>削除ボタンが出なくなった投稿は、<a href="#reports" class="bd-req">不具合報告の「掲示板の削除依頼」</a>から知らせてください。</li>
+    </ul>`,
   credits: () => `<h2 id="info-title">権利表記</h2>
     <h3>クトゥルフ神話TRPG</h3>
     <p class="doc-coc">${COC_FULL}</p>
