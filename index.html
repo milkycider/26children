@@ -344,6 +344,8 @@ body[data-page="board"] .controls, body[data-page="board"] .count{display:none}
 .bd-link i{flex:none; font-style:normal; color:#0f6f9c}
 .bd-rep .bd-link{margin-top:2px}
 .bd-rform .bd-rurl, .bd-eform .bd-rurl{max-width:none; width:100%}
+.bd-rcount{font-size:12px; color:var(--muted); padding:2px 0 4px; display:flex; flex-wrap:wrap; gap:4px 12px; align-items:center}
+.bd-more{font-size:12px; color:#0f6f9c}
 .bd-fold{display:block; margin-top:2px; font-size:12px; color:#0f6f9c}
 .bd-wide label{flex:1 1 240px}
 .bd-hobox{margin:0 0 10px}
@@ -1091,7 +1093,8 @@ function linkHtml(url){
   if(short.length > 48) short = short.slice(0, 46) + "…";
   return `<a class="bd-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer"><b>${esc(siteOf(u))}</b><span>${esc(short)}</span><i>↗</i></a>`;
 }
-const bdShow = new Set();   // ネタバレ投稿のうち「表示する」を押したもの
+const bdShow = new Set();
+const REP_SHOW = 3, bdRepOpen = new Set();   // 返信は新しい3件だけ表示し、残りは「古い返信を表示」でしまっておく   // ネタバレ投稿のうち「表示する」を押したもの
 function threadHtml({ r, rs }){
   const open = state.replyTo === r.id, dr = bdDrafts[r.id] || {};
   const u = safeUrl(r.url);
@@ -1109,14 +1112,20 @@ function threadHtml({ r, rs }){
     ${linkHtml(r.url)}
     ${(r.hos || []).length ? `<div class="bd-tags">${r.hos.map(hoTag).join("")}</div>` : ""}
     ${bodyHtml(r)}`;
-  const reps = rs.map(x => `<div class="bd-rep"><div class="rp-head">${postMeta(x)}</div>${state.editId === x.id ? editFormHtml(x) : linkHtml(x.url) + bodyHtml(x)}</div>`).join("");
+  const many = rs.length > REP_SHOW && !bdRepOpen.has(r.id) && !rs.some(x => x.id === state.editId);
+  const shown = many ? rs.slice(-REP_SHOW) : rs;     // 返信が多いときは新しい方だけ出す
+  const more = rs.length > REP_SHOW ? (many
+    ? `<button class="lnk bd-more" data-bdmore="${esc(r.id)}">▾ 古い返信をあと${rs.length - REP_SHOW}件表示</button>`
+    : `<button class="lnk bd-more" data-bdmore="${esc(r.id)}">▴ 古い返信をしまう</button>`) : "";
+  const reps = shown.map(x => `<div class="bd-rep"><div class="rp-head">${postMeta(x)}</div>${state.editId === x.id ? editFormHtml(x) : linkHtml(x.url) + bodyHtml(x)}</div>`).join("");
   const form = open ? `<div class="bd-rform">
       <input data-bdr="${esc(r.id)}" data-f="name" maxlength="20" placeholder="お名前(任意)" autocomplete="off" value="${esc(dr.name ?? getName())}">
       <input data-bdr="${esc(r.id)}" data-f="url" type="url" maxlength="500" placeholder="URL(任意)" autocomplete="off" value="${esc(dr.url || "")}" class="bd-rurl">
       <textarea data-bdr="${esc(r.id)}" data-f="text" maxlength="1000" rows="2" placeholder="返信を書く(URLだけでもOK)">${esc(dr.text || "")}</textarea>
       <div class="rp-act"><button class="btn rp-send" data-bdsend="${esc(r.id)}">返信する</button><button class="btn" data-bdreply="">閉じる</button><span class="bd-rmsg" id="bd-rmsg"></span></div>
     </div>` : ((r.deleted || state.editId === r.id) ? "" : `<button class="btn bd-rbtn" data-bdreply="${esc(r.id)}">↩ 返信</button>`);
-  return `<article class="rp bd">${head}${reps ? `<div class="bd-reps">${reps}</div>` : ""}${form}</article>`;
+  const repHead = rs.length ? `<div class="bd-rcount">返信 ${rs.length}件 ${more}</div>` : "";
+  return `<article class="rp bd">${head}${reps ? `<div class="bd-reps">${repHead}${reps}</div>` : ""}${form}</article>`;
 }
 function drawBoard(){
   const box = document.getElementById("bd-list"); if(!box) return;
@@ -1225,6 +1234,8 @@ document.addEventListener("click", async e => {
     catch(err){ es.disabled = false; say("bd-emsg", "保存に失敗しました", true); }
     return;
   }
+  const mo = t.closest("[data-bdmore]");
+  if(mo){ const id = mo.dataset.bdmore; if(bdRepOpen.has(id)) bdRepOpen.delete(id); else bdRepOpen.add(id); drawBoard(); return; }
   const sh = t.closest("[data-bdshow]");
   if(sh){ bdShow.add(sh.dataset.bdshow); drawBoard(); return; }
   const fd = t.closest("[data-bdfold]");
