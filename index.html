@@ -236,6 +236,7 @@ th.hm2{padding:3px 2px; line-height:1.25}
 .pair.lvl-c .lv:first-child{color:#c42b22; font-weight:700}
 .pair.lvl-z{background:#dcdfe6}
 .pair.lvl-z .lv:first-child{color:#555; font-weight:700}
+.pair.dec .lv:first-child{color:#1b6fd0; font-weight:700}
 .pair i{font-style:normal; color:var(--muted); font-size:11px}
 .lv.sm{width:27px; padding:4px 0}
 th.grp.sk{background:#e7f6ee}
@@ -567,14 +568,31 @@ const indOf = base => (base === null || base === undefined) ? null : base - Math
 const toVal = (v, max = 99) => { if(v === "" || v === null || v === undefined) return null; const n = Math.round(Number(v)); return isNaN(n) ? null : Math.max(0, Math.min(max, n)); };
 try { const o = JSON.parse(localStorage.getItem(LIVE_KEY) || "{}"); Object.keys(o).forEach(k => Object.assign(liveOf(+k), o[k])); } catch(e){}
 function persistLocal(){ try { localStorage.setItem(LIVE_KEY, JSON.stringify(live)); } catch(e){} }
-/* HP・MPの現在値に応じた色: 空欄=通常 / 最大の1/2以下=黄 / 1/4以下=赤 / 0=灰。最大が空欄のときは初期値(HP=(CON+SIZ)/2切り上げ, MP=POW)で判定 */
-function hmLevel(d, kind){
+/* HP・MPの現在値に応じた表示: 空欄=通常 / 最大より減っている=現在値が青字 / 最大の1/2以下=黄 / 1/4以下=赤 / 0=灰。最大が空欄のときは初期値(HP=(CON+SIZ)/2切り上げ, MP=POW)で判定 */
+function hmInfo(d, kind){
   const L = liveOf(d.ho), cur = kind === "hp" ? L.hp : L.mp;
   const max = (kind === "hp" ? L.hpMax : L.mpMax) ?? (kind === "hp" ? Math.ceil(((d.st.CON ?? 0) + (d.st.SIZ ?? 0)) / 2) : (d.st.POW ?? 0));
+  return { cur, max };
+}
+function hmLevel(d, kind){
+  const { cur, max } = hmInfo(d, kind);
   if(cur === null || !(max > 0)) return "";
   if(cur <= 0) return "z";
   const r = cur / max;
   return r <= 0.25 ? "c" : r <= 0.5 ? "w" : "";
+}
+const hmDec = (d, kind) => { const { cur, max } = hmInfo(d, kind); return cur !== null && max > 0 && cur < max; };
+const isHurt = d => hmDec(d, "hp") || hmDec(d, "mp");
+const pairCls = (d, kind) => "pair" + (hmLevel(d, kind) ? " lvl-" + hmLevel(d, kind) : "") + (hmDec(d, kind) ? " dec" : "");
+/* 「減っている人のみ」: 行は全員ぶん描画しておき、減っていない行だけ隠す(編集モード中は行が消えないよう更新しない) */
+function syncHurt(force){
+  if(!state.hurt || state.page !== "skills" || (state.edit && !force)) return;
+  let n = 0;
+  document.querySelectorAll("tbody tr[data-ho]").forEach(tr => {
+    const d = D.find(x => x.ho === +tr.dataset.ho), h = !!d && isHurt(d);
+    tr.hidden = !h; if(h) n++;
+  });
+  const c = document.getElementById("count"); if(c) c.textContent = n;
 }
 function applyLive(ho){
   const L = liveOf(ho);
@@ -587,12 +605,13 @@ function applyLive(ho){
     }
   });
   const d0 = D.find(x => x.ho === ho);
-  if(d0) document.querySelectorAll(`.pair[data-ho="${ho}"]`).forEach(el => { el.className = "pair" + (hmLevel(d0, el.dataset.kind) ? " lvl-" + hmLevel(d0, el.dataset.kind) : ""); });
+  if(d0) document.querySelectorAll(`.pair[data-ho="${ho}"]`).forEach(el => { el.className = pairCls(d0, el.dataset.kind); });
   const tr = document.querySelector(`tr[data-ho="${ho}"]`); if(tr) tr.classList.toggle("insane", !!L.insane);
 }
 function setLive(ho, patch, remote){
   Object.assign(liveOf(ho), patch);
   applyLive(ho);
+  syncHurt();
   if(remote) return;
   if(liveMode === "firestore" && fbSave) fbSave(ho, patch); else persistLocal();
 }
@@ -738,7 +757,7 @@ const accent = d => !d.hex ? "#9db6c2" : (lum(d.hex) > 0.6 ? darken(d.hex, 0.78)
 
 /* ===== 状態 ===== */
 const PAGE_HASH = { chars:"", skills:"#skills", height:"#height" };
-const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true, showSan:true, showHm:true, edit:false };
+const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true, showSan:true, showHm:true, edit:false, hurt:false };
 let current = []; // 現在表示中の配列
 let openHo = null;
 
@@ -787,7 +806,7 @@ $("#ftoggle").addEventListener("click", () => {
   $("#ftoggle").setAttribute("aria-expanded", String(!p.hidden));
 });
 $("#reset").addEventListener("click", () => {
-  Object.assign(state, { q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", skSort:{key:"ho", dir:1} });
+  Object.assign(state, { q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", skSort:{key:"ho", dir:1}, hurt:false });
   $("#q").value = ""; $("#trait").value = "all"; $("#sort").value = "ho";
   syncChips($("#g-sex"), "sex"); syncChips($("#g-range"), "range"); syncChips($("#g-cat"), "cat");
   render();
@@ -916,7 +935,7 @@ const hpDef = d => Math.ceil(((d.st.CON ?? 0) + (d.st.SIZ ?? 0)) / 2), mpDef = d
 function hmCells(d, key){
   const L = liveOf(d.ho), dis = state.edit ? "" : " disabled", v = x => x === null ? "" : x;
   const one = (k, def, lab) => `<input type="text" class="lv sm" data-lv="${k}" data-ho="${d.ho}" maxlength="3" autocomplete="off" inputmode="numeric" placeholder="${def}" value="${v(L[k])}" aria-label="HO${d.ho} ${lab}"${dis}>`;
-  const cell = (id, cur, max, def, nm, first) => `<td class="num wide lvc${first ? " gb" : ""}${key === id || key === id + "M" ? " sorted" : ""}"><span class="pair${hmLevel(d, cur) ? " lvl-" + hmLevel(d, cur) : ""}" data-ho="${d.ho}" data-kind="${cur}">${one(cur, def, "現在" + nm)}<i>/</i>${one(max, def, "最大" + nm)}</span></td>`;
+  const cell = (id, cur, max, def, nm, first) => `<td class="num wide lvc${first ? " gb" : ""}${key === id || key === id + "M" ? " sorted" : ""}"><span class="${pairCls(d, cur)}" data-ho="${d.ho}" data-kind="${cur}">${one(cur, def, "現在" + nm)}<i>/</i>${one(max, def, "最大" + nm)}</span></td>`;
   return cell("HP", "hp", "hpMax", hpDef(d), "HP", true) + cell("MP", "mp", "mpMax", mpDef(d), "MP", false);
 }
 function tableHtml(list){
@@ -940,7 +959,7 @@ function tableHtml(list){
     + grp("san","SAN",sanOn,3) + grp("hm","HP・MP",hmOn,2) + grp("st","ステータス",stOn,STX.length) + grp("sk","技能",skOn,skN) + `<th rowspan="2" class="gb">備考</th></tr>`;
   const head2 = `<tr>${sanOn ? th("SAN","SAN"," num gb") + th("IND","不定"," num") + th("INS","発狂"," num") : ""}${hmOn ? hmTh("HP","HP",true) + hmTh("MP","MP",false) : ""}${stOn ? STX.map((k,i) => th(k, k, " num" + (i === 0 ? " gb" : ""))).join("") : ""}`
     + (skOn ? SKL.map((l,i) => th(l, l, " num" + (i === 0 ? " gb" : ""))).join("") + th("nego","交渉技能") + th("hv","HO推奨技能") : "") + `</tr>`;
-  const rows = list.map(d => `<tr data-ho="${d.ho}"${liveOf(d.ho).insane ? ' class="insane"' : ""}>
+  const rows = list.map(d => `<tr data-ho="${d.ho}"${liveOf(d.ho).insane ? ' class="insane"' : ""}${state.hurt && !isHurt(d) ? " hidden" : ""}>
     <td class="nw${cl("ho")}">HO${d.ho}</td>
     ${iniOn ? `<td class="num${cl("INI")}">${d.st.INI === null ? "" : d.st.INI}</td>` : ""}
     <td>${hoName(d)}<div class="sm">${esc(d.mean)}</div></td>
@@ -961,6 +980,8 @@ function tableHtml(list){
     <button class="chip" data-grpt="hm" aria-pressed="${hmOn}">HP・MP</button>
     <button class="chip" data-grpt="st" aria-pressed="${stOn}">ステータス</button>
     <button class="chip" data-grpt="sk" aria-pressed="${skOn}">技能</button>
+    <span class="vsep"></span>
+    <button class="chip" data-grpt="hurt" aria-pressed="${state.hurt}" title="HPかMPが最大より減っているHOだけ表示">減っている人のみ</button>
     ${liveStatusHtml()}
     <span class="dhint">表は掴んで左右にドラッグでスクロールできます</span></div>`;
   return `${tools}<div class="tablewrap dragscroll"><table><thead>${head1}${head2}</thead><tbody>${rows}</tbody></table></div>`;
@@ -1095,6 +1116,7 @@ function render(){
     : state.view === "table" ? charTableHtml(current)
     : `<div class="grid${state.cols !== "auto" ? " fixed" : ""}"${state.cols !== "auto" ? ` style="--cols:${state.cols}"` : ""}>${current.map(cardHtml).join("")}</div>`;
   if(state.page === "height") drawHeight();
+  syncHurt(true);
 }
 $("#main").addEventListener("click", e => {
   if(e.target.closest(".lvc")) return;                      // 入力欄の操作ではモーダルを開かない
@@ -1106,7 +1128,7 @@ $("#main").addEventListener("click", e => {
   const gt = e.target.closest("[data-grpt], th[data-grp]");
   if(gt){
     const g = gt.dataset.grpt || gt.dataset.grp;
-    if(g === "edit") state.edit = !state.edit; else if(g === "ini") state.showIni = !state.showIni; else if(g === "san") state.showSan = !state.showSan; else if(g === "hm") state.showHm = !state.showHm; else if(g === "st") state.showSt = !state.showSt; else state.showSk = !state.showSk;
+    if(g === "edit") state.edit = !state.edit; else if(g === "hurt") state.hurt = !state.hurt; else if(g === "ini") state.showIni = !state.showIni; else if(g === "san") state.showSan = !state.showSan; else if(g === "hm") state.showHm = !state.showHm; else if(g === "st") state.showSt = !state.showSt; else state.showSk = !state.showSk;
     render(); return;
   }
   const ch = e.target.closest("th[data-cs]");
