@@ -352,6 +352,15 @@ body[data-page="board"] .controls, body[data-page="board"] .count{display:none}
 .bd-rform .bd-rspl input, .bd-eform .bd-rspl input{width:16px; height:16px; min-width:0; padding:0; margin:0; accent-color:#d6453d}
 .bd-rep .bd-reveal{margin-top:2px}
 .bd-fold{display:block; margin-top:2px; font-size:12px; color:#0f6f9c}
+.bd-top{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.bd-top{margin-bottom:10px}
+.bd-top .hdesc{margin-bottom:0}
+.btn.bd-ftg{flex:none; padding:9px 20px}
+.btn.bd-ftg[aria-expanded="true"]{background:var(--panel2); color:var(--text); border-color:var(--line); font-weight:400}
+.bd-notes{margin:0; padding:10px 12px 10px 28px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; font-size:12.5px; color:var(--muted); line-height:1.7}
+.bd-notes li{margin:1px 0}
+.bd-notes b{color:var(--text)}
+.bd-formbody{margin-top:14px; padding-top:14px; border-top:1px dashed var(--line)}
 .bd-wide label{flex:1 1 240px}
 .bd-hobox{margin:0 0 10px}
 .bd-hohead{display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px}
@@ -364,7 +373,9 @@ body[data-page="board"] .controls, body[data-page="board"] .count{display:none}
 .bd-hoc{justify-content:flex-start; text-align:left; font-size:12px; padding:5px 10px; border-left:4px solid var(--c, var(--line)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .bd-tags{display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; font-size:12px}
 .bd-tags .bd-ho{margin:0}
-.bd-hof{display:flex; align-items:center; gap:6px; margin-left:auto; font-size:12px; color:var(--muted)}
+.bd-q{flex:1 1 180px; min-width:140px; max-width:280px; margin-left:auto; font:inherit; font-size:13px; color:var(--text); padding:6px 10px; border:1px solid var(--line); border-radius:99px; background:#fff}
+.bd-q:focus{outline:2px solid var(--accent); outline-offset:0}
+.bd-hof{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted)}
 .bd-hof select{font:inherit; font-size:13px; color:var(--text); padding:5px 8px; border:1px solid var(--line); border-radius:8px; background:#fff}
 .bd-wide input{width:100%; box-sizing:border-box}
 .bd-text{width:100%; box-sizing:border-box; font:inherit; font-size:14px; color:var(--text); padding:9px 10px; border:1px solid var(--line); border-radius:10px; background:#fff; resize:vertical}
@@ -1117,7 +1128,7 @@ function threadHtml({ r, rs }){
     ${linkHtml(r.url)}
     ${(r.hos || []).length ? `<div class="bd-tags">${r.hos.map(hoTag).join("")}</div>` : ""}
     ${bodyHtml(r)}`;
-  const many = rs.length > REP_SHOW && !bdRepOpen.has(r.id) && !rs.some(x => x.id === state.editId);
+  const many = rs.length > REP_SHOW && !bdRepOpen.has(r.id) && !state.bdQ && !rs.some(x => x.id === state.editId);
   const shown = many ? (REP_SHOW ? rs.slice(-REP_SHOW) : []) : rs;   // しまっているときは新しい方の REP_SHOW 件だけ
   const more = rs.length > REP_SHOW ? (many
     ? `<button class="lnk bd-more" data-bdmore="${esc(r.id)}">▾ ${REP_SHOW ? `古い返信をあと${rs.length - REP_SHOW}件表示` : "返信を表示"}</button>`
@@ -1152,7 +1163,10 @@ function drawBoard(){
     return { r, rs, last:Math.max(r.at, ...rs.map(x => x.at)) };
   }).filter(t => !(t.r.deleted && !t.rs.length));
   const hf = state.bdHo, hoOk = t => hf === "all" || (hf === "0" ? !(t.r.hos || []).length : (t.r.hos || []).includes(+hf));
-  const byHo = all.filter(hoOk);
+  const q = state.bdQ;
+  const hay = p => [p.title, p.text, p.url, p.name, p.cat, ...(p.hos || []).map(hoLabel)].join(" ").normalize("NFKC").toLowerCase();
+  const qOk = t => !q || hay(t.r).includes(q) || t.rs.some(x => hay(x).includes(q));   // 返信の中身も検索対象
+  const byHo = all.filter(t => hoOk(t) && qOk(t));
   document.querySelectorAll("[data-bdcat]").forEach(b => {
     const c = b.dataset.bdcat, n = c === "all" ? byHo.length : byHo.filter(t => t.r.cat === c).length;
     b.setAttribute("aria-pressed", String(state.bdCat === c)); b.querySelector("b").textContent = n;
@@ -1175,8 +1189,20 @@ function boardHtml(){
   const cats = BD_CATS.map(c => `<option>${esc(c)}</option>`).join("");
   const chips = ["all", ...BD_CATS].map(c => `<button class="chip" data-bdcat="${esc(c)}" aria-pressed="${state.bdCat === c}">${c === "all" ? "すべて" : esc(c)} <b>0</b></button>`).join("");
   return `<div class="hcard rp-form">
-    <h2>掲示板</h2>
-    <p class="hdesc">ふせったーや二次創作のURLを共有したり、ひとこと残したりする場所です。シナリオのネタバレを含むときは「ネタバレを含む」にチェックし、タイトルにはネタバレを書かないでください。投稿には返信でき、返信にもURLを付けられます(「ふせまとめ」のように、ひとつの投稿にまとめていく使い方もできます)。自分の投稿は編集・削除できます(別の端末からも編集・削除したいときは、右上からGoogleでログインしてください)。<br>削除ボタンが出ない自分の投稿を消したいときは、<a href="#reports" class="bd-req">不具合報告の「掲示板の削除依頼」</a>から知らせてください。</p>
+    <div class="bd-top">
+      <div>
+        <h2>掲示板</h2>
+        <p class="hdesc">ふせったーや二次創作のURLを共有したり、ひとこと残したりする場所です。</p>
+      </div>
+      <button class="btn rp-send bd-ftg" id="bd-ftg" aria-expanded="${state.bdForm}" aria-controls="bd-formbody">${state.bdForm ? "閉じる ▴" : "＋ 投稿する"}</button>
+    </div>
+    <ul class="bd-notes">
+      <li><b>ネタバレ</b>を含むときは「ネタバレを含む」にチェック。タイトルにはネタバレを書かないでください。</li>
+      <li>返信にもURLを付けられます。「ふせまとめ」のように、ひとつの投稿にまとめていく使い方もできます。</li>
+      <li>自分の投稿は<b>編集・削除</b>できます。別の端末からも操作したいときは、右上からGoogleでログインしてください。</li>
+      <li>削除ボタンが出なくなった投稿は、<a href="#reports" class="bd-req">不具合報告の「掲示板の削除依頼」</a>から知らせてください。</li>
+    </ul>
+    <div id="bd-formbody" class="bd-formbody"${state.bdForm ? "" : " hidden"}>
     <div class="rp-row">
       <label>種類<select id="bd-cat">${cats}</select></label>
       <label class="bd-spl"><span>&nbsp;</span><span><input type="checkbox" id="bd-spoiler"> ネタバレを含む</span></label>
@@ -1192,9 +1218,10 @@ function boardHtml(){
     </div>
     <textarea id="bd-text" class="bd-text" maxlength="1000" rows="3" placeholder="ひとこと・本文(任意)"></textarea>
     <div class="rp-act"><button class="btn rp-send" id="bd-send">投稿</button><span id="bd-msg" role="status"></span>${liveStatusHtml()}</div>
+    </div>
     <div class="rp-err" id="bd-err" hidden></div>
   </div>
-  <div class="hcard rp-list"><div class="bd-filter">${chips}<label class="bd-hof">関連HO<select id="bd-hof">${hof}</select></label></div><div id="bd-list"></div></div>`;
+  <div class="hcard rp-list"><div class="bd-filter">${chips}<input id="bd-q" class="bd-q" type="search" placeholder="掲示板を検索" aria-label="掲示板を検索" value="${esc(state.bdQRaw || "")}" autocomplete="off"><label class="bd-hof">関連HO<select id="bd-hof">${hof}</select></label></div><div id="bd-list"></div></div>`;
 }
 function syncHoSel(){
   const sel = state.bdHos;
@@ -1202,6 +1229,13 @@ function syncHoSel(){
   const el = document.getElementById("bd-hosel");
   if(el) el.innerHTML = sel.length ? sel.map(hoTag).join("") : '<span class="bd-none">なし</span>';
 }
+let bdQTimer;
+document.addEventListener("input", e => {
+  if(e.target.id !== "bd-q") return;
+  state.bdQRaw = e.target.value;
+  clearTimeout(bdQTimer);
+  bdQTimer = setTimeout(() => { state.bdQ = state.bdQRaw.trim().normalize("NFKC").toLowerCase(); drawBoard(); }, 150);
+});
 document.addEventListener("change", e => { if(e.target.id === "bd-hof"){ state.bdHo = e.target.value; drawBoard(); } });
 document.addEventListener("input", e => { const el = e.target; if(bdEdit && el.dataset && el.dataset.bde) bdEdit[el.dataset.bde] = el.value; });
 document.addEventListener("change", e => { const el = e.target; if(bdEdit && el.dataset && el.dataset.bde) bdEdit[el.dataset.bde] = el.type === "checkbox" ? el.checked : el.value; });
@@ -1258,6 +1292,13 @@ document.addEventListener("click", async e => {
   if(fd){ const id = fd.dataset.bdfold; if(bdOpen.has(id)) bdOpen.delete(id); else bdOpen.add(id); drawBoard(); return; }
   const cat = t.closest("[data-bdcat]");
   if(cat){ state.bdCat = cat.dataset.bdcat; drawBoard(); return; }
+  if(t.closest("#bd-ftg")){
+    state.bdForm = !state.bdForm;
+    const f = document.getElementById("bd-formbody"), b = t.closest("#bd-ftg");
+    f.hidden = !state.bdForm; b.setAttribute("aria-expanded", String(state.bdForm)); b.textContent = state.bdForm ? "閉じる ▴" : "＋ 投稿する";
+    if(state.bdForm) document.getElementById("bd-title").focus();
+    return;
+  }
   if(t.closest("#bd-hotg")){
     const g = document.getElementById("bd-hogrid"), b = t.closest("#bd-hotg"), open = g.hidden;
     g.hidden = !open; b.setAttribute("aria-expanded", String(open)); b.textContent = open ? "閉じる ▴" : "選ぶ ▾";
@@ -1643,7 +1684,7 @@ const accent = d => !d.hex ? "#9db6c2" : (lum(d.hex) > 0.6 ? darken(d.hex, 0.78)
 
 /* ===== 状態 ===== */
 const PAGE_HASH = { chars:"", skills:"#data", height:"#height", board:"#board", reports:"#reports" };
-const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true, showSan:true, showHm:true, edit:false, hurtHp:false, hurtMp:false, bdCat:"all", replyTo:null, rpCat:"ステータス", bdHos:[], bdHo:"all", editId:null };
+const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true, showSan:true, showHm:true, edit:false, hurtHp:false, hurtMp:false, bdCat:"all", replyTo:null, rpCat:"ステータス", bdHos:[], bdHo:"all", editId:null, bdQ:"", bdQRaw:"", bdForm:false };
 let current = []; // 現在表示中の配列
 let openHo = null;
 
