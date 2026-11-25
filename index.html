@@ -198,6 +198,8 @@ ruby.hn rt::before{content:attr(data-rt)}
 th{white-space:nowrap}
 th.num,td.num{padding:8px 4px; text-align:center; font-variant-numeric:tabular-nums}
 td .cats{flex-direction:column; align-items:flex-start}
+td .cat{white-space:nowrap}
+td.memo{min-width:220px}
 td .swatch{gap:5px}
 
 /* table view */
@@ -211,6 +213,22 @@ tbody tr{cursor:pointer}
 tbody tr:hover{background:var(--panel2)}
 td.pcn{font-weight:700}
 td .swatch{color:var(--text)}
+
+.coltools{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:0 0 10px; font-size:12px; color:var(--muted)}
+.coltools .dhint{margin-left:auto}
+.dragscroll{cursor:grab}
+.dragscroll.dragging, .dragscroll.dragging *{cursor:grabbing !important; user-select:none; -webkit-user-select:none}
+th.grp{height:26px; text-align:center; font-size:11px; letter-spacing:.08em; cursor:pointer; user-select:none}
+th.grp.st{background:#dff1f8}
+th.grp.sk{background:#e7f6ee}
+th.grp:hover{filter:brightness(.96)}
+th.gcol, td.gcol{width:26px; min-width:26px; padding:0; text-align:center}
+th.gcol span{writing-mode:vertical-rl; display:inline-block; padding:6px 0; white-space:nowrap}
+th.gb, td.gb{border-left:1px solid var(--line)}
+.stg{display:grid; grid-template-columns:repeat(auto-fill,minmax(66px,1fr)); gap:6px; margin-top:8px}
+.stg div{background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:4px 6px; text-align:center; line-height:1.3}
+.stg i{display:block; font-style:normal; font-size:10px; color:var(--muted); letter-spacing:.08em}
+.stg b{font-size:15px; font-variant-numeric:tabular-nums}
 
 /* modal */
 .overlay{
@@ -449,6 +467,41 @@ const NEGO = {
 };
 D.forEach(d => { d.nego = NEGO[d.ho] || null; });
 
+/* ステータス(INI,STR,CON,POW,DEX,APP,SIZ,INT,EDU / INIは同じDEXの時の順番用) */
+const STK = ["INI","STR","CON","POW","DEX","APP","SIZ","INT","EDU"];
+const STD = {
+ 1:"13.95,10,9,15,13,10,15,17,11",
+ 2:"14.23,16,10,16,14,14,9,15,6",
+ 3:"11.78,11,13,16,11,15,11,15,8",
+ 4:"5.9,7,19,17,5,13,16,12,11",
+ 5:"17.38,12,14,19,17,14,8,10,6",
+ 6:"10.24,10,14,18,10,13,10,17,8",
+ 7:"18.75,11,10,17,18,12,8,18,6",
+ 8:"8.02,16,12,15,8,5,19,14,11",
+ 9:"12.92,9,18,19,12,8,9,14,11",
+ 10:"14.11,12,8,19,14,12,13,13,9",
+ 11:"16.95,15,15,15,16,5,18,8,8",
+ 12:"16.94,15,11,16,16,11,10,15,6",
+ 13:"10.49,13,10,17,10,18,10,12,10",
+ 14:"16.63,7,13,19,16,10,10,16,9",
+ 15:"14.31,13,14,15,14,9,12,15,8",
+ 16:"13.12,11,13,15,13,14,11,17,6",
+ 17:"11.84,13,12,15,11,17,12,10,9",
+ 18:"18.83,8,17,14,18,10,10,14,9",
+ 19:"11.47,13,14,17,11,12,12,14,7",
+ 20:"19.41,10,13,14,19,13,12,13,6",
+ 21:"15.66,9,12,18,15,14,9,17,6",
+ 22:"11.02,3,17,18,11,9,12,19,11",
+ 23:"3.05,16,19,12,3,10,18,15,7",
+ 24:"19.35,12,9,15,19,8,14,13,10",
+ 25:"19.02,15,13,15,19,5,10,17,6",
+ 26:"14.83,19,13,12,14,11,14,8,9"
+};
+D.forEach(d => {
+  const a = (STD[d.ho] || "").split(",");
+  d.st = {}; STK.forEach((k,i) => { const v = parseFloat(a[i]); d.st[k] = isNaN(v) ? null : v; });
+});
+
 /* ===== 立ち絵(カードの薄背景) =====
    u:画像URL / x:横位置(%) / z:拡大率。追加したいHOはここに足す。画像は外部リンクのまま読み込む */
 const PORTRAITS = {
@@ -540,7 +593,7 @@ const accent = d => !d.hex ? "#9db6c2" : (lum(d.hex) > 0.6 ? darken(d.hex, 0.78)
 
 /* ===== 状態 ===== */
 const PAGE_HASH = { chars:"", skills:"#skills", height:"#height" };
-const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null };
+const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true };
 let current = []; // 現在表示中の配列
 let openHo = null;
 
@@ -611,6 +664,7 @@ function skKeyVal(d, key){
   if(key === "pc") return d.pc.toLowerCase();
   if(key === "hv") return d.hv;
   if(key === "nego") return d.nego ? d.nego.v : null;
+  if(STK.includes(key)) return d.st[key];
   return skEff(d, key).n;
 }
 function skCmp(a, b){
@@ -702,21 +756,34 @@ function charTableHtml(list){
 function tableHtml(list){
   const {key, dir} = state.skSort;
   const cl = k => key === k ? " sorted" : "";
-  const th = (k, label, extra="") => {
+  const th = (k, label, extra="", attr="") => {
     const on = key === k;
-    return `<th class="sortable${extra}${cl(k)}" data-sk="${esc(k)}" aria-sort="${on ? (dir > 0 ? "ascending" : "descending") : "none"}">${esc(label)}<span class="ind">${on ? (dir > 0 ? "▲" : "▼") : ""}</span></th>`;
+    return `<th${attr} class="sortable${extra}${cl(k)}" data-sk="${esc(k)}" aria-sort="${on ? (dir > 0 ? "ascending" : "descending") : "none"}">${esc(label)}<span class="ind">${on ? (dir > 0 ? "▲" : "▼") : ""}</span></th>`;
   };
+  const stOn = state.showSt, skOn = state.showSk;
+  const skN = SKL.length + 2;
+  const grp = (id, label, on, n) => on
+    ? `<th class="grp ${id} gb" colspan="${n}" data-grp="${id}" title="クリックで折りたたみ">▼ ${label}</th>`
+    : `<th class="grp ${id} gcol gb" rowspan="2" data-grp="${id}" title="クリックで展開"><span>▶ ${label}</span></th>`;
+  const head1 = `<tr>${th("ho","HO","",' rowspan="2"')}<th rowspan="2">HO名</th>${th("pc","PC名","",' rowspan="2"')}<th rowspan="2">能力</th>`
+    + grp("st","ステータス",stOn,STK.length) + grp("sk","技能",skOn,skN) + `<th rowspan="2">備考</th></tr>`;
+  const head2 = `<tr>${stOn ? STK.map((k,i) => th(k, k, " num" + (i === 0 ? " gb" : ""))).join("") : ""}`
+    + (skOn ? SKL.map((l,i) => th(l, l, " num" + (i === 0 ? " gb" : ""))).join("") + th("nego","交渉技能") + th("hv","HO推奨技能") : "") + `</tr>`;
   const rows = list.map(d => `<tr data-ho="${d.ho}">
     <td class="nw${cl("ho")}">HO${d.ho}</td>
     <td>${hoName(d)}<div class="sm">${esc(d.mean)}</div></td>
     <td class="pcn${cl("pc")}">${esc(d.pc)}<div class="sm">${esc(d.pcKana)}</div></td>
     <td>${catHtml(d)}</td>
-    ${SKL.map(l => `<td class="num${cl(l)}">${skCell(d, l)}</td>`).join("")}
-    <td class="${cl("nego").trim()}">${d.nego ? esc(d.nego.n) + " <b>" + d.nego.v + "</b>" : ""}</td>
-    <td class="${cl("hv").trim()}">${esc(d.hn)}${d.hv !== null ? " <b>" + d.hv + "</b>" : ""}</td>
+    ${stOn ? STK.map((k,i) => `<td class="num${cl(k)}${i === 0 ? " gb" : ""}">${d.st[k] === null ? "" : d.st[k]}</td>`).join("") : '<td class="gcol gb"></td>'}
+    ${skOn ? SKL.map((l,i) => `<td class="num${cl(l)}${i === 0 ? " gb" : ""}">${skCell(d, l)}</td>`).join("")
+      + `<td class="${cl("nego").trim()}">${d.nego ? esc(d.nego.n) + " <b>" + d.nego.v + "</b>" : ""}</td>`
+      + `<td class="${cl("hv").trim()}">${esc(d.hn)}${d.hv !== null ? " <b>" + d.hv + "</b>" : ""}</td>` : '<td class="gcol gb"></td>'}
     <td class="memo">${esc(d.sm)}</td></tr>`).join("");
-  return `<div class="tablewrap"><table><thead><tr>
-    ${th("ho","HO")}<th>HO名</th>${th("pc","PC名")}<th>能力</th>${SKL.map(l => th(l, l, " num")).join("")}${th("nego","交渉技能")}${th("hv","HO推奨技能")}<th>備考</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  const tools = `<div class="coltools"><span class="lbl">表示する項目</span>
+    <button class="chip" data-grpt="st" aria-pressed="${stOn}">ステータス</button>
+    <button class="chip" data-grpt="sk" aria-pressed="${skOn}">技能</button>
+    <span class="dhint">表は掴んで左右にドラッグでスクロールできます</span></div>`;
+  return `${tools}<div class="tablewrap dragscroll"><table><thead>${head1}${head2}</thead><tbody>${rows}</tbody></table></div>`;
 }
 /* ===== 身長くらべ ===== */
 function heightHtml(){
@@ -725,7 +792,7 @@ function heightHtml(){
     <h2>身長くらべ</h2>
     <p class="hdesc">身長が入っているHOの人型を同じ縮尺で並べています(全${D.length}名のうち、身長が数値で入っているのは${n}名)。人型をクリックすると詳細が出ます。</p>
     <div class="htools">
-      <div class="group"><button class="chip" data-hsort="ho" aria-pressed="${state.hSort === "ho"}">HO順</button><button class="chip" data-hsort="h" aria-pressed="${state.hSort === "h"}">身長順</button><button class="chip" data-hsort="age" aria-pressed="${state.hSort === "age"}">年齢順</button></div>
+      <div class="group"><button class="chip" data-hsort="ho" aria-pressed="${state.hSort === "ho"}">HO順</button><button class="chip" data-hsort="h" aria-pressed="${state.hSort === "h"}">身長順</button><button class="chip" data-hsort="age" aria-pressed="${state.hSort === "age"}">年齢順</button><button class="chip" data-hsort="siz" aria-pressed="${state.hSort === "siz"}">SIZ順</button></div>
       <label><input type="checkbox" id="h-age"${state.hAge ? " checked" : ""}> 年齢を重ねる</label>
     </div>
     <div class="hlegend"><span><i style="background:#3b8ee8"></i>男</span><span><i style="background:#e0592b"></i>女</span><span>人型の中の数字 = 年齢</span></div>
@@ -743,6 +810,12 @@ function drawHeight(){
     if(x === null) return 1; if(y === null) return -1;
     return x - y || a.ho - b.ho;
   });
+  else if(state.hSort === "siz") list.sort((a,b) => {
+    const x = a.st.SIZ, y = b.st.SIZ;
+    if(x === null && y === null) return a.ho - b.ho;
+    if(x === null) return 1; if(y === null) return -1;
+    return x - y || (hNum(a) ?? Infinity) - (hNum(b) ?? Infinity) || a.ho - b.ho;   // SIZが低い順、同値は身長→HO順
+  });
   else if(state.hSort === "age") list.sort((a,b) => {
     if(a.age !== b.age) return a.age - b.age;                       // 年齢が低い順、同じ年齢は身長が低い順→HO順
     const x = hNum(a), y = hNum(b);
@@ -759,7 +832,8 @@ function drawHeight(){
   const slotW = avail / per;
   const MAXH = Math.max(205, ...list.map(d => hNum(d) || 0));
   const s = Math.min(1.25, 0.85 * slotW / (0.31 * MAXH));            // px / cm
-  const labelH = Math.max(...list.map(d => ("HO" + d.ho + " " + d.pc).length)) * 6.4 + 14;
+  const lab = d => "HO" + d.ho + " " + d.pc + (state.hSort === "siz" ? " ・SIZ" + d.st.SIZ : "");
+  const labelH = Math.max(...list.map(d => lab(d).length)) * 6.4 + 14;
   const top = 26, yB = top + 210 * s, rowH = yB + labelH + 8;
   const MALE = "#3b8ee8", FEMALE = "#e0592b";
 
@@ -785,7 +859,7 @@ function drawHeight(){
     } else {
       g += `<text x="${cx}" y="${yB - 8}" text-anchor="middle" font-size="11" fill="#9db6c2">—</text>`;
     }
-    g += `<text transform="translate(${cx - 4},${yB + 8}) rotate(90)" font-size="11" fill="${sel ? "#0a2e41" : "#5f8798"}" font-weight="${sel ? 700 : 400}">${esc("HO" + d.ho + " " + d.pc)}</text></g>`;
+    g += `<text transform="translate(${cx - 4},${yB + 8}) rotate(90)" font-size="11" fill="${sel ? "#0a2e41" : "#5f8798"}" font-weight="${sel ? 700 : 400}">${esc(lab(d))}</text></g>`;
     return g;
   };
 
@@ -806,7 +880,7 @@ function drawHeight(){
 
   const sel = D.find(d => d.ho === state.hSel);
   $("#hpanel").innerHTML = sel
-    ? `<b>HO${sel.ho} ${esc(sel.pc)}</b><span>${esc(sel.sex)} ／ ${sel.age}歳 ／ ${esc(hText(sel))}</span>${catHtml(sel)}<button class="chip" id="h-open">詳細を開く</button>`
+    ? `<b>HO${sel.ho} ${esc(sel.pc)}</b><span>${esc(sel.sex)} ／ ${sel.age}歳 ／ ${esc(hText(sel))} ／ SIZ ${sel.st.SIZ}</span>${catHtml(sel)}<button class="chip" id="h-open">詳細を開く</button>`
     : '<span style="color:var(--muted)">人型をクリックすると、そのHOの性別・年齢・身長が出ます。</span>';
   const miss = D.filter(d => hNum(d) === null);
   $("#hnote").textContent = miss.length
@@ -848,6 +922,12 @@ $("#main").addEventListener("click", e => {
   const hf = e.target.closest("[data-hsel]");
   if(hf){ state.hSel = parseInt(hf.dataset.hsel, 10); drawHeight(); return; }
   if(e.target.closest("#h-open")){ if(state.hSel !== null) openModal(state.hSel); return; }
+  const gt = e.target.closest("[data-grpt], th[data-grp]");
+  if(gt){
+    const g = gt.dataset.grpt || gt.dataset.grp;
+    if(g === "st") state.showSt = !state.showSt; else state.showSk = !state.showSk;
+    render(); return;
+  }
   const ch = e.target.closest("th[data-cs]");
   if(ch){
     const m = CHAR_SORT[ch.dataset.cs], i = m.indexOf(state.sort);
@@ -866,6 +946,47 @@ $("#main").addEventListener("click", e => {
   if(el) openModal(parseInt(el.dataset.ho, 10));
 });
 
+/* ===== 表のドラッグスクロール(マウス用。タッチは標準スクロール) =====
+   #main に一度だけ委譲するので、再描画で表が作り直されても効く。移動が4px未満ならクリック扱い */
+(function(){
+  let wrap = null, sx = 0, sy = 0, sl = 0, st = 0, moved = false, suppress = false;
+  function stop(){
+    window.removeEventListener("mousemove", onMove, true);
+    window.removeEventListener("mouseup", onUp, true);
+    window.removeEventListener("blur", onUp);
+    if(wrap) wrap.classList.remove("dragging");
+    if(moved){ suppress = true; setTimeout(() => { suppress = false; }, 0); }
+    wrap = null; moved = false;
+  }
+  function onMove(e){
+    if(!wrap) return;
+    if(e.buttons === 0){ stop(); return; }                 // ボタンを離したのを取りこぼした場合
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if(!moved){
+      if(Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+      moved = true; wrap.classList.add("dragging");
+      const sel = window.getSelection && window.getSelection(); if(sel) sel.removeAllRanges();
+    }
+    wrap.scrollLeft = sl - dx;
+    if(wrap.scrollHeight > wrap.clientHeight) wrap.scrollTop = st - dy;
+    e.preventDefault();
+  }
+  function onUp(){ stop(); }
+  document.addEventListener("mousedown", e => {
+    if(e.button !== 0 || !e.target.closest) return;
+    const w = e.target.closest(".dragscroll");
+    if(!w || w.scrollWidth <= w.clientWidth) return;
+    const r = w.getBoundingClientRect();
+    if(e.clientX - r.left - w.clientLeft > w.clientWidth || e.clientY - r.top - w.clientTop > w.clientHeight) return; // 標準スクロールバー上は触らない
+    wrap = w; sx = e.clientX; sy = e.clientY; sl = w.scrollLeft; st = w.scrollTop; moved = false;
+    e.preventDefault();                                      // 文字選択・ネイティブドラッグの開始を止める
+    window.addEventListener("mousemove", onMove, true);
+    window.addEventListener("mouseup", onUp, true);
+    window.addEventListener("blur", onUp);
+  });
+  window.addEventListener("click", e => { if(suppress){ e.stopPropagation(); e.preventDefault(); suppress = false; } }, true);
+})();
+
 /* ===== 詳細モーダル ===== */
 function skillHtml(d){
   const rows = [];
@@ -875,7 +996,7 @@ function skillHtml(d){
   const grid = rows.map(r => `<div class="skrow${r.def ? " def" : (r.n === null ? " off" : "")}"><span class="skn">${esc(r.l)}</span><span class="bar"><i style="width:${Math.min(r.n ?? 0,100)}%"></i></span><span class="skv">${r.n === null ? esc(skShow(r.raw)) : r.n}</span></div>`).join("");
   const ho = d.hn ? `<dl style="margin:12px 0 0"><dt>HO推奨技能</dt><dd>${esc(d.hn)}${d.hv !== null ? ` <b>${d.hv}</b>` : ""}</dd></dl>` : "";
   const memo = d.sm ? `<div class="skmemo">${esc(d.sm)}</div>` : "";
-  return `<div class="sec">技能 <span class="def" style="letter-spacing:0">(薄いグレー=初期値)</span></div><div class="skgrid">${grid}</div>${ho}${memo}`;
+  return `<div class="sec">ステータス</div><div class="stg">${STK.map(k => `<div><i>${k}</i><b>${d.st[k] === null ? "—" : d.st[k]}</b></div>`).join("")}</div><div class="sec">技能 <span class="def" style="letter-spacing:0">(薄いグレー=初期値)</span></div><div class="skgrid">${grid}</div>${ho}${memo}`;
 }
 function modalHtml(d){
   const ranges = d.range.length ? d.range.map(esc).join(" / ") : "—";
