@@ -797,7 +797,7 @@ document.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.dat
    「修正済み」は一方通行(未対応→修正済みのみ)。戻すときはFirebaseコンソールで done を false に直す */
 const RP_CATS = ["ステータス", "技能", "名前・設定", "表示・動作", "掲示板の削除依頼", "その他"];   // 増やすときはここと、Firestoreルールの一覧の両方に足す
 const RP_KEY = "roado-reports-v1", RP_NAME = "roado-rpname-v1";
-const ADMIN_UIDS = [];   // 「修正済みにする」を押せる端末のID。不具合報告ページの一番下に出るIDを "..." で入れる(複数可)
+const ADMIN_UIDS = [aXHRxtCbAhXXAXF1Xb1W8sscwch1];   // 「修正済みにする」を押せる端末のID。不具合報告ページの一番下に出るIDを "..." で入れる(複数可)
 const useFs = () => liveMode === "firestore" && !!fbCtx;
 const isAdmin = () => !useFs() || ADMIN_UIDS.includes(myUid);
 const getName = () => { try { return localStorage.getItem(RP_NAME) || ""; } catch(e){ return ""; } };
