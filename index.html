@@ -243,9 +243,6 @@ th.gb, td.gb{border-left:1px solid var(--line)}
 .lv.ind{color:#8a4a9a; font-weight:700}
 .lv.ind.raw{color:var(--text); font-weight:400; background:#fffbe6}
 .lvchk{width:18px; height:18px; accent-color:#d6453d; cursor:pointer}
-tr.insane td{background:#fdecec}
-tr.insane:hover td{background:#fbdede}
-tr.insane td:first-child{background:#fbdada}
 .coltools .lvnote{flex-basis:100%; font-size:11px}
 .lvstat{font-size:11px; padding:2px 8px; border-radius:99px; border:1px solid var(--line); background:#fff}
 .lvstat.firestore{color:#1a7f4b; border-color:#9bd3b4}
@@ -297,6 +294,12 @@ footer{color:var(--muted); font-size:12px; text-align:center; padding:0 0 40px}
 .tablewrap th:first-child{background:var(--panel2); z-index:3}
 .tablewrap tbody tr:hover td:first-child{background:var(--panel2)}
 .tablewrap td.sorted:first-child{background:#e4f4fa}
+/* 発狂中の行(上の通常行・並べ替え列・HO固定列の色より優先させる) */
+.tablewrap tbody tr.insane td{background:#fdecec}
+.tablewrap tbody tr.insane td.sorted{background:#fadede}
+.tablewrap tbody tr.insane td:first-child{background:#fbdada}
+.tablewrap tbody tr.insane:hover td{background:#fad4d4}
+.tablewrap tbody tr.insane:hover td:first-child{background:#f7c8c8}
 @media (pointer:coarse){ .chip{padding:8px 14px} select{padding:9px 10px} }
 @media (max-width:700px){
   header.top{padding:22px 16px 6px}
