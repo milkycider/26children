@@ -7,6 +7,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Quicksand:wght@500;700&display=swap">
 <title>ロアドの児従録 - テストプレイ班 探索者ポータル</title>
+<!-- 検索避け: 検索エンジンに載せない・キャッシュさせない(身内向けサイトのため) -->
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="description" content="クトゥルフ神話TRPG「ロアドの児従録」テストプレイ班の探索者ポータル(非公式・身内向け)">
+<!-- リンクを貼ったときのプレビュー(Discord・Xなど) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="ロアドの児従録 - テストプレイ班 探索者ポータル">
+<meta property="og:description" content="テストプレイ班の探索者一覧・データ一覧・掲示板">
+<meta name="twitter:card" content="summary">
+<!-- ▼ ファビコン・プレビュー画像を用意したら、この行と「▲ ここまで」の行を消して、間の3行を有効にする(ファイルはこのHTMLと同じ場所に置く)
+<link rel="icon" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<meta property="og:image" content="https://(サイトのURL)/ogp.png">
+▲ ここまで -->
 <style>
 :root{
   --bg:#dff3f9; --panel:#ffffff; --panel2:#ecf8fc; --line:#bfe0ec;
@@ -316,6 +329,14 @@ body[data-page="reports"] .controls, body[data-page="reports"] .count{display:no
 body[data-page="board"] .controls, body[data-page="board"] .count{display:none}
 /* 掲示板 */
 .bd-req{color:#0f6f9c}
+.bd-edited{font-size:11px}
+.bd-eform{margin-top:8px; display:flex; flex-direction:column; gap:8px}
+.bd-eform .bd-wide label{display:flex; flex-direction:column; gap:3px; font-size:12px; color:var(--muted)}
+.bd-eform .bd-wide label:first-child{flex:0 0 auto}
+.bd-eform select, .bd-eform input{font:inherit; font-size:14px; color:var(--text); padding:7px 8px; border:1px solid var(--line); border-radius:8px; background:#fff}
+.bd-eform textarea{width:100%; box-sizing:border-box; font:inherit; font-size:14px; color:var(--text); padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:#fff; resize:vertical}
+.bd-eform .bd-hogrid{margin-top:0}
+#bd-emsg.bad{color:#b3372f}
 .bd-fold{display:block; margin-top:2px; font-size:12px; color:#0f6f9c}
 .bd-wide label{flex:1 1 240px}
 .bd-hobox{margin:0 0 10px}
@@ -358,6 +379,47 @@ body[data-page="board"] .controls, body[data-page="board"] .count{display:none}
 .lnk{font:inherit; font-size:11px; color:var(--muted); background:none; border:0; padding:0; text-decoration:underline; cursor:pointer}
 .lnk:hover{color:var(--text)}
 .rp-uid .bad{color:#b3372f}
+
+/* ログイン */
+.hbtns{display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+.login{display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:flex-end; font-size:12px; color:var(--muted)}
+.lme{max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text)}
+.lq{width:22px; height:22px; border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--muted); font:700 12px/1 var(--font-body); cursor:pointer; padding:0}
+.lq:hover{border-color:var(--accent); color:var(--accent)}
+.lerr{color:#b3372f; flex-basis:100%; text-align:right}
+.hright{position:relative}
+.lhelp{position:absolute; right:0; top:calc(100% + 6px); z-index:40; width:min(420px, calc(100vw - 32px)); max-height:70vh; overflow:auto; box-sizing:border-box; background:var(--panel); border:1px solid var(--line); border-left:6px solid var(--accent); border-radius:14px; padding:16px 18px; box-shadow:0 10px 30px rgba(10,55,75,.18); font-size:13px; line-height:1.7; text-align:left; color:var(--text)}
+.lhelp h3{margin:0 0 8px; font-size:16px}
+.lhelp p{margin:0 0 10px}
+.lhelp ul{margin:-4px 0 10px; padding-left:1.3em}
+.lhelp li{margin:2px 0}
+.lhelp .close{right:8px; top:8px; min-width:30px; min-height:30px}
+@media (max-width:700px){ .lhelp{position:fixed; left:12px; right:12px; top:64px; width:auto; max-height:calc(100dvh - 90px)} }
+
+/* フッター・規約モーダル */
+.sitefoot{max-width:var(--w); margin:0 auto; padding:28px 20px 44px; border-top:1px solid var(--line); line-height:1.8}
+.sitefoot p{margin:4px 0}
+.flinks{display:flex; justify-content:center; flex-wrap:wrap; gap:4px 10px; margin-bottom:6px}
+.flinks .lnk{font-size:12.5px; color:var(--text)}
+.fcoc{font-size:11px}
+.fhint{font-size:11px; margin-top:10px !important; opacity:.85}
+.infomodal{width:min(680px,100%)}
+.infomodal .mscroll{font-size:14px; line-height:1.8}
+.infomodal h3{font-size:15px; margin:20px 0 6px; padding-left:8px; border-left:3px solid var(--accent)}
+.infomodal p{margin:0 0 8px}
+.infomodal ul{margin:0 0 8px; padding-left:1.4em}
+.infomodal li{margin:3px 0}
+.infomodal a{color:#0f6f9c}
+.doc-date{font-size:12px; color:var(--muted)}
+.doc-coc{font-size:13px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:10px 12px}
+.doc-note{margin-top:18px !important; font-size:12px; color:var(--muted)}
+/* ネタバレ */
+.bd-spl{justify-content:flex-end}
+.bd-spl span:last-child{display:flex; align-items:center; gap:6px; padding:8px 0; color:var(--text); font-size:13px; white-space:nowrap}
+.rp-row .bd-spl input, .bd-eform .bd-spl input{width:16px; height:16px; min-width:0; padding:0; margin:0; accent-color:#d6453d}
+.bd-splb{background:#fdecec; color:#c42b22; border:1px solid #f1b9b4; border-radius:99px; padding:0 8px; font-size:11px; font-weight:700}
+.btn.bd-reveal{margin-top:8px; font-size:12px; background:#fff7f6; border-color:#f1b9b4; color:#a33}
+.rp.bd.bd-hidden{border-left-color:#e8908a}
 
 /* modal */
 .overlay{
@@ -453,7 +515,31 @@ footer{color:var(--muted); font-size:12px; text-align:center; padding:0 0 40px}
     <div class="sub">テストプレイ班　探索者ポータル</div>
   </div>
   <div class="hright">
-    <button class="newsbtn" id="newsbtn" aria-haspopup="dialog">お知らせ<span class="rbadge" id="nbadge" hidden></span></button>
+    <div class="hbtns">
+      <div class="login" id="login" hidden></div>
+      <button class="newsbtn" id="newsbtn" aria-haspopup="dialog">お知らせ<span class="rbadge" id="nbadge" hidden></span></button>
+    </div>
+    <div class="lhelp" id="lhelp" role="dialog" aria-label="ログインについて" hidden>
+      <button class="btn close" id="lhelp-close" aria-label="閉じる">✕</button>
+      <h3>ログインについて</h3>
+      <p><b>ログインは任意です。</b>しなくても、掲示板も不具合報告もこれまでどおり使えます。</p>
+      <p><b>何に使うの?</b><br>掲示板で「この投稿を書いたのは誰か」を見分けるためだけに使います。これで、自分の投稿だけに「編集」「削除」ボタンが出ます。</p>
+      <p><b>ログインしないとき</b><br>このブラウザの中だけに、見分け用の番号(ID)が自動で保存されます。次のときは番号が変わり、それまでの自分の投稿を編集・削除できなくなります。</p>
+      <ul>
+        <li>最初に開いてから30日が過ぎたとき(自動で削除されます)</li>
+        <li>ブラウザの履歴・Cookie・サイトデータを削除したとき</li>
+        <li>別の端末や別のブラウザで開いたとき</li>
+      </ul>
+      <p><b>Googleでログインすると</b><br>番号がGoogleアカウントにひもづくので、どの端末からでも、ずっと自分の投稿を編集・削除できます。ログイン前にこのブラウザで書いた投稿も、そのまま引き継がれます。</p>
+      <p><b>Googleの情報はどう扱われるの?</b></p>
+      <ul>
+        <li>Googleのパスワードが、このサイトに渡ることはありません(ログインはGoogleの画面で行います)</li>
+        <li>メールアドレスや名前は、投稿には保存されず、ほかのPLにも見えません。右上の「ログイン中」の表示に、あなたの画面でだけ使います</li>
+        <li>ただし、ログインした人のメールアドレスは、サイトの管理者(KP)が見られるFirebaseの管理画面のユーザー一覧に記録されます</li>
+        <li>Googleのメール・連絡先・ドライブなどの中身を、このサイトが見ることはできません</li>
+      </ul>
+      <p>自分の投稿を消せなくなったときは、不具合報告の「掲示板の削除依頼」から知らせてください。</p>
+    </div>
     <div class="count"><b id="count">0</b>/<span id="total">0</span> 名表示中</div>
   </div>
 </header>
@@ -503,7 +589,14 @@ footer{color:var(--muted); font-size:12px; text-align:center; padding:0 0 40px}
 </div>
 
 <main id="main"></main>
-<footer>クリックで詳細が開きます(←/→キーで前後、Escで閉じる)/ データ一覧は見出しクリックで並び替え / 技能の薄いグレーは初期値</footer>
+<footer class="sitefoot" id="sitefoot"></footer>
+
+<div class="overlay" id="info-ov" role="dialog" aria-modal="true" aria-labelledby="info-title">
+  <div class="modal newsmodal infomodal">
+    <button class="btn close" id="info-close">✕</button>
+    <div class="mscroll" id="info-body"></div>
+  </div>
+</div>
 
 <div class="overlay" id="news-ov" role="dialog" aria-modal="true" aria-labelledby="news-title">
   <div class="modal newsmodal">
@@ -719,7 +812,7 @@ function liveStatusHtml(){
   const tip = { local:"DBに接続していないため、入力した値はこの端末だけに保存されます", connecting:"DBに接続しています", firestore:"入力した値は全員に反映されます", error:"DBに接続できませんでした。入力した値はこの端末だけに保存されます" }[liveMode];
   return `<span class="lvstat ${liveMode}" id="lvstat" title="${tip}">${t}</span>`;
 }
-function setLiveMode(m){ liveMode = m; const el = document.getElementById("lvstat"); if(el){ el.outerHTML = liveStatusHtml(); } }
+function setLiveMode(m){ liveMode = m; if(typeof drawLogin === "function") drawLogin(); const el = document.getElementById("lvstat"); if(el){ el.outerHTML = liveStatusHtml(); } }
 async function initFirebase(){
   let cfg = null;
   try { cfg = (typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG) || (typeof firebaseConfig !== "undefined" && firebaseConfig) || null; } catch(e){}
@@ -734,9 +827,10 @@ async function initFirebase(){
     fbAuth = { au, auth };
     au.onAuthStateChanged(auth, u => {
       myUid = u ? u.uid : null;
-      myUser = u && !u.isAnonymous ? { email:u.email || "", name:u.displayName || "" } : null;   // Googleでログイン中(管理者用)
+      const pd = u && u.providerData && u.providerData[0];
+      myUser = u && !u.isAnonymous ? { email:u.email || (pd && pd.email) || "", name:u.displayName || (pd && pd.displayName) || "" } : null;   // Googleでログイン中
       if(!u) au.signInAnonymously(auth).then(() => { authError = false; }).catch(() => { authError = true; drawBoard(); });   // 初回・匿名アカウントの自動削除後・ログアウト後は匿名で入り直す
-      drawBoard(); drawReports();
+      drawLogin(); drawBoard(); drawReports();
     });
     fbSave = (ho, patch) => fs.setDoc(fs.doc(db, "characters", "HO" + ho), { ...patch, updatedAt:fs.serverTimestamp() }, { merge:true })
       .catch(() => setLiveMode("error"));
@@ -758,7 +852,7 @@ async function initFirebase(){
       bdError = false;
       const ms = t => (t && t.toMillis) ? t.toMillis() : null;
       posts = snap.docs.map(q => { const x = q.data({ serverTimestamps:"estimate" });
-        return { id:q.id, parent:x.parent || null, cat:x.cat || "", title:x.title || "", url:x.url || "", text:x.text || "", name:x.name || "", hos:normHos(x), uid:x.uid || "", deleted:!!x.deleted, at:ms(x.createdAt) ?? Date.now() }; });
+        return { id:q.id, parent:x.parent || null, cat:x.cat || "", title:x.title || "", url:x.url || "", text:x.text || "", name:x.name || "", hos:normHos(x), uid:x.uid || "", deleted:!!x.deleted, spoiler:!!x.spoiler, at:ms(x.createdAt) ?? Date.now(), editedAt:ms(x.editedAt) }; });
       drawBoard();
     }, () => { bdError = true; drawBoard(); });
   } catch(e){ setLiveMode("error"); }
@@ -841,8 +935,8 @@ function drawReports(){
   const idl = document.getElementById("rp-uid");
   if(idl){
     if(!useFs() || !fbAuth) idl.innerHTML = "";
-    else if(myUser) idl.innerHTML = `管理者ログイン中: ${esc(myUser.email || myUser.name)}${isAdmin() ? "" : " (このIDは管理者に未登録)"} ・ ID: ${esc(myUid || "")} <button class="lnk" id="adm-out">ログアウト</button>`;
-    else idl.innerHTML = `<button class="lnk" id="adm-in">管理者ログイン</button>`;
+    else if(myUser) idl.innerHTML = `ログイン中のID: ${esc(myUid || "")}${isAdmin() ? " (管理者)" : ""}`;
+    else idl.innerHTML = "";
   }
 }
 const rpPh = c => c === "掲示板の削除依頼"
@@ -872,16 +966,6 @@ function reportsHtml(){
 }
 document.addEventListener("click", async e => {
   const t = e.target;
-  if(t.closest && t.closest("#adm-in")){
-    const { au, auth } = fbAuth;
-    try { await au.signInWithPopup(auth, new au.GoogleAuthProvider()); }
-    catch(err){
-      const m = { "auth/popup-blocked":"ポップアップがブロックされました。ブラウザの設定で許可してください", "auth/unauthorized-domain":"このサイトのドメインがFirebaseに登録されていません", "auth/operation-not-allowed":"FirebaseでGoogleログインが有効になっていません" }[err.code];
-      if(err.code !== "auth/popup-closed-by-user" && err.code !== "auth/cancelled-popup-request") { const el = document.getElementById("rp-uid"); if(el) el.insertAdjacentHTML("beforeend", `<span class="bad"> ${esc(m || "ログインに失敗しました (" + (err.code || "") + ")")}</span>`); }
-    }
-    return;
-  }
-  if(t.closest && t.closest("#adm-out")){ await fbAuth.au.signOut(fbAuth.auth); return; }
   if(t.closest && t.closest("#rp-send")){
     const btn = t.closest("#rp-send"), msg = document.getElementById("rp-msg");
     const text = document.getElementById("rp-text").value.trim();
@@ -941,6 +1025,11 @@ async function addPost(p){
     persistPosts(); drawBoard();
   }
 }
+async function editPost(id, patch){
+  if(useFs()) await fbCtx.fs.updateDoc(fbCtx.fs.doc(fbCtx.db, "posts", id), { ...patch, editedAt:fbCtx.fs.serverTimestamp() });
+  else { const x = posts.find(y => y.id === id); if(x){ Object.assign(x, patch, { editedAt:Date.now() }); persistPosts(); drawBoard(); } }
+}
+let bdEdit = null;   // 編集中の下書き { id, reply, cat, title, url, text, hos }
 async function delPost(id){
   const blank = { deleted:true, title:"", text:"", url:"" };
   if(useFs()) await fbCtx.fs.updateDoc(fbCtx.fs.doc(fbCtx.db, "posts", id), blank);
@@ -948,7 +1037,8 @@ async function delPost(id){
 }
 function postMeta(p){
   const mine = p.uid && p.uid === curUid() && !p.deleted;
-  return `<span class="rp-meta">${esc(p.name || "名無し")} ・ ${fmtTime(p.at)}${mine ? `<button class="bd-del" data-bddel="${esc(p.id)}">削除</button>` : ""}</span>`;
+  const ed = p.editedAt && !p.deleted ? ` <span class="bd-edited" title="${esc(fmtTime(p.editedAt))}に編集">(編集済み)</span>` : "";
+  return `<span class="rp-meta">${esc(p.name || "名無し")} ・ ${fmtTime(p.at)}${ed}${mine && state.editId !== p.id ? `<button class="bd-del" data-bdedit="${esc(p.id)}">編集</button><button class="bd-del" data-bddel="${esc(p.id)}">削除</button>` : ""}</span>`;
 }
 /* 長い本文は折りたたむ(140文字超 または 6行超)。開いた投稿は再描画しても開いたまま */
 const FOLD_CHARS = 140, FOLD_LINES = 6;
@@ -961,26 +1051,55 @@ function bodyHtml(p){
   const short = lines.slice(0, FOLD_LINES).join("\n").slice(0, FOLD_CHARS).replace(/\s+$/, "");
   return `<p class="rp-text">${esc(short)}…</p><button class="lnk bd-fold" data-bdfold="${esc(p.id)}">続きを読む ▾</button>`;
 }
+function editFormHtml(p){
+  const e = bdEdit;
+  const act = `<div class="rp-act"><button class="btn rp-send" data-bdesave="${esc(p.id)}">保存</button><button class="btn" data-bdecancel="1">やめる</button><span id="bd-emsg"></span></div>`;
+  if(e.reply) return `<div class="bd-eform"><textarea data-bde="text" maxlength="1000" rows="3">${esc(e.text)}</textarea>${act}</div>`;
+  const cats = BD_CATS.map(c => `<option${e.cat === c ? " selected" : ""}>${esc(c)}</option>`).join("");
+  const chips = [0, ...D.map(d => d.ho), BD_OTHER].map(n => {
+    const d = D.find(x => x.ho === n), on = n === 0 ? !e.hos.length : e.hos.includes(n);
+    return `<button type="button" class="chip bd-hoc" data-bdeho="${n}"${d ? ` style="--c:${esc(accent(d))}"` : ""} aria-pressed="${on}">${n === 0 ? "なし" : esc(hoLabel(n))}</button>`;
+  }).join("");
+  return `<div class="bd-eform">
+    <div class="rp-row bd-wide">
+      <label>種類<select data-bde="cat">${cats}</select></label>
+      <label class="bd-spl"><span>&nbsp;</span><span><input type="checkbox" data-bde="spoiler"${e.spoiler ? " checked" : ""}> ネタバレを含む</span></label>
+      <label>タイトル<input data-bde="title" maxlength="80" autocomplete="off" value="${esc(e.title)}"></label>
+      <label>URL(任意)<input data-bde="url" type="url" maxlength="500" autocomplete="off" placeholder="https://" value="${esc(e.url)}"></label>
+    </div>
+    <div class="bd-lbl">関連するHO</div><div class="bd-hogrid">${chips}</div>
+    <textarea data-bde="text" class="bd-text" maxlength="1000" rows="4" placeholder="ひとこと・本文(任意)">${esc(e.text)}</textarea>
+    ${act}</div>`;
+}
+const bdShow = new Set();   // ネタバレ投稿のうち「表示する」を押したもの
 function threadHtml({ r, rs }){
   const open = state.replyTo === r.id, dr = bdDrafts[r.id] || {};
   const u = safeUrl(r.url);
-  const head = r.deleted ? `<div class="bd-gone">この投稿は削除されました</div>` : `
-    <div class="rp-head"><span class="rp-cat">${esc(r.cat)}</span>${postMeta(r)}</div>
+  const spl = r.spoiler && !r.deleted ? `<span class="bd-splb">ネタバレ注意</span>` : "";
+  if(r.spoiler && !r.deleted && !bdShow.has(r.id) && state.editId !== r.id){
+    return `<article class="rp bd bd-hidden">
+      <div class="rp-head"><span class="rp-cat">${esc(r.cat)}</span>${spl}${postMeta(r)}</div>
+      <div class="bd-title">${esc(r.title)}</div>
+      <button class="btn bd-reveal" data-bdshow="${esc(r.id)}">ネタバレを含む投稿です。押すと表示します${rs.length ? `(返信${rs.length}件)` : ""}</button>
+    </article>`;
+  }
+  const head = r.deleted ? `<div class="bd-gone">この投稿は削除されました</div>` : state.editId === r.id ? `<div class="rp-head"><span class="rp-cat">編集中</span>${postMeta(r)}</div>${editFormHtml(r)}` : `
+    <div class="rp-head"><span class="rp-cat">${esc(r.cat)}</span>${spl}${postMeta(r)}</div>
     <div class="bd-title">${u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a> <span class="bd-site">${esc(siteOf(u))} ↗</span>` : esc(r.title)}</div>
     ${(r.hos || []).length ? `<div class="bd-tags">${r.hos.map(hoTag).join("")}</div>` : ""}
     ${bodyHtml(r)}`;
-  const reps = rs.map(x => `<div class="bd-rep"><div class="rp-head">${postMeta(x)}</div>${bodyHtml(x)}</div>`).join("");
+  const reps = rs.map(x => `<div class="bd-rep"><div class="rp-head">${postMeta(x)}</div>${state.editId === x.id ? editFormHtml(x) : bodyHtml(x)}</div>`).join("");
   const form = open ? `<div class="bd-rform">
       <input data-bdr="${esc(r.id)}" data-f="name" maxlength="20" placeholder="お名前(任意)" autocomplete="off" value="${esc(dr.name ?? getName())}">
       <textarea data-bdr="${esc(r.id)}" data-f="text" maxlength="1000" rows="2" placeholder="返信を書く">${esc(dr.text || "")}</textarea>
       <div class="rp-act"><button class="btn rp-send" data-bdsend="${esc(r.id)}">返信する</button><button class="btn" data-bdreply="">閉じる</button><span class="bd-rmsg" id="bd-rmsg"></span></div>
-    </div>` : (r.deleted ? "" : `<button class="btn bd-rbtn" data-bdreply="${esc(r.id)}">↩ 返信</button>`);
+    </div>` : ((r.deleted || state.editId === r.id) ? "" : `<button class="btn bd-rbtn" data-bdreply="${esc(r.id)}">↩ 返信</button>`);
   return `<article class="rp bd">${head}${reps ? `<div class="bd-reps">${reps}</div>` : ""}${form}</article>`;
 }
 function drawBoard(){
   const box = document.getElementById("bd-list"); if(!box) return;
-  const ae = document.activeElement, fid = ae && ae.dataset && ae.dataset.bdr, fk = fid ? ae.dataset.f : null;
-  const sel = fid && typeof ae.selectionStart === "number" ? [ae.selectionStart, ae.selectionEnd] : null;
+  const ae = document.activeElement, fid = ae && ae.dataset && ae.dataset.bdr, fk = fid ? ae.dataset.f : null, fe = ae && ae.dataset && ae.dataset.bde;
+  const sel = (fid || fe) && typeof ae.selectionStart === "number" ? [ae.selectionStart, ae.selectionEnd] : null;
   const kids = {};
   posts.filter(p => p.parent).forEach(p => { (kids[p.parent] = kids[p.parent] || []).push(p); });
   const all = posts.filter(p => !p.parent).map(r => {
@@ -995,7 +1114,7 @@ function drawBoard(){
   });
   const th = byHo.filter(t => state.bdCat === "all" || t.r.cat === state.bdCat).sort((a, b) => b.last - a.last);
   box.innerHTML = th.length ? th.map(threadHtml).join("") : `<div class="rp-empty">${all.length ? "条件に合う投稿はありません" : "まだ投稿はありません"}</div>`;
-  if(fid){ const el = box.querySelector(`[data-bdr="${CSS.escape(fid)}"][data-f="${fk}"]`); if(el){ el.focus(); if(sel) try { el.setSelectionRange(sel[0], sel[1]); } catch(e){} } }
+  if(fid || fe){ const el = fid ? box.querySelector(`[data-bdr="${CSS.escape(fid)}"][data-f="${fk}"]`) : box.querySelector(`[data-bde="${fe}"]`); if(el){ el.focus(); if(sel) try { el.setSelectionRange(sel[0], sel[1]); } catch(e){} } }
   const er = document.getElementById("bd-err");
   if(er){
     er.hidden = !(bdError || (useFs() && authError));
@@ -1012,9 +1131,10 @@ function boardHtml(){
   const chips = ["all", ...BD_CATS].map(c => `<button class="chip" data-bdcat="${esc(c)}" aria-pressed="${state.bdCat === c}">${c === "all" ? "すべて" : esc(c)} <b>0</b></button>`).join("");
   return `<div class="hcard rp-form">
     <h2>掲示板</h2>
-    <p class="hdesc">ふせったーや二次創作のURLを共有したり、ひとこと残したりする場所です。投稿には返信できます。自分の投稿は、投稿した端末から削除できます。<br>削除ボタンが出ない自分の投稿を消したいときは、<a href="#reports" class="bd-req">不具合報告の「掲示板の削除依頼」</a>から知らせてください。</p>
+    <p class="hdesc">ふせったーや二次創作のURLを共有したり、ひとこと残したりする場所です。シナリオのネタバレを含むときは「ネタバレを含む」にチェックし、タイトルにはネタバレを書かないでください。投稿には返信できます。自分の投稿は編集・削除できます(別の端末からも編集・削除したいときは、右上からGoogleでログインしてください)。<br>削除ボタンが出ない自分の投稿を消したいときは、<a href="#reports" class="bd-req">不具合報告の「掲示板の削除依頼」</a>から知らせてください。</p>
     <div class="rp-row">
       <label>種類<select id="bd-cat">${cats}</select></label>
+      <label class="bd-spl"><span>&nbsp;</span><span><input type="checkbox" id="bd-spoiler"> ネタバレを含む</span></label>
       <label>お名前(任意)<input id="bd-name" maxlength="20" value="${esc(getName())}" autocomplete="off"></label>
     </div>
     <div class="bd-hobox">
@@ -1038,6 +1158,8 @@ function syncHoSel(){
   if(el) el.innerHTML = sel.length ? sel.map(hoTag).join("") : '<span class="bd-none">なし</span>';
 }
 document.addEventListener("change", e => { if(e.target.id === "bd-hof"){ state.bdHo = e.target.value; drawBoard(); } });
+document.addEventListener("input", e => { const el = e.target; if(bdEdit && el.dataset && el.dataset.bde) bdEdit[el.dataset.bde] = el.value; });
+document.addEventListener("change", e => { const el = e.target; if(bdEdit && el.dataset && el.dataset.bde) bdEdit[el.dataset.bde] = el.type === "checkbox" ? el.checked : el.value; });
 document.addEventListener("input", e => {
   const el = e.target; if(!el.dataset || !el.dataset.bdr) return;
   (bdDrafts[el.dataset.bdr] = bdDrafts[el.dataset.bdr] || {})[el.dataset.f] = el.value;
@@ -1045,6 +1167,42 @@ document.addEventListener("input", e => {
 document.addEventListener("click", async e => {
   const t = e.target; if(!t.closest) return;
   const say = (id, m, bad) => { const el = document.getElementById(id); if(el){ el.textContent = m; el.className = bad ? "bad" : "ok"; } };
+  const eb = t.closest("[data-bdedit]");
+  if(eb){
+    const p = posts.find(x => x.id === eb.dataset.bdedit); if(!p) return;
+    bdEdit = { id:p.id, reply:!!p.parent, cat:p.cat, title:p.title, url:p.url, text:p.text, hos:[...(p.hos || [])], spoiler:!!p.spoiler };
+    state.editId = p.id; drawBoard();
+    const f = document.querySelector(p.parent ? '[data-bde="text"]' : '[data-bde="title"]'); if(f) f.focus();
+    return;
+  }
+  if(t.closest("[data-bdecancel]")){ bdEdit = null; state.editId = null; drawBoard(); return; }
+  const eh = t.closest("[data-bdeho]");
+  if(eh && bdEdit){
+    const n = +eh.dataset.bdeho;
+    bdEdit.hos = n === 0 ? [] : bdEdit.hos.includes(n) ? bdEdit.hos.filter(x => x !== n) : [...bdEdit.hos, n].sort((a, b) => a - b);
+    document.querySelectorAll("[data-bdeho]").forEach(b => { const k = +b.dataset.bdeho; b.setAttribute("aria-pressed", String(k === 0 ? !bdEdit.hos.length : bdEdit.hos.includes(k))); });
+    return;
+  }
+  const es = t.closest("[data-bdesave]");
+  if(es && bdEdit){
+    const ed = bdEdit, text = (ed.text || "").trim();
+    let patch;
+    if(ed.reply){
+      if(!text){ say("bd-emsg", "返信を入力してください", true); return; }
+      patch = { text:text.slice(0, 1000) };
+    } else {
+      const title = (ed.title || "").trim(), rawUrl = (ed.url || "").trim(), url = rawUrl ? safeUrl(rawUrl) : "";
+      if(!title){ say("bd-emsg", "タイトルを入力してください", true); return; }
+      if(rawUrl && !url){ say("bd-emsg", "URLは https:// から始まる形で入れてください", true); return; }
+      patch = { cat:ed.cat, title:title.slice(0, 80), url, text:text.slice(0, 1000), hos:[...ed.hos], spoiler:!!ed.spoiler };
+    }
+    es.disabled = true;
+    try { await editPost(ed.id, patch); bdEdit = null; state.editId = null; drawBoard(); }
+    catch(err){ es.disabled = false; say("bd-emsg", "保存に失敗しました", true); }
+    return;
+  }
+  const sh = t.closest("[data-bdshow]");
+  if(sh){ bdShow.add(sh.dataset.bdshow); drawBoard(); return; }
   const fd = t.closest("[data-bdfold]");
   if(fd){ const id = fd.dataset.bdfold; if(bdOpen.has(id)) bdOpen.delete(id); else bdOpen.add(id); drawBoard(); return; }
   const cat = t.closest("[data-bdcat]");
@@ -1076,10 +1234,11 @@ document.addEventListener("click", async e => {
     const name = v("bd-name").slice(0, 20);
     btn.disabled = true;
     try {
-      await addPost({ parent:null, cat:v("bd-cat"), title:title.slice(0, 80), url, text:v("bd-text").slice(0, 1000), name, hos:[...state.bdHos] });
+      await addPost({ parent:null, cat:v("bd-cat"), title:title.slice(0, 80), url, text:v("bd-text").slice(0, 1000), name, hos:[...state.bdHos], spoiler:document.getElementById("bd-spoiler").checked });
       setName(name);
       state.bdHos = []; syncHoSel();
       ["bd-title", "bd-url", "bd-text"].forEach(id => { document.getElementById(id).value = ""; });
+      document.getElementById("bd-spoiler").checked = false;
       say("bd-msg", "投稿しました", false);
     } catch(err){ say("bd-msg", "投稿に失敗しました。時間をおいてもう一度試してください", true); }
     btn.disabled = false;
@@ -1109,6 +1268,195 @@ document.addEventListener("click", async e => {
     try { await delPost(dl.dataset.bddel); } catch(err){ dl.disabled = false; dl.textContent = "失敗(もう一度)"; delete dl.dataset.armed; }
   }
 });
+
+/* ===== Googleログイン(任意) =====
+   匿名のままでも使える。ログインすると、匿名アカウントを「同じIDのまま」Googleにつなぐので、それまでの投稿も自分のものとして残る */
+let loginMsg = "";
+function drawLogin(){
+  const el = document.getElementById("login"); if(!el) return;
+  el.hidden = !(useFs() && fbAuth);
+  if(el.hidden) return;
+  const help = `<button class="lq" id="lhelp-open" aria-label="ログインについて" title="ログインについて">?</button>`;
+  el.innerHTML = myUser
+    ? `<span class="lme" title="${esc(myUser.email)}">ログイン中: ${esc(myUser.name || myUser.email)}</span><button class="lnk" id="logout">ログアウト</button>${help}`
+    : `<button class="newsbtn" id="glogin">Googleでログイン</button>${help}`;
+  if(loginMsg) el.insertAdjacentHTML("beforeend", `<span class="lerr">${esc(loginMsg)}</span>`);
+}
+async function googleLogin(){
+  const { au, auth } = fbAuth, provider = new au.GoogleAuthProvider();
+  loginMsg = "";
+  try {
+    if(auth.currentUser && auth.currentUser.isAnonymous){
+      try { await au.linkWithPopup(auth.currentUser, provider); }          // 匿名 → 同じIDのままGoogleに
+      catch(err){
+        if(err.code === "auth/credential-already-in-use"){                 // そのGoogleアカウントは別の端末で使用済み → そちらのIDで入る
+          const cred = au.GoogleAuthProvider.credentialFromError(err);
+          if(!cred) throw err;
+          await au.signInWithCredential(auth, cred);
+        } else throw err;
+      }
+      await auth.currentUser.reload();
+      const u = auth.currentUser, pd = u.providerData && u.providerData[0];
+      myUid = u.uid; myUser = { email:u.email || (pd && pd.email) || "", name:u.displayName || (pd && pd.displayName) || "" };
+    } else {
+      await au.signInWithPopup(auth, provider);
+    }
+  } catch(err){
+    if(err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request") return;
+    loginMsg = { "auth/popup-blocked":"ポップアップがブロックされました。ブラウザで許可してください", "auth/unauthorized-domain":"このサイトがFirebaseに登録されていません", "auth/operation-not-allowed":"Googleログインが有効になっていません" }[err.code] || "ログインに失敗しました";
+  }
+  drawLogin(); drawBoard(); drawReports();
+}
+function toggleHelp(show){
+  const h = document.getElementById("lhelp"); h.hidden = !show;
+  if(show) document.getElementById("lhelp-close").focus();
+}
+document.addEventListener("click", e => {
+  const t = e.target; if(!t.closest) return;
+  if(t.closest("#glogin")){ googleLogin(); return; }
+  if(t.closest("#logout")){ fbAuth.au.signOut(fbAuth.auth); return; }
+  if(t.closest("#lhelp-open")){ toggleHelp(document.getElementById("lhelp").hidden); return; }
+  if(t.closest("#lhelp-close") || (!t.closest("#lhelp") && !document.getElementById("lhelp").hidden)) toggleHelp(false);
+});
+document.addEventListener("keydown", e => { if(e.key === "Escape" && !document.getElementById("lhelp").hidden) toggleHelp(false); });
+
+/* ===== サイト情報(フッター・利用規約・プライバシーポリシー・権利表記) =====
+   （　）の部分は書き換える。運営者名は本名でなくてよい(KP名・サークル名など) */
+const SITE = {
+  name: "ロアドの児従録",
+  team: "テストプレイ班",
+  owner: "（運営者名）",                 // サイトの運営者
+  contactLabel: "",                    // 連絡先の表示名(例: "X(@xxxx)")。空なら不具合報告ページを案内
+  contactUrl: "",                      // 連絡先のURL(https://〜)
+  scenario: "ロアドの児従録",
+  scenarioAuthor: "（シナリオ作者名）",
+  since: 2026,
+  updated: "2026-11-25",               // フッターの最終更新日(HTMLを更新したら書き換える)
+  policyDate: "2026-11-25"             // 利用規約・プライバシーポリシーの制定日・改定日
+};
+const COC_NOTE = "本サイトは、「株式会社アークライト」及び「株式会社KADOKAWA」が権利を有する『クトゥルフ神話TRPG』の二次創作物です。";
+const COC_FULL = COC_NOTE + "<br>Call of Cthulhu is copyright ©1981, 2015, 2019 by Chaosium Inc. ;all rights reserved. Arranged by Arclight Inc.<br>Call of Cthulhu is a registered trademark of Chaosium Inc.<br>PUBLISHED BY KADOKAWA CORPORATION";
+const contactHtml = () => {
+  const u = safeUrl(SITE.contactUrl);
+  const ext = u ? `、または <a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(SITE.contactLabel || u)}</a>` : "";
+  return `本サイトの<a href="#reports" data-infogo="reports">不具合報告</a>ページ${ext}`;
+};
+const DOCS = {
+  terms: () => `<h2 id="info-title">利用規約</h2>
+    <p class="doc-date">制定・改定: ${esc(SITE.policyDate.replace(/-/g, "/"))}</p>
+    <p>本サイト「${esc(SITE.name)} ${esc(SITE.team)} 探索者ポータル」(以下「本サイト」)は、クトゥルフ神話TRPGのシナリオ「${esc(SITE.scenario)}」のテストプレイ参加者と関係者のための、非公式・身内向けのファンサイトです。本サイトを利用した時点で、この規約に同意したものとみなします。</p>
+    <h3>1. 掲示板・不具合報告での禁止事項</h3>
+    <ul>
+      <li>他の人への誹謗中傷・攻撃的な書き込み、嫌がらせ</li>
+      <li>自分や他人の本名・住所・連絡先など、個人を特定できる情報の書き込み</li>
+      <li>他人の作品の無断転載や、作者の許可なく作品のURLを共有すること</li>
+      <li>成人向け・グロテスクな内容への、注意書きのないリンク</li>
+      <li>シナリオのネタバレを、「ネタバレを含む」のチェックなしで書くこと、またはタイトルに書くこと</li>
+      <li>他人になりすますこと</li>
+      <li>本サイトのデータを不正に書き換えたり、動作を妨げたりすること</li>
+      <li>その他、管理者が不適切と判断すること</li>
+    </ul>
+    <h3>2. 投稿の扱い</h3>
+    <ul>
+      <li>管理者は、上の禁止事項に当たる、または不適切と判断した投稿を、予告なく削除・非表示にできます。</li>
+      <li>投稿の内容についての責任は、投稿した本人が負います。</li>
+    </ul>
+    <h3>3. 立ち絵・イラスト・作品について</h3>
+    <p>本サイトに掲載している立ち絵やイラスト、掲示板で共有された作品の権利は、それぞれのPL・作者に帰属します。無断での転載・保存・加工・再配布・AIの学習などへの利用はご遠慮ください。</p>
+    <h3>4. 免責</h3>
+    <ul>
+      <li>本サイトからリンクしている外部サイトの内容について、管理者は責任を負いません。</li>
+      <li>入力したデータ(SAN・HP・MP、投稿など)の消失や、本サイトの不具合・停止によって生じた損害について、管理者は責任を負いません。</li>
+      <li>本サイトは、予告なく内容の変更や公開の終了をすることがあります。</li>
+    </ul>
+    <h3>5. 規約の変更</h3>
+    <p>この規約は、必要に応じて変更することがあります。変更したときは、本サイトのお知らせでお知らせします。</p>
+    <h3>6. お問い合わせ</h3>
+    <p>${contactHtml()}からご連絡ください。</p>`,
+  privacy: () => `<h2 id="info-title">プライバシーポリシー</h2>
+    <p class="doc-date">制定・改定: ${esc(SITE.policyDate.replace(/-/g, "/"))}</p>
+    <p>本サイトでの、利用者の情報の扱いについて説明します。</p>
+    <h3>1. 取得する情報</h3>
+    <ul>
+      <li><b>Googleでログインした場合</b>: Googleアカウントのメールアドレス、表示名、ログイン用のID</li>
+      <li><b>ログインしない場合</b>: 端末ごとに自動で振られる匿名のID</li>
+      <li><b>入力した内容</b>: 掲示板・不具合報告に入力したお名前・本文・URL・選択した項目と、その日時</li>
+      <li><b>キャラクターの数値</b>: 入力したSAN・不定・発狂・HP・MP</li>
+    </ul>
+    <p>このほか、表示の設定・お知らせの既読・お名前の入力欄の内容などを、利用者のブラウザの中に保存します。これらは本サイトの管理者には送られません。</p>
+    <h3>2. 利用目的</h3>
+    <ul>
+      <li>掲示板で、投稿した人を見分けるため(自分の投稿だけを編集・削除できるようにするため)</li>
+      <li>管理者を見分けるため</li>
+      <li>本サイトの提供と、不具合への対応のため</li>
+    </ul>
+    <p>これ以外の目的には使いません。</p>
+    <h3>3. 公開される範囲</h3>
+    <ul>
+      <li>Googleアカウントのメールアドレス・表示名は、ほかの利用者には公開されません。ログイン中の表示として、本人の画面にだけ表示します。</li>
+      <li>ログインした人のメールアドレスは、管理者が閲覧できる管理画面(Firebase)のユーザー一覧に記録されます。</li>
+      <li>掲示板・不具合報告に入力したお名前・本文などは、本サイトの利用者全員が見られます。</li>
+    </ul>
+    <h3>4. 利用している外部サービス</h3>
+    <ul>
+      <li><b>Firebase(Google LLC)</b>: ログインと、データの保存に使っています。データはGoogleのサーバー(日本国外のものを含みます)に保存されます。</li>
+      <li><b>Google Fonts(Google LLC)</b>: 文字の表示に使っています。表示のため、利用者のブラウザからGoogleのサーバーに接続します。</li>
+      <li><b>ココフォリア</b>: 立ち絵の画像を、ココフォリアのサーバーから読み込んでいます。</li>
+      <li>イメージソングなどのリンク先(YouTubeなど)は、それぞれのサービスのプライバシーポリシーに従います。</li>
+    </ul>
+    <p>アクセス解析ツールや広告は使っていません。</p>
+    <h3>5. 第三者への提供</h3>
+    <p>法令に基づく場合を除き、取得した情報を第三者に提供することはありません。</p>
+    <h3>6. 削除の依頼</h3>
+    <p>自分の掲示板の投稿は、自分で編集・削除できます。自分で削除できなくなった投稿や、ログイン情報の削除を希望するときは、${contactHtml()}からご連絡ください。</p>
+    <h3>7. 改定</h3>
+    <p>このポリシーは、必要に応じて改定することがあります。改定したときは、本サイトのお知らせでお知らせします。</p>`,
+  credits: () => `<h2 id="info-title">権利表記</h2>
+    <h3>クトゥルフ神話TRPG</h3>
+    <p class="doc-coc">${COC_FULL}</p>
+    <h3>シナリオ</h3>
+    <p>「${esc(SITE.scenario)}」 作: ${esc(SITE.scenarioAuthor)}</p>
+    <h3>キャラクター・立ち絵</h3>
+    <p>各探索者と立ち絵の権利は、それぞれのPL・作者に帰属します。無断での転載・保存・加工・再配布・AIの学習などへの利用はご遠慮ください。</p>
+    <h3>イメージソング</h3>
+    <p>各楽曲の権利は、それぞれの権利者に帰属します。本サイトでは、公式に公開されている動画へのリンクのみを掲載しています。</p>
+    <h3>フォント</h3>
+    <p>Zen Kaku Gothic New / Zen Maru Gothic / Quicksand(SIL Open Font License 1.1、Google Fonts)</p>
+    <p class="doc-note">本サイトは非公式のファンサイトであり、上記の権利者とは関係ありません。</p>`
+};
+function openInfo(key){
+  const f = DOCS[key]; if(!f) return;
+  document.getElementById("info-body").innerHTML = f() + '<div style="height:22px"></div>';
+  document.getElementById("info-ov").classList.add("open");
+  document.documentElement.classList.add("modal-open");
+  document.getElementById("info-body").scrollTop = 0;
+  document.getElementById("info-close").focus();
+}
+function closeInfo(){
+  document.getElementById("info-ov").classList.remove("open");
+  if(!document.getElementById("overlay").classList.contains("open") && !document.getElementById("news-ov").classList.contains("open")) document.documentElement.classList.remove("modal-open");
+}
+function drawFooter(){
+  const u = safeUrl(SITE.contactUrl);
+  document.getElementById("sitefoot").innerHTML = `
+    <nav class="flinks" aria-label="サイト情報">
+      <button class="lnk" data-info="terms">利用規約</button><span>|</span>
+      <button class="lnk" data-info="privacy">プライバシーポリシー</button><span>|</span>
+      <button class="lnk" data-info="credits">権利表記</button>
+    </nav>
+    <p class="fcoc">${esc(COC_NOTE)}</p>
+    <p>© ${SITE.since} ${esc(SITE.name)} ${esc(SITE.team)} ・ 運営: ${u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(SITE.owner)}</a>` : esc(SITE.owner)} ・ 最終更新: ${esc(SITE.updated.replace(/-/g, "/"))}</p>
+    <p class="fhint">カードや行をクリックで詳細(←/→キーで前後、Escで閉じる) / データ一覧は見出しクリックで並び替え / 技能の薄いグレーは初期値<br>推奨環境: PC・スマートフォンの最新版の Chrome / Safari / Edge / Firefox</p>`;
+}
+document.addEventListener("click", e => {
+  const t = e.target; if(!t.closest) return;
+  const b = t.closest("[data-info]");
+  if(b){ openInfo(b.dataset.info); return; }
+  const g = t.closest("[data-infogo]");
+  if(g){ e.preventDefault(); closeInfo(); setPage(g.dataset.infogo); window.scrollTo(0, 0); return; }
+});
+document.getElementById("info-ov").addEventListener("click", e => { if(e.target.id === "info-ov" || e.target.id === "info-close") closeInfo(); });
+document.addEventListener("keydown", e => { if(e.key === "Escape" && document.getElementById("info-ov").classList.contains("open")) closeInfo(); });
 
 /* ===== お知らせ・更新履歴 =====
    新しいものを一番上に足す。id は前のものより大きい数字にする(未読の判定に使う)。k は "更新" か "お知らせ" */
@@ -1231,7 +1579,7 @@ const accent = d => !d.hex ? "#9db6c2" : (lum(d.hex) > 0.6 ? darken(d.hex, 0.78)
 
 /* ===== 状態 ===== */
 const PAGE_HASH = { chars:"", skills:"#data", height:"#height", board:"#board", reports:"#reports" };
-const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true, showSan:true, showHm:true, edit:false, hurtHp:false, hurtMp:false, bdCat:"all", replyTo:null, rpCat:"ステータス", bdHos:[], bdHo:"all" };
+const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true, showSan:true, showHm:true, edit:false, hurtHp:false, hurtMp:false, bdCat:"all", replyTo:null, rpCat:"ステータス", bdHos:[], bdHo:"all", editId:null };
 let current = []; // 現在表示中の配列
 let openHo = null;
 
@@ -1776,6 +2124,8 @@ else if(location.hash === "#board") state.page = "board";
 render();
 drawReports();
 drawNewsBadge();
+drawLogin();
+drawFooter();
 (function(){ const m = /^#HO(\d+)$/.exec(location.hash); if(m) openModal(parseInt(m[1], 10)); })();
 </script>
 </body>
