@@ -244,7 +244,6 @@ th.gb, td.gb{border-left:1px solid var(--line)}
 .lv.ind{color:#8a4a9a; font-weight:700}
 .lv.ind.raw{color:var(--text); font-weight:400; background:#fffbe6}
 .lvchk{width:18px; height:18px; accent-color:#d6453d; cursor:pointer}
-.coltools .lvnote{flex-basis:100%; font-size:11px}
 .lvstat{font-size:11px; padding:2px 8px; border-radius:99px; border:1px solid var(--line); background:#fff}
 .lvstat.firestore{color:#1a7f4b; border-color:#9bd3b4}
 .lvstat.error{color:#b3372f; border-color:#e9aaa5}
@@ -895,7 +894,7 @@ function tableHtml(list){
     ? `<th class="grp ${id} gb" colspan="${n}" data-grp="${id}" title="クリックで折りたたみ">▼ ${label}</th>`
     : `<th class="grp ${id} gcol gb" rowspan="2" data-grp="${id}" title="クリックで展開"><span>▶<br>${label}</span></th>`;
   const head1 = `<tr>${th("ho","HO","",' rowspan="2"')}${iniOn ? th("INI","INI"," num",' rowspan="2"') : ""}<th rowspan="2">HO名</th>${th("pc","PC名","",' rowspan="2"')}<th rowspan="2">能力</th>`
-    + grp("san","SAN",sanOn,3) + grp("st","ステータス",stOn,STX.length) + grp("sk","技能",skOn,skN) + `<th rowspan="2">備考</th></tr>`;
+    + grp("san","SAN",sanOn,3) + grp("st","ステータス",stOn,STX.length) + grp("sk","技能",skOn,skN) + `<th rowspan="2" class="gb">備考</th></tr>`;
   const head2 = `<tr>${sanOn ? th("SAN","SAN"," num gb") + th("IND","不定"," num") + th("INS","発狂"," num") : ""}${stOn ? STX.map((k,i) => th(k, k, " num" + (i === 0 ? " gb" : ""))).join("") : ""}`
     + (skOn ? SKL.map((l,i) => th(l, l, " num" + (i === 0 ? " gb" : ""))).join("") + th("nego","交渉技能") + th("hv","HO推奨技能") : "") + `</tr>`;
   const rows = list.map(d => `<tr data-ho="${d.ho}"${liveOf(d.ho).insane ? ' class="insane"' : ""}>
@@ -909,7 +908,7 @@ function tableHtml(list){
     ${skOn ? SKL.map((l,i) => `<td class="num${cl(l)}${i === 0 ? " gb" : ""}">${skCell(d, l)}</td>`).join("")
       + `<td class="${cl("nego").trim()}">${d.nego ? esc(d.nego.n) + " <b>" + d.nego.v + "</b>" : ""}</td>`
       + `<td class="${cl("hv").trim()}">${esc(d.hn)}${d.hv !== null ? " <b>" + d.hv + "</b>" : ""}</td>` : '<td class="gcol gb"></td>'}
-    <td class="memo">${esc(d.sm)}</td></tr>`).join("");
+    <td class="memo gb">${esc(d.sm)}</td></tr>`).join("");
   const tools = `<div class="coltools"><span class="lbl">表示する項目</span>
     <button class="chip edit" data-grpt="edit" aria-pressed="${state.edit}">${state.edit ? "✎ 編集モード ON" : "✎ 編集モード OFF"}</button>
     <span class="vsep"></span>
@@ -918,8 +917,7 @@ function tableHtml(list){
     <button class="chip" data-grpt="st" aria-pressed="${stOn}">ステータス</button>
     <button class="chip" data-grpt="sk" aria-pressed="${skOn}">技能</button>
     ${liveStatusHtml()}
-    <span class="dhint">表は掴んで左右にドラッグでスクロールできます</span>
-    <span class="lvnote">SAN・不定・発狂は「編集モード」をONにしたときだけ書き換えできます(誤入力防止)。<br>SAN=現在値(薄い数字はPOW×5の初期値) ／ 不定=「SANがこの値以下になると不定」のライン(開始時SAN − その1/5・端数切り上げ。例: 53 → 42)。編集モードで欄をクリックすると開始時SANを入力でき、確定するとラインに戻ります ／ 発狂=チェックで行が赤くなります(発狂中)</span></div>`;
+    <span class="dhint">表は掴んで左右にドラッグでスクロールできます</span></div>`;
   return `${tools}<div class="tablewrap dragscroll"><table><thead>${head1}${head2}</thead><tbody>${rows}</tbody></table></div>`;
 }
 /* ===== 身長くらべ ===== */
