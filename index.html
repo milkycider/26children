@@ -229,6 +229,13 @@ th.hm2{padding:3px 2px; line-height:1.25}
 .hs:hover{background:rgba(31,162,211,.16)}
 .hs.on{color:var(--text); font-weight:700}
 .pair{display:inline-flex; align-items:center; gap:1px}
+.pair{border-radius:6px; padding:0 2px}
+.pair.lvl-w{background:#fff0c2}
+.pair.lvl-w .lv:first-child{color:#a35f00; font-weight:700}
+.pair.lvl-c{background:#ffd8d4}
+.pair.lvl-c .lv:first-child{color:#c42b22; font-weight:700}
+.pair.lvl-z{background:#dcdfe6}
+.pair.lvl-z .lv:first-child{color:#555; font-weight:700}
 .pair i{font-style:normal; color:var(--muted); font-size:11px}
 .lv.sm{width:27px; padding:4px 0}
 th.grp.sk{background:#e7f6ee}
@@ -242,8 +249,9 @@ th.gb, td.gb{border-left:1px solid var(--line)}
 .lv::-webkit-outer-spin-button, .lv::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
 .lv{-moz-appearance:textfield; appearance:textfield; box-sizing:border-box; width:36px; padding:4px 2px; text-align:center; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--text); font:inherit; font-size:12.5px; font-variant-numeric:tabular-nums}
 .lv::placeholder{color:#b4cbd6}
-.lv:disabled, .lvchk:disabled{pointer-events:none; opacity:.75}
-.lv:disabled{background:transparent; border-color:transparent}
+.lv:disabled, .lvchk:disabled{pointer-events:none}
+.lvchk:disabled{opacity:.75}
+.lv:disabled{background:transparent; border-color:transparent; -webkit-text-fill-color:currentColor; opacity:1}
 .lv:disabled::placeholder{color:#c3d6df}
 .chip.edit[aria-pressed="true"]{background:#d6453d; border-color:#d6453d}
 .vsep{width:1px; height:20px; background:var(--line); margin:0 4px}
@@ -559,6 +567,15 @@ const indOf = base => (base === null || base === undefined) ? null : base - Math
 const toVal = (v, max = 99) => { if(v === "" || v === null || v === undefined) return null; const n = Math.round(Number(v)); return isNaN(n) ? null : Math.max(0, Math.min(max, n)); };
 try { const o = JSON.parse(localStorage.getItem(LIVE_KEY) || "{}"); Object.keys(o).forEach(k => Object.assign(liveOf(+k), o[k])); } catch(e){}
 function persistLocal(){ try { localStorage.setItem(LIVE_KEY, JSON.stringify(live)); } catch(e){} }
+/* HP・MPの現在値に応じた色: 空欄=通常 / 最大の1/2以下=黄 / 1/4以下=赤 / 0=灰。最大が空欄のときは初期値(HP=(CON+SIZ)/2切り上げ, MP=POW)で判定 */
+function hmLevel(d, kind){
+  const L = liveOf(d.ho), cur = kind === "hp" ? L.hp : L.mp;
+  const max = (kind === "hp" ? L.hpMax : L.mpMax) ?? (kind === "hp" ? Math.ceil(((d.st.CON ?? 0) + (d.st.SIZ ?? 0)) / 2) : (d.st.POW ?? 0));
+  if(cur === null || !(max > 0)) return "";
+  if(cur <= 0) return "z";
+  const r = cur / max;
+  return r <= 0.25 ? "c" : r <= 0.5 ? "w" : "";
+}
 function applyLive(ho){
   const L = liveOf(ho);
   document.querySelectorAll(`[data-lv][data-ho="${ho}"]`).forEach(el => {
@@ -569,6 +586,8 @@ function applyLive(ho){
       else el.value = L[k] === null ? "" : L[k];
     }
   });
+  const d0 = D.find(x => x.ho === ho);
+  if(d0) document.querySelectorAll(`.pair[data-ho="${ho}"]`).forEach(el => { el.className = "pair" + (hmLevel(d0, el.dataset.kind) ? " lvl-" + hmLevel(d0, el.dataset.kind) : ""); });
   const tr = document.querySelector(`tr[data-ho="${ho}"]`); if(tr) tr.classList.toggle("insane", !!L.insane);
 }
 function setLive(ho, patch, remote){
@@ -897,7 +916,7 @@ const hpDef = d => Math.ceil(((d.st.CON ?? 0) + (d.st.SIZ ?? 0)) / 2), mpDef = d
 function hmCells(d, key){
   const L = liveOf(d.ho), dis = state.edit ? "" : " disabled", v = x => x === null ? "" : x;
   const one = (k, def, lab) => `<input type="text" class="lv sm" data-lv="${k}" data-ho="${d.ho}" maxlength="3" autocomplete="off" inputmode="numeric" placeholder="${def}" value="${v(L[k])}" aria-label="HO${d.ho} ${lab}"${dis}>`;
-  const cell = (id, cur, max, def, nm, first) => `<td class="num wide lvc${first ? " gb" : ""}${key === id || key === id + "M" ? " sorted" : ""}"><span class="pair">${one(cur, def, "現在" + nm)}<i>/</i>${one(max, def, "最大" + nm)}</span></td>`;
+  const cell = (id, cur, max, def, nm, first) => `<td class="num wide lvc${first ? " gb" : ""}${key === id || key === id + "M" ? " sorted" : ""}"><span class="pair${hmLevel(d, cur) ? " lvl-" + hmLevel(d, cur) : ""}" data-ho="${d.ho}" data-kind="${cur}">${one(cur, def, "現在" + nm)}<i>/</i>${one(max, def, "最大" + nm)}</span></td>`;
   return cell("HP", "hp", "hpMax", hpDef(d), "HP", true) + cell("MP", "mp", "mpMax", mpDef(d), "MP", false);
 }
 function tableHtml(list){
