@@ -221,10 +221,18 @@ td .swatch{color:var(--text)}
 th.grp{height:26px; text-align:center; font-size:11px; letter-spacing:.08em; cursor:pointer; user-select:none}
 th.grp.st{background:#dff1f8}
 th.grp.san{background:#f3e6f6}
+th.grp.hm{background:#fdf0dc}
+th.num.wide, td.num.wide{width:68px; min-width:68px; max-width:68px}
+th.hm2{padding:3px 2px; line-height:1.25}
+.hm2 .hml{font-size:11px}
+.hs{display:inline-block; padding:0 3px; border-radius:4px; cursor:pointer}
+.hs:hover{background:rgba(31,162,211,.16)}
+.hs.on{color:var(--text); font-weight:700}
+.pair{display:inline-flex; align-items:center; gap:1px}
+.pair i{font-style:normal; color:var(--muted); font-size:11px}
+.lv.sm{width:27px; padding:4px 0}
 th.grp.sk{background:#e7f6ee}
 th.grp:hover{filter:brightness(.96)}
-th.gcol, td.gcol{width:58px; min-width:58px; max-width:58px; box-sizing:border-box; padding:0 2px; text-align:center}
-th.gcol span{display:block; font-size:10.5px; line-height:1.35; letter-spacing:0; white-space:nowrap}
 th.gb, td.gb{border-left:1px solid var(--line)}
 .stg{display:grid; grid-template-columns:repeat(auto-fill,minmax(66px,1fr)); gap:6px; margin-top:8px}
 .stg div{background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:4px 6px; text-align:center; line-height:1.3}
@@ -539,15 +547,15 @@ const firebaseConfig = {
   storageBucket: "children-81e2c.firebasestorage.app",
   messagingSenderId: "83378381554",
   appId: "1:83378381554:web:3f9067554820c01ed9e66b"
-};   // Firebaseコンソールの firebaseConfig = {...} を、この行ごと置き換える(名前は FIREBASE_CONFIG / firebaseConfig どちらでも可)
-const FB_VER = "10.14.1";
+};const FB_VER = "10.14.1";
 const live = {};                       // { ho: { san, base, insane } }
 let liveMode = "local";                // "local" | "connecting" | "firestore" | "error"
 let fbSave = null;
 const LIVE_KEY = "roado-live-v1";
-const liveOf = ho => live[ho] || (live[ho] = { san:null, base:null, insane:false });
+const liveOf = ho => live[ho] || (live[ho] = { san:null, base:null, insane:false, hp:null, hpMax:null, mp:null, mpMax:null });
+const LIVE_MAX = { san:99, base:99, hp:999, hpMax:999, mp:999, mpMax:999 };   // 各項目の上限(0〜上限の整数)
 const indOf = base => (base === null || base === undefined) ? null : base - Math.ceil(base / 5);   // 不定ライン = 開始時SAN − その1/5(端数切り上げ)。SANがこの値以下になると不定
-const toVal = v => { if(v === "" || v === null || v === undefined) return null; const n = Math.round(Number(v)); return isNaN(n) ? null : Math.max(0, Math.min(99, n)); };
+const toVal = (v, max = 99) => { if(v === "" || v === null || v === undefined) return null; const n = Math.round(Number(v)); return isNaN(n) ? null : Math.max(0, Math.min(max, n)); };
 try { const o = JSON.parse(localStorage.getItem(LIVE_KEY) || "{}"); Object.keys(o).forEach(k => Object.assign(liveOf(+k), o[k])); } catch(e){}
 function persistLocal(){ try { localStorage.setItem(LIVE_KEY, JSON.stringify(live)); } catch(e){} }
 function applyLive(ho){
@@ -589,7 +597,7 @@ async function initFirebase(){
       snap.docChanges().forEach(ch => {
         const ho = parseInt(ch.doc.id.replace("HO", ""), 10); if(!ho) return;
         const x = ch.doc.data();
-        setLive(ho, { san:toVal(x.san), base:toVal(x.base), insane:!!x.insane }, true);
+        setLive(ho, { san:toVal(x.san), base:toVal(x.base), insane:!!x.insane, hp:toVal(x.hp, 999), hpMax:toVal(x.hpMax, 999), mp:toVal(x.mp, 999), mpMax:toVal(x.mpMax, 999) }, true);
       });
     }, () => setLiveMode("error"));
   } catch(e){ setLiveMode("error"); }
@@ -613,7 +621,7 @@ document.addEventListener("change", e => {
   const ho = parseInt(el.dataset.ho, 10), k = el.dataset.lv;
   if(k === "insane") setLive(ho, { insane:el.checked });
   else {
-    const v = toVal(el.value); setLive(ho, { [k]:v });
+    const v = toVal(el.value, LIVE_MAX[k]); setLive(ho, { [k]:v });
     if(k === "base"){ const t = indOf(v); el.value = t === null ? "" : t; } else el.value = v === null ? "" : v;
   }
 });
@@ -710,7 +718,7 @@ const accent = d => !d.hex ? "#9db6c2" : (lum(d.hex) > 0.6 ? darken(d.hex, 0.78)
 
 /* ===== 状態 ===== */
 const PAGE_HASH = { chars:"", skills:"#skills", height:"#height" };
-const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true, showSan:true, edit:false };
+const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true, showSan:true, showHm:true, edit:false };
 let current = []; // 現在表示中の配列
 let openHo = null;
 
@@ -785,6 +793,10 @@ function skKeyVal(d, key){
   if(key === "SAN") return liveOf(d.ho).san;
   if(key === "IND") return indOf(liveOf(d.ho).base);
   if(key === "INS") return liveOf(d.ho).insane ? 1 : 0;
+  if(key === "HP") return liveOf(d.ho).hp;
+  if(key === "HPM") return liveOf(d.ho).hpMax;
+  if(key === "MP") return liveOf(d.ho).mp;
+  if(key === "MPM") return liveOf(d.ho).mpMax;
   if(STK.includes(key)) return d.st[key];
   return skEff(d, key).n;
 }
@@ -880,6 +892,13 @@ function liveCells(d, cl){
     + `<td class="num lvc${cl("IND")}"><input type="text" class="lv ind" data-lv="base" data-ho="${d.ho}" inputmode="numeric" autocomplete="off" value="${ind === null ? "" : ind}" title="不定ライン(SANがこの値以下で不定)。編集モードONでクリック → その日の開始時SANを入力" aria-label="HO${d.ho} 不定ライン(入力は開始時SAN)"${dis}></td>`
     + `<td class="num lvc${cl("INS")}"><input type="checkbox" class="lvchk" data-lv="insane" data-ho="${d.ho}"${L.insane ? " checked" : ""} aria-label="HO${d.ho} 発狂"${dis}></td>`;
 }
+const hpDef = d => Math.ceil(((d.st.CON ?? 0) + (d.st.SIZ ?? 0)) / 2), mpDef = d => d.st.POW ?? 0;   // 欄が空のとき薄く出す初期値(HP=(CON+SIZ)/2切り上げ, MP=POW)
+function hmCells(d, key){
+  const L = liveOf(d.ho), dis = state.edit ? "" : " disabled", v = x => x === null ? "" : x;
+  const one = (k, def, lab) => `<input type="text" class="lv sm" data-lv="${k}" data-ho="${d.ho}" maxlength="3" autocomplete="off" inputmode="numeric" placeholder="${def}" value="${v(L[k])}" aria-label="HO${d.ho} ${lab}"${dis}>`;
+  const cell = (id, cur, max, def, nm, first) => `<td class="num wide lvc${first ? " gb" : ""}${key === id || key === id + "M" ? " sorted" : ""}"><span class="pair">${one(cur, def, "現在" + nm)}<i>/</i>${one(max, def, "最大" + nm)}</span></td>`;
+  return cell("HP", "hp", "hpMax", hpDef(d), "HP", true) + cell("MP", "mp", "mpMax", mpDef(d), "MP", false);
+}
 function tableHtml(list){
   const {key, dir} = state.skSort;
   const cl = k => key === k ? " sorted" : "";
@@ -887,15 +906,19 @@ function tableHtml(list){
     const on = key === k;
     return `<th${attr} class="sortable${extra}${cl(k)}" data-sk="${esc(k)}" aria-sort="${on ? (dir > 0 ? "ascending" : "descending") : "none"}">${esc(label)}<span class="ind">${on ? (dir > 0 ? "▲" : "▼") : ""}</span></th>`;
   };
-  const stOn = state.showSt, skOn = state.showSk, iniOn = state.showIni, sanOn = state.showSan;
+  const stOn = state.showSt, skOn = state.showSk, iniOn = state.showIni, sanOn = state.showSan, hmOn = state.showHm;
+  const hmTh = (id, label, first) => {
+    const part = (k, t) => { const on = key === k; return `<span class="hs${on ? " on" : ""}" data-sk="${k}" title="${label}の${t === "現" ? "現在値" : "最大値"}で並べ替え">${t}${on ? (dir > 0 ? "▲" : "▼") : ""}</span>`; };
+    return `<th class="num wide hm2${first ? " gb" : ""}"><div class="hml">${label}</div><div class="hsr">${part(id, "現")}/${part(id + "M", "最")}</div></th>`;
+  };
   const STX = STK.slice(1);   // INIはHOの横に別枠で表示
   const skN = SKL.length + 2;
   const grp = (id, label, on, n) => on
-    ? `<th class="grp ${id} gb" colspan="${n}" data-grp="${id}" title="クリックで折りたたみ">▼ ${label}</th>`
-    : `<th class="grp ${id} gcol gb" rowspan="2" data-grp="${id}" title="クリックで展開"><span>▶<br>${label}</span></th>`;
+    ? `<th class="grp ${id} gb" colspan="${n}" data-grp="${id}" title="クリックで非表示(再表示は表の上のボタン)">▼ ${label}</th>`
+    : "";                                                   // 折りたたんだグループは表から完全に消す(再表示は表の上のボタン)
   const head1 = `<tr>${th("ho","HO","",' rowspan="2"')}${iniOn ? th("INI","INI"," num",' rowspan="2"') : ""}<th rowspan="2">HO名</th>${th("pc","PC名","",' rowspan="2"')}<th rowspan="2">能力</th>`
-    + grp("san","SAN",sanOn,3) + grp("st","ステータス",stOn,STX.length) + grp("sk","技能",skOn,skN) + `<th rowspan="2" class="gb">備考</th></tr>`;
-  const head2 = `<tr>${sanOn ? th("SAN","SAN"," num gb") + th("IND","不定"," num") + th("INS","発狂"," num") : ""}${stOn ? STX.map((k,i) => th(k, k, " num" + (i === 0 ? " gb" : ""))).join("") : ""}`
+    + grp("san","SAN",sanOn,3) + grp("hm","HP・MP",hmOn,2) + grp("st","ステータス",stOn,STX.length) + grp("sk","技能",skOn,skN) + `<th rowspan="2" class="gb">備考</th></tr>`;
+  const head2 = `<tr>${sanOn ? th("SAN","SAN"," num gb") + th("IND","不定"," num") + th("INS","発狂"," num") : ""}${hmOn ? hmTh("HP","HP",true) + hmTh("MP","MP",false) : ""}${stOn ? STX.map((k,i) => th(k, k, " num" + (i === 0 ? " gb" : ""))).join("") : ""}`
     + (skOn ? SKL.map((l,i) => th(l, l, " num" + (i === 0 ? " gb" : ""))).join("") + th("nego","交渉技能") + th("hv","HO推奨技能") : "") + `</tr>`;
   const rows = list.map(d => `<tr data-ho="${d.ho}"${liveOf(d.ho).insane ? ' class="insane"' : ""}>
     <td class="nw${cl("ho")}">HO${d.ho}</td>
@@ -903,17 +926,19 @@ function tableHtml(list){
     <td>${hoName(d)}<div class="sm">${esc(d.mean)}</div></td>
     <td class="pcn${cl("pc")}">${esc(d.pc)}<div class="sm">${esc(d.pcKana)}</div></td>
     <td>${catHtml(d)}</td>
-    ${sanOn ? liveCells(d, cl) : '<td class="gcol gb"></td>'}
-    ${stOn ? STX.map((k,i) => `<td class="num${cl(k)}${i === 0 ? " gb" : ""}">${d.st[k] === null ? "" : d.st[k]}</td>`).join("") : '<td class="gcol gb"></td>'}
+    ${sanOn ? liveCells(d, cl) : ''}
+    ${hmOn ? hmCells(d, key) : ''}
+    ${stOn ? STX.map((k,i) => `<td class="num${cl(k)}${i === 0 ? " gb" : ""}">${d.st[k] === null ? "" : d.st[k]}</td>`).join("") : ''}
     ${skOn ? SKL.map((l,i) => `<td class="num${cl(l)}${i === 0 ? " gb" : ""}">${skCell(d, l)}</td>`).join("")
       + `<td class="${cl("nego").trim()}">${d.nego ? esc(d.nego.n) + " <b>" + d.nego.v + "</b>" : ""}</td>`
-      + `<td class="${cl("hv").trim()}">${esc(d.hn)}${d.hv !== null ? " <b>" + d.hv + "</b>" : ""}</td>` : '<td class="gcol gb"></td>'}
+      + `<td class="${cl("hv").trim()}">${esc(d.hn)}${d.hv !== null ? " <b>" + d.hv + "</b>" : ""}</td>` : ''}
     <td class="memo gb">${esc(d.sm)}</td></tr>`).join("");
   const tools = `<div class="coltools"><span class="lbl">表示する項目</span>
     <button class="chip edit" data-grpt="edit" aria-pressed="${state.edit}">${state.edit ? "✎ 編集モード ON" : "✎ 編集モード OFF"}</button>
     <span class="vsep"></span>
     <button class="chip" data-grpt="ini" aria-pressed="${iniOn}">INI</button>
     <button class="chip" data-grpt="san" aria-pressed="${sanOn}">SAN</button>
+    <button class="chip" data-grpt="hm" aria-pressed="${hmOn}">HP・MP</button>
     <button class="chip" data-grpt="st" aria-pressed="${stOn}">ステータス</button>
     <button class="chip" data-grpt="sk" aria-pressed="${skOn}">技能</button>
     ${liveStatusHtml()}
@@ -1061,7 +1086,7 @@ $("#main").addEventListener("click", e => {
   const gt = e.target.closest("[data-grpt], th[data-grp]");
   if(gt){
     const g = gt.dataset.grpt || gt.dataset.grp;
-    if(g === "edit") state.edit = !state.edit; else if(g === "ini") state.showIni = !state.showIni; else if(g === "san") state.showSan = !state.showSan; else if(g === "st") state.showSt = !state.showSt; else state.showSk = !state.showSk;
+    if(g === "edit") state.edit = !state.edit; else if(g === "ini") state.showIni = !state.showIni; else if(g === "san") state.showSan = !state.showSan; else if(g === "hm") state.showHm = !state.showHm; else if(g === "st") state.showSt = !state.showSt; else state.showSk = !state.showSk;
     render(); return;
   }
   const ch = e.target.closest("th[data-cs]");
@@ -1070,7 +1095,7 @@ $("#main").addEventListener("click", e => {
     state.sort = m[(i + 1) % m.length];
     render(); return;
   }
-  const h = e.target.closest("th[data-sk]");
+  const h = e.target.closest("[data-sk]");
   if(h){
     const k = h.dataset.sk;
     state.skSort = state.skSort.key === k
@@ -1134,7 +1159,7 @@ function skillHtml(d){
   const ho = d.hn ? `<dl style="margin:12px 0 0"><dt>HO推奨技能</dt><dd>${esc(d.hn)}${d.hv !== null ? ` <b>${d.hv}</b>` : ""}</dd></dl>` : "";
   const memo = d.sm ? `<div class="skmemo">${esc(d.sm)}</div>` : "";
   const L = liveOf(d.ho), ind = indOf(L.base);
-  const lvm = `<div class="lvm">現在SAN <b>${L.san === null ? "—" : L.san}</b> ／ 不定ライン <b>${ind === null ? "—" : ind}</b>${L.insane ? ' ／ <b class="bad">発狂中</b>' : ""}</div>`;
+  const lvm = `<div class="lvm">現在SAN <b>${L.san === null ? "—" : L.san}</b> ／ 不定ライン <b>${ind === null ? "—" : ind}</b>${L.insane ? ' ／ <b class="bad">発狂中</b>' : ""}</div><div class="lvm">HP <b>${L.hp === null ? "—" : L.hp}/${L.hpMax === null ? "—" : L.hpMax}</b> ／ MP <b>${L.mp === null ? "—" : L.mp}/${L.mpMax === null ? "—" : L.mpMax}</b></div>`;
   return `<div class="sec">ステータス</div>${lvm}<div class="stg">${STK.map(k => `<div><i>${k}</i><b>${d.st[k] === null ? "—" : d.st[k]}</b></div>`).join("")}</div><div class="sec">技能 <span class="def" style="letter-spacing:0">(薄いグレー=初期値)</span></div><div class="skgrid">${grid}</div>${ho}${memo}`;
 }
 function modalHtml(d){
