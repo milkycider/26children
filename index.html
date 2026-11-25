@@ -223,8 +223,8 @@ th.grp.st{background:#dff1f8}
 th.grp.san{background:#f3e6f6}
 th.grp.sk{background:#e7f6ee}
 th.grp:hover{filter:brightness(.96)}
-th.gcol, td.gcol{width:26px; min-width:26px; padding:0; text-align:center}
-th.gcol span{writing-mode:vertical-rl; display:inline-block; padding:6px 0; white-space:nowrap}
+th.gcol, td.gcol{width:58px; min-width:58px; max-width:58px; box-sizing:border-box; padding:0 2px; text-align:center}
+th.gcol span{display:block; font-size:10.5px; line-height:1.35; letter-spacing:0; white-space:nowrap}
 th.gb, td.gb{border-left:1px solid var(--line)}
 .stg{display:grid; grid-template-columns:repeat(auto-fill,minmax(66px,1fr)); gap:6px; margin-top:8px}
 .stg div{background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:4px 6px; text-align:center; line-height:1.3}
@@ -893,7 +893,7 @@ function tableHtml(list){
   const skN = SKL.length + 2;
   const grp = (id, label, on, n) => on
     ? `<th class="grp ${id} gb" colspan="${n}" data-grp="${id}" title="クリックで折りたたみ">▼ ${label}</th>`
-    : `<th class="grp ${id} gcol gb" rowspan="2" data-grp="${id}" title="クリックで展開"><span>▶ ${label}</span></th>`;
+    : `<th class="grp ${id} gcol gb" rowspan="2" data-grp="${id}" title="クリックで展開"><span>▶<br>${label}</span></th>`;
   const head1 = `<tr>${th("ho","HO","",' rowspan="2"')}${iniOn ? th("INI","INI"," num",' rowspan="2"') : ""}<th rowspan="2">HO名</th>${th("pc","PC名","",' rowspan="2"')}<th rowspan="2">能力</th>`
     + grp("san","SAN",sanOn,3) + grp("st","ステータス",stOn,STX.length) + grp("sk","技能",skOn,skN) + `<th rowspan="2">備考</th></tr>`;
   const head2 = `<tr>${sanOn ? th("SAN","SAN"," num gb") + th("IND","不定"," num") + th("INS","発狂"," num") : ""}${stOn ? STX.map((k,i) => th(k, k, " num" + (i === 0 ? " gb" : ""))).join("") : ""}`
