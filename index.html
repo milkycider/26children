@@ -268,6 +268,83 @@ th.gb, td.gb{border-left:1px solid var(--line)}
 .lvm b{font-size:16px; margin:0 4px 0 2px}
 .lvm b.bad{color:#d6453d}
 
+/* 不具合報告ページ */
+body[data-page="reports"] .controls, body[data-page="reports"] .count{display:none}
+.rbadge{display:inline-block; margin-left:6px; min-width:18px; padding:0 5px; border-radius:99px; background:#d6453d; color:#fff; font-size:11px; font-weight:700; line-height:18px; letter-spacing:0; vertical-align:2px}
+.rbadge[hidden]{display:none}
+.rp-form{margin-bottom:14px}
+.rp-row{display:flex; flex-wrap:wrap; gap:10px 14px; margin-bottom:10px}
+.rp-row label{display:flex; flex-direction:column; gap:3px; font-size:12px; color:var(--muted)}
+.rp-row select, .rp-row input{font:inherit; font-size:14px; color:var(--text); padding:7px 8px; border:1px solid var(--line); border-radius:8px; background:#fff; min-width:150px}
+#rp-text{width:100%; box-sizing:border-box; font:inherit; font-size:14px; color:var(--text); padding:9px 10px; border:1px solid var(--line); border-radius:10px; background:#fff; resize:vertical}
+.rp-row select:focus, .rp-row input:focus, #rp-text:focus{outline:2px solid var(--accent); outline-offset:0}
+.rp-act{display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap}
+.btn.rp-send{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700; padding:9px 28px}
+.btn.rp-send:disabled{opacity:.6; cursor:default}
+#rp-msg.ok{color:#1a7f4b} #rp-msg.bad{color:#b3372f}
+.rp-err{margin-top:10px; padding:8px 12px; border-radius:8px; background:#fdecec; color:#b3372f; font-size:13px}
+.rp-list{margin-bottom:14px}
+.rp-list h3{margin:0 0 10px; font-size:16px}
+.rp-list h3 b{display:inline-block; margin-left:4px; min-width:22px; text-align:center; background:var(--panel2); border:1px solid var(--line); border-radius:99px; font-size:12px; padding:0 6px}
+.rp{border:1px solid var(--line); border-left:6px solid var(--c); border-radius:10px; padding:10px 14px; margin-bottom:8px; background:#fff}
+.rp-head{display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; font-size:12px; color:var(--muted)}
+.rp-ho{font-weight:700; color:var(--text); font-size:14px}
+.rp-cat{background:var(--panel2); border:1px solid var(--line); border-radius:99px; padding:0 8px}
+.rp-meta{margin-left:auto}
+.rp-text{margin:6px 0 0; white-space:pre-wrap; word-break:break-word; font-size:14px; line-height:1.6}
+.rp-btn{margin-top:8px; font-size:12px}
+.btn.rp-btn.armed{background:#d6453d; border-color:#d6453d; color:#fff}
+.rp-ok{margin-top:6px; font-size:12px; color:#1a7f4b}
+.rp.done{background:#f4f8fa; border-left-color:#b8cdd6; pointer-events:none; user-select:text}
+.rp.done .rp-text, .rp.done .rp-ho{color:var(--muted)}
+.rp-empty{color:var(--muted); font-size:13px; padding:6px 2px}
+.modal .nav #m-report{margin:0 auto}
+
+/* お知らせ */
+.hright{display:flex; flex-direction:column; align-items:flex-end; gap:8px}
+.newsbtn{font:inherit; font-size:13px; color:var(--text); background:var(--panel); border:1px solid var(--line); border-radius:99px; padding:6px 14px; cursor:pointer}
+.newsbtn:hover{border-color:var(--accent)}
+.newsmodal{border-left-color:var(--accent); width:min(560px,100%)}
+.newsmodal h2{font-size:22px; margin-bottom:12px}
+.nw{border-top:1px solid var(--line); padding:12px 2px}
+.nw-head{display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted)}
+.nw-k{border-radius:99px; padding:0 8px; font-size:11px; border:1px solid var(--line)}
+.nw-k.up{background:#e4f4fa; color:#1572a0}
+.nw-k.info{background:#fdf0dc; color:#9a5c00}
+.nw-new{color:#d6453d; font-weight:700; font-size:11px}
+.nw p{margin:5px 0 0; font-size:14px; line-height:1.7; white-space:pre-wrap}
+body[data-page="board"] .controls, body[data-page="board"] .count{display:none}
+/* 掲示板 */
+.bd-req{color:#0f6f9c}
+.bd-wide label{flex:1 1 240px}
+.bd-wide input{width:100%; box-sizing:border-box}
+.bd-text{width:100%; box-sizing:border-box; font:inherit; font-size:14px; color:var(--text); padding:9px 10px; border:1px solid var(--line); border-radius:10px; background:#fff; resize:vertical}
+.bd-text:focus, .bd-rform input:focus, .bd-rform textarea:focus{outline:2px solid var(--accent); outline-offset:0}
+.bd-filter{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px}
+.bd-filter .chip b{font-weight:400; opacity:.75; margin-left:2px}
+.rp.bd{border-left-color:var(--accent)}
+.bd-title{margin-top:6px; font-size:16px; font-weight:700; line-height:1.5; word-break:break-word}
+.bd-title a{color:#0f6f9c; text-decoration:underline; text-underline-offset:3px}
+.bd-site{font-size:11px; font-weight:400; color:var(--muted); white-space:nowrap}
+.bd-ho{display:inline-block; margin-right:6px; padding:0 6px; border-radius:6px; border-left:3px solid var(--c); background:var(--panel2); color:var(--text)}
+.bd-del{margin-left:8px; font:inherit; font-size:11px; color:var(--muted); background:none; border:1px solid var(--line); border-radius:6px; padding:0 6px; cursor:pointer}
+.bd-del.armed{background:#d6453d; border-color:#d6453d; color:#fff}
+.bd-reps{margin:10px 0 0 6px; padding-left:12px; border-left:2px solid var(--line)}
+.bd-rep{padding:6px 0}
+.bd-rep + .bd-rep{border-top:1px dashed var(--line)}
+.bd-rep .rp-meta{margin-left:0}
+.bd-rbtn{margin-top:8px; font-size:12px}
+.bd-rform{margin-top:10px; display:flex; flex-direction:column; gap:6px}
+.bd-rform input, .bd-rform textarea{font:inherit; font-size:14px; color:var(--text); padding:7px 9px; border:1px solid var(--line); border-radius:8px; background:#fff; box-sizing:border-box}
+.bd-rform input{max-width:220px}
+.bd-rform textarea{width:100%; resize:vertical}
+#bd-rmsg.bad{color:#b3372f} #bd-msg.ok{color:#1a7f4b} #bd-msg.bad{color:#b3372f}
+.bd-gone{color:var(--muted); font-size:13px; font-style:italic}
+.rp-uid{margin:4px 2px 0; font-size:11px; color:var(--muted); word-break:break-all; text-align:right}
+.lnk{font:inherit; font-size:11px; color:var(--muted); background:none; border:0; padding:0; text-decoration:underline; cursor:pointer}
+.lnk:hover{color:var(--text)}
+.rp-uid .bad{color:#b3372f}
+
 /* modal */
 .overlay{
   position:fixed; inset:0; background:rgba(10,55,75,.45); z-index:50;
@@ -361,13 +438,18 @@ footer{color:var(--muted); font-size:12px; text-align:center; padding:0 0 40px}
     <div class="yomi">-ろあどのにじゅうろく-</div>
     <div class="sub">テストプレイ班　探索者ポータル</div>
   </div>
-  <div class="count"><b id="count">0</b>/<span id="total">0</span> 名表示中</div>
+  <div class="hright">
+    <button class="newsbtn" id="newsbtn" aria-haspopup="dialog">お知らせ<span class="rbadge" id="nbadge" hidden></span></button>
+    <div class="count"><b id="count">0</b>/<span id="total">0</span> 名表示中</div>
+  </div>
 </header>
 
 <nav class="tabs" aria-label="ページ切り替え">
   <button data-p="chars" aria-selected="true">キャラクター</button>
   <button data-p="skills" aria-selected="false">技能表</button>
   <button data-p="height" aria-selected="false">身長くらべ</button>
+  <button data-p="board" aria-selected="false">掲示板</button>
+  <button data-p="reports" aria-selected="false">不具合報告<span class="rbadge" id="rbadge" hidden></span></button>
 </nav>
 
 <div class="controls">
@@ -408,6 +490,13 @@ footer{color:var(--muted); font-size:12px; text-align:center; padding:0 0 40px}
 
 <main id="main"></main>
 <footer>クリックで詳細が開きます(←/→キーで前後、Escで閉じる)/ 技能表は見出しクリックで並び替え / 技能の薄いグレーは初期値</footer>
+
+<div class="overlay" id="news-ov" role="dialog" aria-modal="true" aria-labelledby="news-title">
+  <div class="modal newsmodal">
+    <button class="btn close" id="news-close">✕</button>
+    <div class="mscroll"><h2 id="news-title">お知らせ・更新履歴</h2><div id="news-list"></div><div style="height:22px"></div></div>
+  </div>
+</div>
 
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="m-title">
   <div class="modal" id="modal"></div>
@@ -560,7 +649,7 @@ const firebaseConfig = {
 const FB_VER = "10.14.1";
 const live = {};                       // { ho: { san, base, insane } }
 let liveMode = "local";                // "local" | "connecting" | "firestore" | "error"
-let fbSave = null;
+let fbSave = null, fbCtx = null, fbAuth = null, myUser = null, rpError = false, bdError = false, authError = false, myUid = null;
 const LIVE_KEY = "roado-live-v1";
 const liveOf = ho => live[ho] || (live[ho] = { san:null, base:null, insane:false, hp:null, hpMax:null, mp:null, mpMax:null });
 const LIVE_MAX = { san:99, base:99, hp:999, hpMax:999, mp:999, mpMax:999 };   // 各項目の上限(0〜上限の整数)
@@ -629,8 +718,17 @@ async function initFirebase(){
   setLiveMode("connecting");
   try {
     const base = "https://www.gstatic.com/firebasejs/" + FB_VER + "/";
-    const [{ initializeApp }, fs] = await Promise.all([import(base + "firebase-app.js"), import(base + "firebase-firestore.js")]);
-    const db = fs.getFirestore(initializeApp(cfg));
+    const [{ initializeApp }, fs, au] = await Promise.all([import(base + "firebase-app.js"), import(base + "firebase-firestore.js"), import(base + "firebase-auth.js")]);
+    const app = initializeApp(cfg), db = fs.getFirestore(app);
+    fbCtx = { fs, db };
+    const auth = au.getAuth(app);                         // 匿名認証: 端末ごとに見えないIDが振られる(掲示板の「自分の投稿」の判定に使う)
+    fbAuth = { au, auth };
+    au.onAuthStateChanged(auth, u => {
+      myUid = u ? u.uid : null;
+      myUser = u && !u.isAnonymous ? { email:u.email || "", name:u.displayName || "" } : null;   // Googleでログイン中(管理者用)
+      if(!u) au.signInAnonymously(auth).then(() => { authError = false; }).catch(() => { authError = true; drawBoard(); });   // 初回・匿名アカウントの自動削除後・ログアウト後は匿名で入り直す
+      drawBoard(); drawReports();
+    });
     fbSave = (ho, patch) => fs.setDoc(fs.doc(db, "characters", "HO" + ho), { ...patch, updatedAt:fs.serverTimestamp() }, { merge:true })
       .catch(() => setLiveMode("error"));
     fs.onSnapshot(fs.collection(db, "characters"), snap => {
@@ -641,6 +739,19 @@ async function initFirebase(){
         setLive(ho, { san:toVal(x.san), base:toVal(x.base), insane:!!x.insane, hp:toVal(x.hp, 999), hpMax:toVal(x.hpMax, 999), mp:toVal(x.mp, 999), mpMax:toVal(x.mpMax, 999) }, true);
       });
     }, () => setLiveMode("error"));
+    fs.onSnapshot(fs.collection(db, "reports"), snap => {
+      rpError = false;
+      reports = snap.docs.map(q => { const x = q.data({ serverTimestamps:"estimate" }), ms = t => (t && t.toMillis) ? t.toMillis() : null;
+        return { id:q.id, ho:x.ho | 0, cat:x.cat || "", text:x.text || "", name:x.name || "", done:!!x.done, at:ms(x.createdAt) ?? Date.now(), doneAt:ms(x.doneAt) }; });
+      drawReports();
+    }, () => { rpError = true; drawReports(); });
+    fs.onSnapshot(fs.collection(db, "posts"), snap => {
+      bdError = false;
+      const ms = t => (t && t.toMillis) ? t.toMillis() : null;
+      posts = snap.docs.map(q => { const x = q.data({ serverTimestamps:"estimate" });
+        return { id:q.id, parent:x.parent || null, cat:x.cat || "", title:x.title || "", url:x.url || "", text:x.text || "", name:x.name || "", ho:x.ho | 0, uid:x.uid || "", deleted:!!x.deleted, at:ms(x.createdAt) ?? Date.now() }; });
+      drawBoard();
+    }, () => { bdError = true; drawBoard(); });
   } catch(e){ setLiveMode("error"); }
 }
 document.addEventListener("input", e => {      // 数字以外は入れさせない(全角数字は半角に)
@@ -667,6 +778,311 @@ document.addEventListener("change", e => {
   }
 });
 document.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.dataset && e.target.dataset.lv && e.target.type === "text") e.target.blur(); });
+
+/* ===== 不具合報告 =====
+   保存先: reports/<自動ID> = { ho(0=全体), cat, text, name, done, createdAt, doneAt }
+   「修正済み」は一方通行(未対応→修正済みのみ)。戻すときはFirebaseコンソールで done を false に直す */
+const RP_CATS = ["ステータス", "技能", "名前・設定", "表示・動作", "掲示板の削除依頼", "その他"];   // 増やすときはここと、Firestoreルールの一覧の両方に足す
+const RP_KEY = "roado-reports-v1", RP_NAME = "roado-rpname-v1";
+const ADMIN_UIDS = [];   // 「修正済みにする」を押せる端末のID。不具合報告ページの一番下に出るIDを "..." で入れる(複数可)
+const useFs = () => liveMode === "firestore" && !!fbCtx;
+const isAdmin = () => !useFs() || ADMIN_UIDS.includes(myUid);
+const getName = () => { try { return localStorage.getItem(RP_NAME) || ""; } catch(e){ return ""; } };
+const setName = n => { try { localStorage.setItem(RP_NAME, n); } catch(e){} };
+let reports = [];
+try { reports = JSON.parse(localStorage.getItem(RP_KEY) || "[]"); } catch(e){}
+const persistReports = () => { try { localStorage.setItem(RP_KEY, JSON.stringify(reports)); } catch(e){} };
+async function addReport(r){
+  if(liveMode === "firestore" && fbCtx){
+    await fbCtx.fs.addDoc(fbCtx.fs.collection(fbCtx.db, "reports"), { ho:r.ho, cat:r.cat, text:r.text, name:r.name, done:false, createdAt:fbCtx.fs.serverTimestamp() });
+  } else {
+    reports.unshift({ id:"L" + Date.now(), ...r, done:false, at:Date.now(), doneAt:null });
+    persistReports(); drawReports();
+  }
+}
+async function markReportDone(id){
+  if(liveMode === "firestore" && fbCtx){
+    await fbCtx.fs.updateDoc(fbCtx.fs.doc(fbCtx.db, "reports", id), { done:true, doneAt:fbCtx.fs.serverTimestamp() });
+  } else {
+    const x = reports.find(y => y.id === id);
+    if(x){ x.done = true; x.doneAt = Date.now(); persistReports(); drawReports(); }
+  }
+}
+const fmtTime = ms => { if(!ms) return ""; const t = new Date(ms), z = n => String(n).padStart(2, "0"); return (t.getMonth() + 1) + "/" + t.getDate() + " " + z(t.getHours()) + ":" + z(t.getMinutes()); };
+function reportCard(r, done){
+  const d = D.find(x => x.ho === r.ho);
+  const who = d ? "HO" + d.ho + " " + d.pc : "全体";
+  const col = d ? accent(d) : "#7aa5b8";
+  return `<article class="rp${done ? " done" : ""}" style="--c:${esc(col)}">
+    <div class="rp-head"><span class="rp-ho">${esc(who)}</span><span class="rp-cat">${esc(r.cat)}</span><span class="rp-meta">${esc(r.name || "名無し")} ・ ${fmtTime(r.at)}</span></div>
+    <p class="rp-text">${esc(r.text)}</p>
+    ${done ? `<div class="rp-ok">✓ 修正済み ${fmtTime(r.doneAt)}</div>` : isAdmin() ? `<button class="btn rp-btn" data-rdone="${esc(r.id)}">修正済みにする</button>` : ""}
+  </article>`;
+}
+function drawReports(){
+  const open = reports.filter(r => !r.done).sort((a, b) => b.at - a.at);
+  const done = reports.filter(r => r.done).sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0));
+  const b = document.getElementById("rbadge"); if(b){ b.textContent = open.length; b.hidden = !open.length; }
+  const o = document.getElementById("rp-open"); if(!o) return;
+  o.innerHTML = open.length ? open.map(r => reportCard(r, false)).join("") : '<div class="rp-empty">未対応の報告はありません</div>';
+  document.getElementById("rp-done").innerHTML = done.length ? done.map(r => reportCard(r, true)).join("") : '<div class="rp-empty">まだありません</div>';
+  document.getElementById("rp-n-open").textContent = open.length;
+  document.getElementById("rp-n-done").textContent = done.length;
+  const er = document.getElementById("rp-err"); if(er) er.hidden = !rpError;
+  const idl = document.getElementById("rp-uid");
+  if(idl){
+    if(!useFs() || !fbAuth) idl.innerHTML = "";
+    else if(myUser) idl.innerHTML = `管理者ログイン中: ${esc(myUser.email || myUser.name)}${isAdmin() ? "" : " (このIDは管理者に未登録)"} ・ ID: ${esc(myUid || "")} <button class="lnk" id="adm-out">ログアウト</button>`;
+    else idl.innerHTML = `<button class="lnk" id="adm-in">管理者ログイン</button>`;
+  }
+}
+const rpPh = c => c === "掲示板の削除依頼"
+  ? "例: 掲示板の「○○」というタイトルの投稿(11/25ごろ・お名前○○で投稿)を削除してください。返信の場合は、どのスレッドへの返信かも書いてください"
+  : "例: ステータスの○○が、正しくは△△です / スマホで○○を押すと表示が崩れます";
+document.addEventListener("change", e => { if(e.target.id === "rp-cat"){ state.rpCat = e.target.value; const t = document.getElementById("rp-text"); if(t) t.placeholder = rpPh(state.rpCat); } });
+function reportsHtml(){
+  const nm = getName();
+  const sel = state.rpHo ?? 0;
+  const hos = `<option value="0">全体・その他</option>` + D.map(d => `<option value="${d.ho}"${d.ho === sel ? " selected" : ""}>HO${d.ho} ${esc(d.pc)}</option>`).join("");
+  const cats = RP_CATS.map(c => `<option${state.rpCat === c ? " selected" : ""}>${esc(c)}</option>`).join("");
+  return `<div class="hcard rp-form">
+    <h2>不具合報告</h2>
+    <p class="hdesc">データの間違いや、表示・動作のおかしいところに気づいたら、ここから知らせてください。データなら正しい値、表示・動作なら使っている端末(スマホ/PC)と操作を書いてもらえると助かります。</p>
+    <div class="rp-row">
+      <label>対象<select id="rp-ho">${hos}</select></label>
+      <label>項目<select id="rp-cat">${cats}</select></label>
+      <label>お名前(任意)<input id="rp-name" maxlength="20" value="${esc(nm)}" autocomplete="off"></label>
+    </div>
+    <textarea id="rp-text" maxlength="500" rows="4" placeholder="${rpPh(state.rpCat)}"></textarea>
+    <div class="rp-act"><button class="btn rp-send" id="rp-send">送信</button><span id="rp-msg" role="status"></span>${liveStatusHtml()}</div>
+    <div class="rp-err" id="rp-err" hidden>報告の読み込みに失敗しました(Firestoreのルールに reports が入っているか確認してください)。</div>
+  </div>
+  <div class="hcard rp-list"><h3>未対応 <b id="rp-n-open">0</b></h3><div id="rp-open"></div></div>
+  <div class="hcard rp-list rp-donebox"><h3>修正済み <b id="rp-n-done">0</b></h3><div id="rp-done"></div></div>
+  <p class="rp-uid" id="rp-uid"></p>`;
+}
+document.addEventListener("click", async e => {
+  const t = e.target;
+  if(t.closest && t.closest("#adm-in")){
+    const { au, auth } = fbAuth;
+    try { await au.signInWithPopup(auth, new au.GoogleAuthProvider()); }
+    catch(err){
+      const m = { "auth/popup-blocked":"ポップアップがブロックされました。ブラウザの設定で許可してください", "auth/unauthorized-domain":"このサイトのドメインがFirebaseに登録されていません", "auth/operation-not-allowed":"FirebaseでGoogleログインが有効になっていません" }[err.code];
+      if(err.code !== "auth/popup-closed-by-user" && err.code !== "auth/cancelled-popup-request") { const el = document.getElementById("rp-uid"); if(el) el.insertAdjacentHTML("beforeend", `<span class="bad"> ${esc(m || "ログインに失敗しました (" + (err.code || "") + ")")}</span>`); }
+    }
+    return;
+  }
+  if(t.closest && t.closest("#adm-out")){ await fbAuth.au.signOut(fbAuth.auth); return; }
+  if(t.closest && t.closest("#rp-send")){
+    const btn = t.closest("#rp-send"), msg = document.getElementById("rp-msg");
+    const text = document.getElementById("rp-text").value.trim();
+    const name = document.getElementById("rp-name").value.trim().slice(0, 20);
+    const say = (m, bad) => { msg.textContent = m; msg.className = bad ? "bad" : "ok"; };
+    if(!text){ say("内容を入力してください", true); return; }
+    btn.disabled = true;
+    try {
+      await addReport({ ho:parseInt(document.getElementById("rp-ho").value, 10) || 0, cat:document.getElementById("rp-cat").value, text:text.slice(0, 500), name });
+      setName(name);
+      document.getElementById("rp-text").value = "";
+      say("送信しました。ありがとうございます", false);
+    } catch(err){ say("送信に失敗しました。時間をおいてもう一度試してください", true); }
+    btn.disabled = false;
+    setTimeout(() => { const m = document.getElementById("rp-msg"); if(m) m.textContent = ""; }, 5000);
+    return;
+  }
+  const dn = t.closest && t.closest("[data-rdone]");
+  if(dn){
+    if(!dn.dataset.armed){                          // 1回目: 確認表示(誤タップ防止) / 2回目: 確定
+      dn.dataset.armed = "1"; dn.textContent = "もう一度押すと修正済みになります"; dn.classList.add("armed");
+      setTimeout(() => { if(dn.isConnected){ delete dn.dataset.armed; dn.textContent = "修正済みにする"; dn.classList.remove("armed"); } }, 4000);
+      return;
+    }
+    dn.disabled = true;
+    try { await markReportDone(dn.dataset.rdone); } catch(err){ dn.disabled = false; dn.textContent = "失敗しました(もう一度)"; delete dn.dataset.armed; }
+  }
+});
+
+/* ===== 掲示板(PL向け) =====
+   保存先: posts/<自動ID> = { parent(null=スレッド/文字列=返信先), cat, title, url, text, name, ho, uid, deleted, createdAt }
+   削除は「中身を空にして deleted:true にする」方式(返信が付いたスレッドも壊れない)。自分の投稿だけ消せる */
+const BD_CATS = ["ふせったー", "二次創作", "その他"];   // 種類を増やすときはここと、Firestoreルールの一覧の両方に足す
+const BD_KEY = "roado-board-v1";
+let posts = [];
+try { posts = JSON.parse(localStorage.getItem(BD_KEY) || "[]"); } catch(e){}
+const persistPosts = () => { try { localStorage.setItem(BD_KEY, JSON.stringify(posts)); } catch(e){} };
+const localUid = (() => { try { let u = localStorage.getItem("roado-uid"); if(!u){ u = "L" + Math.random().toString(36).slice(2, 12); localStorage.setItem("roado-uid", u); } return u; } catch(e){ return "L-temp"; } })();
+const curUid = () => useFs() ? myUid : localUid;
+const bdDrafts = {};
+const safeUrl = u => { try { const x = new URL(u); return (x.protocol === "https:" || x.protocol === "http:") ? x.href : ""; } catch(e){ return ""; } };
+const SITES = [[/(^|\.)fusetter\.com$/, "ふせったー"], [/(^|\.)pixiv\.net$/, "pixiv"], [/(^|\.)(x|twitter)\.com$/, "X"], [/(^|\.)privatter\.net$/, "Privatter"],
+  [/(^|\.)poipiku\.com$/, "ポイピク"], [/(^|\.)bsky\.app$/, "Bluesky"], [/(^|\.)(youtube\.com|youtu\.be)$/, "YouTube"], [/(^|\.)booth\.pm$/, "BOOTH"]];
+const siteOf = u => { try { const h = new URL(u).hostname.replace(/^www\./, ""); const m = SITES.find(x => x[0].test(h)); return m ? m[1] : h; } catch(e){ return ""; } };
+async function addPost(p){
+  if(useFs()){
+    if(!myUid) throw new Error("noauth");
+    await fbCtx.fs.addDoc(fbCtx.fs.collection(fbCtx.db, "posts"), { ...p, uid:myUid, deleted:false, createdAt:fbCtx.fs.serverTimestamp() });
+  } else {
+    posts.push({ id:"L" + Date.now() + Math.random().toString(36).slice(2, 6), ...p, uid:localUid, deleted:false, at:Date.now() });
+    persistPosts(); drawBoard();
+  }
+}
+async function delPost(id){
+  const blank = { deleted:true, title:"", text:"", url:"" };
+  if(useFs()) await fbCtx.fs.updateDoc(fbCtx.fs.doc(fbCtx.db, "posts", id), blank);
+  else { const x = posts.find(y => y.id === id); if(x){ Object.assign(x, blank); persistPosts(); drawBoard(); } }
+}
+function postMeta(p){
+  const d = D.find(x => x.ho === p.ho);
+  const mine = p.uid && p.uid === curUid() && !p.deleted;
+  return `<span class="rp-meta">${d ? `<span class="bd-ho" style="--c:${esc(accent(d))}">HO${d.ho} ${esc(d.pc)}</span>` : ""}${esc(p.name || "名無し")} ・ ${fmtTime(p.at)}${mine ? `<button class="bd-del" data-bddel="${esc(p.id)}">削除</button>` : ""}</span>`;
+}
+function threadHtml({ r, rs }){
+  const open = state.replyTo === r.id, dr = bdDrafts[r.id] || {};
+  const u = safeUrl(r.url);
+  const head = r.deleted ? `<div class="bd-gone">この投稿は削除されました</div>` : `
+    <div class="rp-head"><span class="rp-cat">${esc(r.cat)}</span>${postMeta(r)}</div>
+    <div class="bd-title">${u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a> <span class="bd-site">${esc(siteOf(u))} ↗</span>` : esc(r.title)}</div>
+    ${r.text ? `<p class="rp-text">${esc(r.text)}</p>` : ""}`;
+  const reps = rs.map(x => `<div class="bd-rep"><div class="rp-head">${postMeta(x)}</div><p class="rp-text">${esc(x.text)}</p></div>`).join("");
+  const form = open ? `<div class="bd-rform">
+      <input data-bdr="${esc(r.id)}" data-f="name" maxlength="20" placeholder="お名前(任意)" autocomplete="off" value="${esc(dr.name ?? getName())}">
+      <textarea data-bdr="${esc(r.id)}" data-f="text" maxlength="1000" rows="2" placeholder="返信を書く">${esc(dr.text || "")}</textarea>
+      <div class="rp-act"><button class="btn rp-send" data-bdsend="${esc(r.id)}">返信する</button><button class="btn" data-bdreply="">閉じる</button><span class="bd-rmsg" id="bd-rmsg"></span></div>
+    </div>` : (r.deleted ? "" : `<button class="btn bd-rbtn" data-bdreply="${esc(r.id)}">↩ 返信</button>`);
+  return `<article class="rp bd">${head}${reps ? `<div class="bd-reps">${reps}</div>` : ""}${form}</article>`;
+}
+function drawBoard(){
+  const box = document.getElementById("bd-list"); if(!box) return;
+  const ae = document.activeElement, fid = ae && ae.dataset && ae.dataset.bdr, fk = fid ? ae.dataset.f : null;
+  const sel = fid && typeof ae.selectionStart === "number" ? [ae.selectionStart, ae.selectionEnd] : null;
+  const kids = {};
+  posts.filter(p => p.parent).forEach(p => { (kids[p.parent] = kids[p.parent] || []).push(p); });
+  const all = posts.filter(p => !p.parent).map(r => {
+    const rs = (kids[r.id] || []).filter(x => !x.deleted).sort((a, b) => a.at - b.at);
+    return { r, rs, last:Math.max(r.at, ...rs.map(x => x.at)) };
+  }).filter(t => !(t.r.deleted && !t.rs.length));
+  document.querySelectorAll("[data-bdcat]").forEach(b => {
+    const c = b.dataset.bdcat, n = c === "all" ? all.length : all.filter(t => t.r.cat === c).length;
+    b.setAttribute("aria-pressed", String(state.bdCat === c)); b.querySelector("b").textContent = n;
+  });
+  const th = all.filter(t => state.bdCat === "all" || t.r.cat === state.bdCat).sort((a, b) => b.last - a.last);
+  box.innerHTML = th.length ? th.map(threadHtml).join("") : '<div class="rp-empty">まだ投稿はありません</div>';
+  if(fid){ const el = box.querySelector(`[data-bdr="${CSS.escape(fid)}"][data-f="${fk}"]`); if(el){ el.focus(); if(sel) try { el.setSelectionRange(sel[0], sel[1]); } catch(e){} } }
+  const er = document.getElementById("bd-err");
+  if(er){
+    er.hidden = !(bdError || (useFs() && authError));
+    er.textContent = authError ? "投稿の準備に失敗しました(Firebaseで匿名認証が有効になっているか確認してください)。" : "掲示板の読み込みに失敗しました(Firestoreのルールに posts が入っているか確認してください)。";
+  }
+}
+function boardHtml(){
+  const hos = `<option value="0">なし</option>` + D.map(d => `<option value="${d.ho}">HO${d.ho} ${esc(d.pc)}</option>`).join("");
+  const cats = BD_CATS.map(c => `<option>${esc(c)}</option>`).join("");
+  const chips = ["all", ...BD_CATS].map(c => `<button class="chip" data-bdcat="${esc(c)}" aria-pressed="${state.bdCat === c}">${c === "all" ? "すべて" : esc(c)} <b>0</b></button>`).join("");
+  return `<div class="hcard rp-form">
+    <h2>掲示板</h2>
+    <p class="hdesc">ふせったーや二次創作のURLを共有したり、ひとこと残したりする場所です。投稿には返信できます。自分の投稿は、投稿した端末から削除できます。<br>削除ボタンが出ない自分の投稿を消したいときは、<a href="#reports" class="bd-req">不具合報告の「掲示板の削除依頼」</a>から知らせてください。</p>
+    <div class="rp-row">
+      <label>種類<select id="bd-cat">${cats}</select></label>
+      <label>関連するHO<select id="bd-ho">${hos}</select></label>
+      <label>お名前(任意)<input id="bd-name" maxlength="20" value="${esc(getName())}" autocomplete="off"></label>
+    </div>
+    <div class="rp-row bd-wide">
+      <label>タイトル<input id="bd-title" maxlength="80" autocomplete="off" placeholder="例: 後日談の小話"></label>
+      <label>URL(任意)<input id="bd-url" type="url" maxlength="500" autocomplete="off" placeholder="https://"></label>
+    </div>
+    <textarea id="bd-text" class="bd-text" maxlength="1000" rows="3" placeholder="ひとこと(任意)"></textarea>
+    <div class="rp-act"><button class="btn rp-send" id="bd-send">投稿</button><span id="bd-msg" role="status"></span>${liveStatusHtml()}</div>
+    <div class="rp-err" id="bd-err" hidden></div>
+  </div>
+  <div class="hcard rp-list"><div class="bd-filter">${chips}</div><div id="bd-list"></div></div>`;
+}
+document.addEventListener("input", e => {
+  const el = e.target; if(!el.dataset || !el.dataset.bdr) return;
+  (bdDrafts[el.dataset.bdr] = bdDrafts[el.dataset.bdr] || {})[el.dataset.f] = el.value;
+});
+document.addEventListener("click", async e => {
+  const t = e.target; if(!t.closest) return;
+  const say = (id, m, bad) => { const el = document.getElementById(id); if(el){ el.textContent = m; el.className = bad ? "bad" : "ok"; } };
+  const cat = t.closest("[data-bdcat]");
+  if(cat){ state.bdCat = cat.dataset.bdcat; drawBoard(); return; }
+  if(t.closest(".bd-req")){ e.preventDefault(); state.rpCat = "掲示板の削除依頼"; state.rpHo = 0; setPage("reports"); return; }
+  const rb = t.closest("[data-bdreply]");
+  if(rb){
+    state.replyTo = rb.dataset.bdreply || null; drawBoard();
+    if(state.replyTo){ const ta = document.querySelector(`textarea[data-bdr="${CSS.escape(state.replyTo)}"]`); if(ta) ta.focus(); }
+    return;
+  }
+  if(t.closest("#bd-send")){
+    const btn = t.closest("#bd-send"), v = id => document.getElementById(id).value.trim();
+    const title = v("bd-title"), rawUrl = v("bd-url"), url = rawUrl ? safeUrl(rawUrl) : "";
+    if(!title){ say("bd-msg", "タイトルを入力してください", true); return; }
+    if(rawUrl && !url){ say("bd-msg", "URLは https:// から始まる形で入れてください", true); return; }
+    const name = v("bd-name").slice(0, 20);
+    btn.disabled = true;
+    try {
+      await addPost({ parent:null, cat:v("bd-cat"), title:title.slice(0, 80), url, text:v("bd-text").slice(0, 1000), name, ho:parseInt(v("bd-ho"), 10) || 0 });
+      setName(name);
+      ["bd-title", "bd-url", "bd-text"].forEach(id => { document.getElementById(id).value = ""; });
+      say("bd-msg", "投稿しました", false);
+    } catch(err){ say("bd-msg", "投稿に失敗しました。時間をおいてもう一度試してください", true); }
+    btn.disabled = false;
+    setTimeout(() => say("bd-msg", "", false), 5000);
+    return;
+  }
+  const sd = t.closest("[data-bdsend]");
+  if(sd){
+    const id = sd.dataset.bdsend, dr = bdDrafts[id] || {};
+    const text = (dr.text || "").trim(), name = (dr.name ?? getName()).trim().slice(0, 20);
+    if(!text){ say("bd-rmsg", "返信を入力してください", true); return; }
+    sd.disabled = true;
+    try {
+      await addPost({ parent:id, cat:"", title:"", url:"", text:text.slice(0, 1000), name, ho:0 });
+      setName(name); delete bdDrafts[id]; state.replyTo = null; drawBoard();
+    } catch(err){ sd.disabled = false; say("bd-rmsg", "送信に失敗しました", true); }
+    return;
+  }
+  const dl = t.closest("[data-bddel]");
+  if(dl){
+    if(!dl.dataset.armed){
+      dl.dataset.armed = "1"; dl.textContent = "本当に削除"; dl.classList.add("armed");
+      setTimeout(() => { if(dl.isConnected){ delete dl.dataset.armed; dl.textContent = "削除"; dl.classList.remove("armed"); } }, 4000);
+      return;
+    }
+    dl.disabled = true;
+    try { await delPost(dl.dataset.bddel); } catch(err){ dl.disabled = false; dl.textContent = "失敗(もう一度)"; delete dl.dataset.armed; }
+  }
+});
+
+/* ===== お知らせ・更新履歴 =====
+   新しいものを一番上に足す。id は前のものより大きい数字にする(未読の判定に使う)。k は "更新" か "お知らせ" */
+const NEWS = [
+  { id:2, d:"2026-11-25", k:"更新", t:"掲示板と不具合報告のページを追加しました。掲示板ではふせったーや二次創作のURLを共有できます。" },
+  { id:1, d:"2026-11-25", k:"更新", t:"技能表にSAN・HP・MP・ステータスの欄を追加しました。SAN・HP・MPは「編集モード」をONにすると書き換えられます。" }
+];
+const NEWS_KEY = "roado-news-seen";
+const newsSeen = () => { try { return parseInt(localStorage.getItem(NEWS_KEY) || "0", 10) || 0; } catch(e){ return 0; } };
+function drawNewsBadge(){
+  const n = NEWS.filter(x => x.id > newsSeen()).length, b = document.getElementById("nbadge");
+  if(b){ b.textContent = n; b.hidden = !n; }
+}
+function openNews(){
+  const seen = newsSeen();
+  document.getElementById("news-list").innerHTML = NEWS.length ? NEWS.map(x => `<div class="nw${x.id > seen ? " new" : ""}">
+      <div class="nw-head"><span class="nw-d">${esc(x.d.replace(/-/g, "/"))}</span><span class="nw-k ${x.k === "更新" ? "up" : "info"}">${esc(x.k)}</span>${x.id > seen ? '<span class="nw-new">NEW</span>' : ""}</div>
+      <p>${esc(x.t)}</p></div>`).join("") : '<div class="rp-empty">お知らせはありません</div>';
+  document.getElementById("news-ov").classList.add("open");
+  document.documentElement.classList.add("modal-open");
+  try { localStorage.setItem(NEWS_KEY, String(Math.max(0, ...NEWS.map(x => x.id)))); } catch(e){}
+  drawNewsBadge();
+  document.getElementById("news-close").focus();
+}
+function closeNews(){
+  document.getElementById("news-ov").classList.remove("open");
+  if(!document.getElementById("overlay").classList.contains("open")) document.documentElement.classList.remove("modal-open");
+}
+document.getElementById("newsbtn").addEventListener("click", openNews);
+document.getElementById("news-ov").addEventListener("click", e => { if(e.target.id === "news-ov" || e.target.id === "news-close") closeNews(); });
+document.addEventListener("keydown", e => { if(e.key === "Escape" && document.getElementById("news-ov").classList.contains("open")) closeNews(); });
 
 /* ===== 立ち絵(カードの薄背景) =====
    u:画像URL / x:横位置(%) / z:拡大率。追加したいHOはここに足す。画像は外部リンクのまま読み込む */
@@ -745,7 +1161,6 @@ const portraitHtml = d => d.img
 const letter = d => d.en.charAt(0).toUpperCase();
 const hNum = d => /^\d+$/.test(d.h) ? parseInt(d.h,10) : null;
 const hText = d => d.h ? (hNum(d) !== null ? d.h + "cm" : d.h) : "—";
-const safeUrl = u => /^https?:\/\//i.test(u || "") ? u : "";
 function lum(hex){
   const m = /^#([0-9a-f]{6})$/i.exec(hex || ""); if(!m) return 0.5;
   const v = [0,2,4].map(i => parseInt(m[1].substr(i,2),16)/255)
@@ -758,8 +1173,8 @@ function darken(hex, f){ const m = /^#([0-9a-f]{6})$/i.exec(hex); if(!m) return 
 const accent = d => !d.hex ? "#9db6c2" : (lum(d.hex) > 0.6 ? darken(d.hex, 0.78) : d.hex);
 
 /* ===== 状態 ===== */
-const PAGE_HASH = { chars:"", skills:"#skills", height:"#height" };
-const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true, showSan:true, showHm:true, edit:false, hurtHp:false, hurtMp:false };
+const PAGE_HASH = { chars:"", skills:"#skills", height:"#height", board:"#board", reports:"#reports" };
+const state = { page:"chars", view:"card", q:"", sex:"all", range:"all", cat:"all", trait:"all", sort:"ho", cols:"auto", skSort:{key:"ho", dir:1}, hSort:"ho", hAge:true, hSel:null, showSt:true, showSk:true, showIni:true, showSan:true, showHm:true, edit:false, hurtHp:false, hurtMp:false, bdCat:"all", replyTo:null, rpCat:"ステータス" };
 let current = []; // 現在表示中の配列
 let openHo = null;
 
@@ -1111,6 +1526,8 @@ function render(){
   $("#count").textContent = current.length;
   $("#total").textContent = D.length;
   const main = $("#main");
+  if(state.page === "reports"){ main.innerHTML = reportsHtml(); drawReports(); return; }
+  if(state.page === "board"){ main.innerHTML = boardHtml(); drawBoard(); return; }
   if(!current.length){ main.innerHTML = '<div class="empty">条件に合うキャラクターがいません</div>'; return; }
   main.innerHTML = state.page === "height" ? heightHtml()
     : !chars ? tableHtml(current)
@@ -1233,6 +1650,7 @@ function modalHtml(d){
     ${skillHtml(d)}
     <div class="nav">
       <button class="btn" id="m-prev">← 前へ</button>
+      <button class="btn" id="m-report" title="このHOのデータの間違いを報告する">報告する</button>
       <button class="btn" id="m-next">次へ →</button>
     </div>
     </div>`;
@@ -1264,6 +1682,7 @@ function step(dir){
 }
 $("#overlay").addEventListener("click", e => {
   if(e.target.id === "overlay" || e.target.id === "m-close") closeModal();
+  else if(e.target.id === "m-report"){ const ho = openHo; closeModal(); state.rpHo = ho; setPage("reports"); }
   else if(e.target.id === "m-prev") step(-1);
   else if(e.target.id === "m-next") step(1);
 });
@@ -1286,7 +1705,7 @@ window.addEventListener("hashchange", () => {
   const m = /^#HO(\d+)$/.exec(location.hash);
   if(m) openModal(parseInt(m[1], 10));
   else {
-    const p = location.hash === "#skills" ? "skills" : location.hash === "#height" ? "height" : "chars";
+    const p = location.hash === "#skills" ? "skills" : location.hash === "#height" ? "height" : location.hash === "#reports" ? "reports" : location.hash === "#board" ? "board" : "chars";
     if(openHo !== null) { setOverlay(false); openHo = null; }
     if(p !== state.page){ state.page = p; render(); }
   }
@@ -1295,7 +1714,11 @@ window.addEventListener("hashchange", () => {
 /* ===== 初期化 ===== */
 if(location.hash === "#skills") state.page = "skills";
 else if(location.hash === "#height") state.page = "height";
+else if(location.hash === "#reports") state.page = "reports";
+else if(location.hash === "#board") state.page = "board";
 render();
+drawReports();
+drawNewsBadge();
 (function(){ const m = /^#HO(\d+)$/.exec(location.hash); if(m) openModal(parseInt(m[1], 10)); })();
 </script>
 </body>
